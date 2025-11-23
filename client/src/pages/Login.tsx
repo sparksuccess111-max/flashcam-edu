@@ -66,7 +66,7 @@ export default function Login() {
               <GraduationCap className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">FlashLearn</CardTitle>
+          <CardTitle className="text-2xl">FlashCam</CardTitle>
           <CardDescription>
             Connectez-vous en tant qu'administrateur pour gérer les cartes.
           </CardDescription>
