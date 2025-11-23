@@ -18,10 +18,14 @@ export default function AdminDashboard() {
   const [isPackDialogOpen, setIsPackDialogOpen] = useState(false);
   const [managingPackId, setManagingPackId] = useState<string | null>(null);
   const [draggedPackId, setDraggedPackId] = useState<string | null>(null);
+  const [displayedPacks, setDisplayedPacks] = useState<Pack[] | null>(null);
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
   });
+
+  // Sync displayed packs with server data
+  const packsToDisplay = displayedPacks !== null ? displayedPacks : (packs || []);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/packs/${id}`),
@@ -77,12 +81,20 @@ export default function AdminDashboard() {
   };
 
   const reorderMutation = useMutation({
-    mutationFn: ({ packId, newOrder }: { packId: string; newOrder: number }) =>
-      apiRequest("PATCH", "/api/packs/reorder", { packId, newOrder }),
+    mutationFn: async (packsWithNewOrder: Array<{ id: string; order: number }>) => {
+      // Send all pack updates in parallel
+      await Promise.all(
+        packsWithNewOrder.map(({ id, order }) =>
+          apiRequest("PATCH", `/api/packs/${id}`, { order })
+        )
+      );
+    },
     onSuccess: () => {
+      setDisplayedPacks(null); // Clear local state to refresh from server
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
     },
     onError: () => {
+      setDisplayedPacks(null); // Reset on error
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -108,24 +120,37 @@ export default function AdminDashboard() {
       return;
     }
 
-    const allPacks = packs || [];
-    const draggedPack = allPacks.find(p => p.id === draggedPackId);
-    if (!draggedPack) return;
+    const currentPacks = packsToDisplay;
+    const draggedIndex = currentPacks.findIndex(p => p.id === draggedPackId);
+    const targetIndex = currentPacks.findIndex(p => p.id === targetPack.id);
 
-    const draggedIndex = allPacks.findIndex(p => p.id === draggedPackId);
-    const targetIndex = allPacks.findIndex(p => p.id === targetPack.id);
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedPackId(null);
+      return;
+    }
 
-    // Swap order values
-    const newOrder = targetPack.order;
-    reorderMutation.mutate({
-      packId: draggedPackId,
-      newOrder: draggedIndex > targetIndex ? newOrder - 0.5 : newOrder + 0.5,
-    });
+    // Reorder locally first for immediate feedback
+    const newPacks = [...currentPacks];
+    const [removed] = newPacks.splice(draggedIndex, 1);
+    newPacks.splice(targetIndex, 0, removed);
+
+    // Update displayed packs with new order values
+    const reorderedPacks = newPacks.map((pack, idx) => ({
+      ...pack,
+      order: idx,
+    }));
+
+    setDisplayedPacks(reorderedPacks);
+
+    // Send updates to server
+    reorderMutation.mutate(
+      reorderedPacks.map(pack => ({ id: pack.id, order: pack.order }))
+    );
 
     setDraggedPackId(null);
   };
 
-  const allPacks = packs || [];
+  const allPacks = packsToDisplay;
 
   if (isLoading) {
     return (
@@ -193,9 +218,9 @@ export default function AdminDashboard() {
               onDragStart={(e) => handleDragStart(e, pack.id)}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, pack)}
-              className={`cursor-move transition-opacity ${draggedPackId === pack.id ? "opacity-50" : "opacity-100"}`}
+              className={`transition-all duration-200 ease-out ${draggedPackId === pack.id ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-shadow">
+            <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-200">
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
