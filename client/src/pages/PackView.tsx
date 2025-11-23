@@ -99,7 +99,7 @@ export default function PackView() {
         </Button>
 
         <div className="flex flex-col items-center w-full">
-          <div className="w-full max-w-2xl mb-0 text-center">
+          <div className="w-full max-w-2xl mb-2 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
           <Card
@@ -123,7 +123,7 @@ export default function PackView() {
           </Card>
         </div>
 
-        <div className="space-y-0 mt-0">
+        <div className="space-y-0 mt-4">
           <div className="flex items-center justify-between mb-0">
             <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
               Carte {currentIndex + 1} sur {flashcards.length}
@@ -132,7 +132,7 @@ export default function PackView() {
           <Progress value={progress} />
         </div>
 
-        <div className="flex items-center justify-between gap-4 mt-1">
+        <div className="flex items-center justify-between gap-4 mt-4">
           <Button
             variant="outline"
             onClick={handlePrevious}
