@@ -6,7 +6,19 @@ export function useWebSocket() {
 
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    // Handle Vite HMR misconfiguration in Replit where host contains :undefined
+    let host = window.location.host;
+    if (host.includes(":undefined")) {
+      host = host.replace(":undefined", "");
+    }
+    
+    // Fallback: if host is empty or still invalid, use current location
+    if (!host || host === "localhost") {
+      host = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
+    }
+    
+    const wsUrl = `${protocol}//${host}/ws`;
 
     const connect = () => {
       const ws = new WebSocket(wsUrl);
