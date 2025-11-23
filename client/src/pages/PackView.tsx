@@ -73,23 +73,37 @@ export default function PackView() {
     const fontSize = 10;
     const numFontSize = 14;
 
-    // Fonction pour afficher du texte centré multi-lignes
+    // Fonction pour afficher du texte centré multi-lignes avec taille adaptative
     const drawMultilineText = (
       text: string,
       cx: number,
       cy: number,
       width: number,
       height: number,
-      size: number
+      maxSize: number
     ) => {
-      doc.setFontSize(size);
-      const lines = doc.splitTextToSize(text, width - 2 * margin);
-      const lineHeight = size * 0.45;
+      const maxLines = 4;
+      const lineHeightRatio = 0.45;
+      let fontSize = maxSize;
+      let lines = [];
+      
+      // Réduire la taille de police jusqu'à ce que le texte rentre en 4 lignes max
+      while (fontSize > 6) {
+        doc.setFontSize(fontSize);
+        lines = doc.splitTextToSize(text, width - 2 * margin);
+        
+        if (lines.length <= maxLines) {
+          break;
+        }
+        fontSize -= 0.5;
+      }
+      
+      const lineHeight = fontSize * lineHeightRatio;
       const totalHeight = lines.length * lineHeight;
       const startY = cy - totalHeight / 2;
       
       // Afficher les lignes dans le bon ordre (première ligne en haut)
-      lines.slice(0, Math.floor(height / lineHeight)).forEach((line: string, idx: number) => {
+      lines.slice(0, maxLines).forEach((line: string, idx: number) => {
         doc.text(line, cx, startY + idx * lineHeight, { align: "center" });
       });
     };
