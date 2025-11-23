@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashCamEdu - Guide d'exécution</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-icon {
+            font-size: 20px;
+        }
+        
+        .section p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .command-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            user-select: all;
+        }
+        
+        .credentials {
+            background: #f0f4ff;
+            border-left: 4px solid #764ba2;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .credential-item {
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        
+        .credential-item strong {
+            color: #764ba2;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .credential-item code {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            user-select: all;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .button {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .button-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+        
+        .button-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .info-box {
+            background: #fffacd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #155724;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .button-container {
+                flex-direction: column;
+            }
+            
+            .button {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 FlashCamEdu</h1>
+            <p>Application de cartes flash multi-utilisateurs</p>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">📋</span>Description</h2>
+            <p>FlashCamEdu est une plateforme complète d'apprentissage par cartes flash avec :</p>
+            <ul style="margin-left: 20px; color: #555;">
+                <li>Authentification JWT sécurisée</li>
+                <li>Contrôle d'accès basé sur les rôles (Admin/Étudiant)</li>
+                <li>Synchronisation WebSocket en temps réel</li>
+                <li>Téléchargement PDF des cartes</li>
+                <li>Interface complètement en français</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">🚀</span>Démarrage rapide</h2>
+            <p>Pour exécuter l'application :</p>
+            <div class="command-block">npm run dev</div>
+            <p style="margin-top: 12px; color: #666; font-size: 13px;">L'application démarrera sur <strong>http://localhost:5000</strong></p>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">👤</span>Identifiants de connexion</h2>
+            <div class="credentials">
+                <div class="credential-item">
+                    <strong>Admin 1 (Administrateur)</strong>
+                    Prénom: <code>Camille</code><br>
+                    Nom: <code>Cordier</code><br>
+                    Mot de passe: <code>CaMa_39.cAmA</code>
+                </div>
+                <div class="credential-item">
+                    <strong>Admin 2 (Administrateur)</strong>
+                    Prénom: <code>Stephen</code><br>
+                    Nom: <code>Dechelotte</code><br>
+                    Mot de passe: <code>Stephen_histoire</code>
+                </div>
+            </div>
+            <div class="success-box">
+                ✓ Les identifiants admin ont accès au tableau de bord pour créer et gérer les packs de cartes.
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">💾</span>Base de données</h2>
+            <p>L'application utilise PostgreSQL (Neon) configurée via la variable d'environnement <code style="background: #f5f5f5; padding: 2px 6px;">DATABASE_URL</code>.</p>
+            <div class="info-box">
+                ℹ️ La base de données est automatiquement initialisée au premier démarrage avec des données d'exemple.
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">🛠️</span>Commandes disponibles</h2>
+            <div class="command-block">npm run dev</div>
+            <p style="color: #666; font-size: 13px; margin-bottom: 12px;">Démarre le serveur de développement (Express + Vite)</p>
+            
+            <div class="command-block">npm run build</div>
+            <p style="color: #666; font-size: 13px; margin-bottom: 12px;">Construit l'application pour la production</p>
+            
+            <div class="command-block">npm start</div>
+            <p style="color: #666; font-size: 13px; margin-bottom: 12px;">Exécute l'application en production</p>
+            
+            <div class="command-block">npm run db:push</div>
+            <p style="color: #666; font-size: 13px;">Synchronise le schéma de la base de données</p>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">📱</span>Format d'affichage</h2>
+            <p>L'application est optimisée pour un affichage <strong>16:9</strong> sur :</p>
+            <ul style="margin-left: 20px; color: #555;">
+                <li>Écrans de classe interactifs</li>
+                <li>Projecteurs vidéo</li>
+                <li>Tableaux interactifs</li>
+                <li>Appareils mobiles et tablettes</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2><span class="section-icon">📥</span>Téléchargement PDF</h2>
+            <p>Vous pouvez télécharger les packs de cartes en version papier découpable :</p>
+            <ul style="margin-left: 20px; color: #555;">
+                <li>Format A4 paysage</li>
+                <li>4 cartes × 4 cartes par page</li>
+                <li>Police adaptative (4 lignes maximum par carte)</li>
+                <li>Optimisé pour impression couleur</li>
+            </ul>
+        </div>
+        
+        <div class="button-container">
+            <a href="/" class="button button-primary">
+                ▶️ Ouvrir l'application
+            </a>
+            <button class="button button-secondary" onclick="copyCommand()">
+                📋 Copier la commande
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function copyCommand() {
+            const command = 'npm run dev';
+            navigator.clipboard.writeText(command).then(() => {
+                const button = event.target.closest('.button-secondary');
+                const originalText = button.innerHTML;
+                button.innerHTML = '✓ Copié !';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Impossible de copier. Essayez manuellement : npm run dev');
+            });
+        }
+        
+        // Vérifier si l'app est accessible après 3 secondes
+        setTimeout(() => {
+            fetch('/api/packs').then(() => {
+                const infoBox = document.querySelector('.info-box');
+                if (infoBox) {
+                    infoBox.innerHTML = '✓ L\'application est en cours d\'exécution ! L\'application est prête à être utilisée.';
+                    infoBox.style.background = '#d4edda';
+                    infoBox.style.color = '#155724';
+                    infoBox.style.borderLeftColor = '#28a745';
+                }
+            }).catch(() => {
+                // L'app n'est pas encore lancée, c'est normal sur cette page
+            });
+        }, 3000);
+    </script>
+</body>
+</html>
