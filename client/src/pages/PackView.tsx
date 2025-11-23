@@ -113,12 +113,10 @@ export default function PackView() {
         const cx = x + cardW / 2;
         const cy = y + cardH / 2;
 
-        // En-tête : Numéro et titre du pack (seulement sur le recto)
-        if (isRecto) {
-          doc.setFont("Helvetica", "bold");
-          doc.setFontSize(8);
-          doc.text(`#${idx + 1} - ${pack?.title || "Pack"}`, x + margin, y + margin + 3);
-        }
+        // En-tête : Numéro et titre du pack (sur recto et verso)
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(8);
+        doc.text(`#${idx + 1} - ${pack?.title || "Pack"}`, x + margin, y + margin + 3);
 
         // Texte centré (Question recto / Réponse verso) - en évidence
         const text = isRecto ? (card.question || "") : (card.answer || "");
