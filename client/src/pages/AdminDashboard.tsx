@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [displayedPacks, setDisplayedPacks] = useState<Pack[] | null>(null);
   const [dragOverPackId, setDragOverPackId] = useState<string | null>(null);
   const [swappedPackId, setSwappedPackId] = useState<string | null>(null);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragCurrentY, setDragCurrentY] = useState(0);
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -107,12 +109,16 @@ export default function AdminDashboard() {
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, packId: string) => {
     setDraggedPackId(packId);
+    setDragStartY(e.clientY);
+    setDragCurrentY(e.clientY);
     e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetPackId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    
+    setDragCurrentY(e.clientY);
     
     if (!draggedPackId || draggedPackId === targetPackId) {
       return;
@@ -177,6 +183,8 @@ export default function AdminDashboard() {
     setDraggedPackId(null);
     setDragOverPackId(null);
     setSwappedPackId(null);
+    setDragStartY(0);
+    setDragCurrentY(0);
   };
 
   const allPacks = packsToDisplay;
@@ -251,9 +259,10 @@ export default function AdminDashboard() {
                 setDragOverPackId(null);
                 setSwappedPackId(null);
               }}
-              className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "relative z-50" : swappedPackId === pack.id ? "opacity-100 scale-100 -translate-y-16" : "opacity-100 scale-100"}`}
+              style={draggedPackId === pack.id ? { transform: `translateY(${dragCurrentY - dragStartY}px)` } : {}}
+              className={`relative z-50 transition-all duration-300 ease-out`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600" : ""}`}>
+            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 shadow-xl ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600" : ""}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
