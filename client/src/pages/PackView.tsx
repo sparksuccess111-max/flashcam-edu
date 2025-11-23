@@ -107,13 +107,13 @@ export default function PackView() {
             onClick={handleFlip}
             data-testid="card-flashcard"
           >
-            <CardContent className="p-6 text-center h-full flex flex-col items-center justify-center">
+            <CardContent className="p-4 sm:p-6 text-center h-full flex flex-col items-center justify-center">
               <div className="mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">
                   {isFlipped ? "Réponse" : "Question"}
                 </span>
               </div>
-              <p className="text-2xl font-semibold leading-relaxed text-foreground line-clamp-5" data-testid={isFlipped ? "text-answer" : "text-question"}>
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold leading-relaxed text-foreground" data-testid={isFlipped ? "text-answer" : "text-question"}>
                 {isFlipped ? currentCard?.answer : currentCard?.question}
               </p>
               <div className="mt-2 text-xs text-muted-foreground/50">
