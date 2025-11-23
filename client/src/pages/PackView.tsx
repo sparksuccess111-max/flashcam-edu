@@ -84,12 +84,13 @@ export default function PackView() {
     ) => {
       doc.setFontSize(size);
       const lines = doc.splitTextToSize(text, width - 2 * margin);
-      const lineHeight = size * 0.5;
+      const lineHeight = size * 0.65;
       const totalHeight = lines.length * lineHeight;
-      const startY = cy + totalHeight / 2;
+      const startY = cy - totalHeight / 2;
       
+      // Afficher les lignes dans le bon ordre (première ligne en haut)
       lines.slice(0, Math.floor(height / lineHeight)).forEach((line: string, idx: number) => {
-        doc.text(line, cx, startY - idx * lineHeight, { align: "center", maxWidth: width - 2 * margin });
+        doc.text(line, cx, startY + idx * lineHeight, { align: "center" });
       });
     };
 
