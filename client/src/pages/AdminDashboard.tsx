@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const [draggedPackId, setDraggedPackId] = useState<string | null>(null);
   const [displayedPacks, setDisplayedPacks] = useState<Pack[] | null>(null);
   const [dragOverPackId, setDragOverPackId] = useState<string | null>(null);
-  const [dragClientY, setDragClientY] = useState(0);
+  const [swappedPackId, setSwappedPackId] = useState<string | null>(null);
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -113,7 +113,6 @@ export default function AdminDashboard() {
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetPackId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
-    setDragClientY(e.clientY);
     
     if (!draggedPackId || draggedPackId === targetPackId) {
       return;
@@ -122,23 +121,28 @@ export default function AdminDashboard() {
     // Get the target element to calculate its position
     const targetElement = (e.currentTarget as HTMLElement);
     const rect = targetElement.getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
+    const twoThirdsPoint = rect.top + (rect.height * 2 / 3);
     
-    // Swap if cursor is past the midpoint
-    if (e.clientY > midpoint) {
-      // Cursor is in the lower half - swap with next
-      setDragOverPackId(targetPackId);
+    // Use 2/3 threshold to reduce jitter
+    if (e.clientY > twoThirdsPoint) {
+      // Cursor is in the lower third - should swap
+      if (swappedPackId !== targetPackId) {
+        setSwappedPackId(targetPackId);
+      }
     } else {
-      // Cursor is in the upper half - swap with previous
-      setDragOverPackId(targetPackId);
+      // Cursor is in the upper two-thirds - no swap yet
+      setSwappedPackId(null);
     }
+    
+    setDragOverPackId(targetPackId);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetPack: Pack) => {
     e.preventDefault();
-    if (!draggedPackId || draggedPackId === targetPack.id) {
+    if (!draggedPackId || draggedPackId === targetPack.id || swappedPackId !== targetPack.id) {
       setDraggedPackId(null);
       setDragOverPackId(null);
+      setSwappedPackId(null);
       return;
     }
 
@@ -149,6 +153,7 @@ export default function AdminDashboard() {
     if (draggedIndex === -1 || targetIndex === -1) {
       setDraggedPackId(null);
       setDragOverPackId(null);
+      setSwappedPackId(null);
       return;
     }
 
@@ -171,6 +176,7 @@ export default function AdminDashboard() {
 
     setDraggedPackId(null);
     setDragOverPackId(null);
+    setSwappedPackId(null);
   };
 
   const allPacks = packsToDisplay;
@@ -241,10 +247,13 @@ export default function AdminDashboard() {
               onDragStart={(e) => handleDragStart(e, pack.id)}
               onDragOver={(e) => handleDragOver(e, pack.id)}
               onDrop={(e) => handleDrop(e, pack)}
-              onDragLeave={() => setDragOverPackId(null)}
-              className={`transition-all duration-200 ease-out ${draggedPackId === pack.id ? "opacity-50 scale-95" : dragOverPackId === pack.id ? "opacity-100 scale-100 -translate-y-12" : "opacity-100 scale-100"}`}
+              onDragLeave={() => {
+                setDragOverPackId(null);
+                setSwappedPackId(null);
+              }}
+              className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "opacity-50 scale-95" : swappedPackId === pack.id ? "opacity-100 scale-100 -translate-y-16" : "opacity-100 scale-100"}`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-200">
+            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 ${draggedPackId === pack.id ? "bg-violet-100 dark:bg-violet-950 border-violet-500" : ""}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
