@@ -87,7 +87,7 @@ export default function PackView() {
 
   return (
     <div className="min-h-screen gradient-violet flex flex-col">
-      <div className="container mx-auto px-4 py-0 max-w-4xl flex flex-col">
+      <div className="container mx-auto px-4 py-0 max-w-4xl flex flex-col flex-1">
         <Button
           variant="ghost"
           onClick={() => setLocation("/")}
@@ -98,7 +98,7 @@ export default function PackView() {
           Retour
         </Button>
 
-        <div className="flex flex-col items-center w-full">
+        <div className="flex-1 flex flex-col items-center justify-center w-full">
           <div className="w-full max-w-2xl mb-2 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
@@ -121,45 +121,45 @@ export default function PackView() {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <div className="space-y-0 mt-4">
-          <div className="flex items-center justify-between mb-0">
-            <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
-              Carte {currentIndex + 1} sur {flashcards.length}
-            </span>
+          <div className="space-y-0 mt-4">
+            <div className="flex items-center justify-between mb-0">
+              <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
+                Carte {currentIndex + 1} sur {flashcards.length}
+              </span>
+            </div>
+            <Progress value={progress} />
           </div>
-          <Progress value={progress} />
-        </div>
 
-        <div className="flex items-center justify-between gap-4 mt-4">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-            data-testid="button-previous"
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Précédent
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            data-testid="button-reset"
-          >
-            <RotateCw className="h-4 w-4 mr-2" />
-            Réinitialiser
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleNext}
-            disabled={currentIndex === flashcards.length - 1}
-            data-testid="button-next"
-          >
-            Suivant
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
+          <div className="flex items-center justify-between gap-4 mt-4">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+              data-testid="button-previous"
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Précédent
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              data-testid="button-reset"
+            >
+              <RotateCw className="h-4 w-4 mr-2" />
+              Réinitialiser
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleNext}
+              disabled={currentIndex === flashcards.length - 1}
+              data-testid="button-next"
+            >
+              Suivant
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
