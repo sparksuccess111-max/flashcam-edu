@@ -25,7 +25,6 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     defaultValues: {
       title: pack?.title || "",
       description: pack?.description || "",
-      order: pack?.order || 0,
       published: pack?.published || false,
     },
   });
@@ -35,8 +34,8 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
       toast({
-        title: "Pack created",
-        description: "Your flashcard pack has been created successfully.",
+        title: "Paquet créé",
+        description: "Votre paquet de cartes a été créé avec succès.",
       });
       onOpenChange(false);
       form.reset();
@@ -44,8 +43,8 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to create pack. Please try again.",
+        title: "Erreur",
+        description: "Impossible de créer le paquet. Veuillez réessayer.",
       });
     },
   });
@@ -56,16 +55,16 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
       toast({
-        title: "Pack updated",
-        description: "Your flashcard pack has been updated successfully.",
+        title: "Paquet mis à jour",
+        description: "Votre paquet de cartes a été mis à jour avec succès.",
       });
       onOpenChange(false);
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update pack. Please try again.",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le paquet. Veuillez réessayer.",
       });
     },
   });
@@ -84,11 +83,11 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Pack" : "Create New Pack"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Modifier le paquet" : "Créer un nouveau paquet"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the details of your flashcard pack."
-              : "Create a new flashcard pack to organize your study materials."}
+              ? "Mettez à jour les détails de votre paquet de cartes."
+              : "Créez un nouveau paquet de cartes pour organiser vos matériaux d'étude."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -98,10 +97,10 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Titre</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Spanish Vocabulary"
+                      placeholder="Ex: Vocabulaire Espagnol"
                       data-testid="input-pack-title"
                       {...field}
                     />
@@ -118,29 +117,10 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe what this pack covers..."
+                      placeholder="Décrivez ce que ce paquet couvre..."
                       rows={3}
                       data-testid="input-pack-description"
                       {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="order"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Order</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      data-testid="input-pack-order"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -154,10 +134,10 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
                 onClick={() => onOpenChange(false)}
                 data-testid="button-cancel"
               >
-                Cancel
+                Annuler
               </Button>
-              <Button type="submit" disabled={isPending} data-testid="button-save-pack">
-                {isPending ? "Saving..." : isEditing ? "Update Pack" : "Create Pack"}
+              <Button type="submit" className="gradient-violet-accent text-white border-0" disabled={isPending} data-testid="button-save-pack">
+                {isPending ? "Enregistrement..." : isEditing ? "Modifier" : "Créer"}
               </Button>
             </div>
           </form>

@@ -128,15 +128,6 @@ export default function PackView() {
             <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
               Carte {currentIndex + 1} sur {flashcards.length}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              data-testid="button-reset"
-            >
-              <RotateCw className="h-4 w-4 mr-2" />
-              Réinitialiser
-            </Button>
           </div>
           <Progress value={progress} />
         </div>
@@ -150,6 +141,15 @@ export default function PackView() {
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Précédent
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            data-testid="button-reset"
+          >
+            <RotateCw className="h-4 w-4 mr-2" />
+            Réinitialiser
           </Button>
           <Button
             variant="outline"

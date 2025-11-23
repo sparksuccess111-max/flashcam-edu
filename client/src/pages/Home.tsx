@@ -34,9 +34,9 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Available Flashcard Packs</h1>
+        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">Paquets de Cartes Flash</h1>
         <p className="text-muted-foreground">
-          {user ? `Welcome back, ${user.username}!` : "Welcome! Please login to access all features."}
+          {user ? `Bienvenue, ${user.username}!` : "Connectez-vous pour accéder à toutes les fonctionnalités."}
         </p>
       </div>
 
@@ -49,9 +49,9 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-semibold mb-2">No Packs Available Yet</h3>
+              <h3 className="text-xl font-semibold mb-2">Aucun paquet disponible</h3>
               <p className="text-muted-foreground">
-                There are no published flashcard packs at the moment. Check back soon!
+                Il n'y a pas de paquets de cartes publiés pour le moment. Revenez bientôt!
               </p>
             </div>
           </CardContent>
@@ -82,7 +82,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <Button variant="outline" className="w-full pointer-events-none" data-testid={`button-study-${pack.id}`}>
-                  Start Studying
+                  Commencer à étudier
                 </Button>
               </CardContent>
             </Card>

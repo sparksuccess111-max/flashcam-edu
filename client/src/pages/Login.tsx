@@ -79,10 +79,10 @@ export default function Login() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Nom d'utilisateur</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter your username"
+                        placeholder="Entrez votre nom d'utilisateur"
                         data-testid="input-username"
                         {...field}
                       />
@@ -96,11 +96,11 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder="Entrez votre mot de passe"
                         data-testid="input-password"
                         {...field}
                       />
@@ -111,11 +111,11 @@ export default function Login() {
               />
               <Button
                 type="submit"
-                className="w-full"
+                className="gradient-violet-accent text-white border-0 w-full"
                 disabled={loginMutation.isPending}
                 data-testid="button-submit"
               >
-                {loginMutation.isPending ? "Logging in..." : "Login"}
+                {loginMutation.isPending ? "Connexion..." : "Se connecter"}
               </Button>
             </form>
           </Form>
