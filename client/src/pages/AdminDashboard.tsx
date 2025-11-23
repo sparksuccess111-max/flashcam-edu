@@ -19,6 +19,8 @@ export default function AdminDashboard() {
   const [managingPackId, setManagingPackId] = useState<string | null>(null);
   const [draggedPackId, setDraggedPackId] = useState<string | null>(null);
   const [displayedPacks, setDisplayedPacks] = useState<Pack[] | null>(null);
+  const [dragOverPackId, setDragOverPackId] = useState<string | null>(null);
+  const [dragClientY, setDragClientY] = useState(0);
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -108,15 +110,35 @@ export default function AdminDashboard() {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetPackId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    setDragClientY(e.clientY);
+    
+    if (!draggedPackId || draggedPackId === targetPackId) {
+      return;
+    }
+
+    // Get the target element to calculate its position
+    const targetElement = (e.currentTarget as HTMLElement);
+    const rect = targetElement.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    
+    // Swap if cursor is past the midpoint
+    if (e.clientY > midpoint) {
+      // Cursor is in the lower half - swap with next
+      setDragOverPackId(targetPackId);
+    } else {
+      // Cursor is in the upper half - swap with previous
+      setDragOverPackId(targetPackId);
+    }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetPack: Pack) => {
     e.preventDefault();
     if (!draggedPackId || draggedPackId === targetPack.id) {
       setDraggedPackId(null);
+      setDragOverPackId(null);
       return;
     }
 
@@ -126,13 +148,13 @@ export default function AdminDashboard() {
 
     if (draggedIndex === -1 || targetIndex === -1) {
       setDraggedPackId(null);
+      setDragOverPackId(null);
       return;
     }
 
-    // Reorder locally first for immediate feedback
+    // Simple swap - exchange the two packs
     const newPacks = [...currentPacks];
-    const [removed] = newPacks.splice(draggedIndex, 1);
-    newPacks.splice(targetIndex, 0, removed);
+    [newPacks[draggedIndex], newPacks[targetIndex]] = [newPacks[targetIndex], newPacks[draggedIndex]];
 
     // Update displayed packs with new order values
     const reorderedPacks = newPacks.map((pack, idx) => ({
@@ -148,6 +170,7 @@ export default function AdminDashboard() {
     );
 
     setDraggedPackId(null);
+    setDragOverPackId(null);
   };
 
   const allPacks = packsToDisplay;
@@ -216,9 +239,10 @@ export default function AdminDashboard() {
               key={pack.id}
               draggable
               onDragStart={(e) => handleDragStart(e, pack.id)}
-              onDragOver={handleDragOver}
+              onDragOver={(e) => handleDragOver(e, pack.id)}
               onDrop={(e) => handleDrop(e, pack)}
-              className={`transition-all duration-200 ease-out ${draggedPackId === pack.id ? "opacity-50 scale-95" : "opacity-100 scale-100"}`}
+              onDragLeave={() => setDragOverPackId(null)}
+              className={`transition-all duration-200 ease-out ${draggedPackId === pack.id ? "opacity-50 scale-95" : dragOverPackId === pack.id ? "opacity-100 scale-100 -translate-y-12" : "opacity-100 scale-100"}`}
             >
             <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-200">
               <CardHeader>
