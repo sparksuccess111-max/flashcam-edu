@@ -112,20 +112,20 @@ export default function PackView() {
         const cx = x + cardW / 2;
         const cy = y + cardH / 2;
 
-        // Numéro en haut-left
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(numFontSize);
-        doc.text(String(idx + 1), x + margin, y + cardH - margin);
+        // En-tête : Numéro et titre du pack (seulement sur le recto)
+        if (isRecto) {
+          doc.setFont("Helvetica", "bold");
+          doc.setFontSize(8);
+          doc.text(`#${idx + 1} - ${pack?.title || "Pack"}`, x + margin, y + margin + 3);
+        }
 
-        // Texte centré (Question recto / Réponse verso)
+        // Texte centré (Question recto / Réponse verso) - en évidence
         const text = isRecto ? (card.question || "") : (card.answer || "");
-        doc.setFont("Helvetica", "normal");
-        drawMultilineText(text, cx, cy, cardW, cardH, fontSize);
-
-        // Signature en bas-droite
-        doc.setFont("Helvetica", "normal");
-        doc.setFontSize(6);
-        doc.text("Camille", x + cardW - margin - 1, y + margin + 1, { align: "right" });
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(12);
+        const contentStartY = isRecto ? (y + margin + 8) : y;
+        const contentHeight = isRecto ? (cardH - margin - 8) : cardH;
+        drawMultilineText(text, cx, contentStartY + contentHeight / 2, cardW, contentHeight, 12);
       });
 
       // Traits de découpe (lignes verticales et horizontales)
