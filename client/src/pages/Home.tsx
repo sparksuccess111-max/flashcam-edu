@@ -36,9 +36,11 @@ export default function Home() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">Paquets de Cartes Flash</h1>
-        <p className="text-muted-foreground">
-          {user ? `Bienvenue, ${user.username}!` : "Connectez-vous pour accéder à toutes les fonctionnalités."}
-        </p>
+        {user && (
+          <p className="text-muted-foreground">
+            Bienvenue, {user.username}!
+          </p>
+        )}
       </div>
 
       {publishedPacks.length === 0 ? (
