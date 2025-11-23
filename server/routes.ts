@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { authenticate, requireAdmin, optionalAuth, generateToken, type AuthRequest } from "./middleware/auth";
+import { logger } from "./logger";
 import {
   loginSchema,
   insertPackSchema,
@@ -29,15 +30,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   wss.on('connection', (ws) => {
-    console.log('WebSocket client connected');
+    const clientId = Math.random().toString(36).slice(2, 9);
+    logger.ws(`Client ${clientId} connected (total: ${wss.clients.size})`);
     
     ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      logger.error(`Client ${clientId} error: ${error.message}`, "websocket", error);
     });
 
     ws.on('close', () => {
-      console.log('WebSocket client disconnected');
+      logger.ws(`Client ${clientId} disconnected (total: ${wss.clients.size - 1})`);
     });
+  });
+
+  // Health check endpoint for keep-alive monitoring
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
   app.post("/api/login", async (req, res) => {
@@ -47,19 +54,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = users_list.find(u => u.firstName === credentials.firstName && u.lastName === credentials.lastName);
 
       if (!user) {
+        logger.warn(`Login failed: user not found (${credentials.firstName} ${credentials.lastName})`, "api");
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       const isValid = await bcrypt.compare(credentials.password, user.password);
       if (!isValid) {
+        logger.warn(`Login failed: invalid password for ${credentials.firstName} ${credentials.lastName}`, "api");
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       const token = generateToken(user);
       const { password: _, ...userWithoutPassword } = user;
 
+      logger.info(`Login successful: ${user.firstName} ${user.lastName}`, "api");
       res.json({ user: userWithoutPassword, token });
     } catch (error: any) {
+      logger.error("Login error", "api", error);
       res.status(400).json({ error: error.message || "Login failed" });
     }
   });
@@ -71,6 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filteredPacks = isAdmin ? allPacks : allPacks.filter(pack => pack.published);
       res.json(filteredPacks);
     } catch (error: any) {
+      logger.error("Failed to fetch packs", "api", error);
       res.status(500).json({ error: error.message || "Failed to fetch packs" });
     }
   });
@@ -86,8 +98,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Pack not found" });
       }
       broadcastUpdate('pack-updated', pack);
+      logger.info(`Pack reordered: ${packId} to position ${newOrder}`, "api");
       res.json(pack);
     } catch (error: any) {
+      logger.error("Failed to reorder pack", "api", error);
       res.status(400).json({ error: error.message || "Failed to reorder pack" });
     }
   });
@@ -100,11 +114,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!pack.published && req.user?.role !== "admin") {
+        logger.warn(`Unauthorized access to unpublished pack: ${req.params.id}`, "api");
         return res.status(403).json({ error: "This pack is not published" });
       }
 
       res.json(pack);
     } catch (error: any) {
+      logger.error("Failed to fetch pack", "api", error);
       res.status(500).json({ error: error.message || "Failed to fetch pack" });
     }
   });
@@ -114,8 +130,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const packData = insertPackSchema.parse(req.body);
       const pack = await storage.createPack(packData);
       broadcastUpdate('pack-created', pack);
+      logger.info(`Pack created: ${pack.id} - "${pack.title}"`, "api");
       res.status(201).json(pack);
     } catch (error: any) {
+      logger.error("Failed to create pack", "api", error);
       res.status(400).json({ error: error.message || "Failed to create pack" });
     }
   });
@@ -128,8 +146,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Pack not found" });
       }
       broadcastUpdate('pack-updated', pack);
+      logger.info(`Pack updated: ${req.params.id} - "${pack.title}"`, "api");
       res.json(pack);
     } catch (error: any) {
+      logger.error("Failed to update pack", "api", error);
       res.status(400).json({ error: error.message || "Failed to update pack" });
     }
   });
@@ -138,8 +158,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.deletePack(req.params.id);
       broadcastUpdate('pack-deleted', { id: req.params.id });
+      logger.info(`Pack deleted: ${req.params.id}`, "api");
       res.status(204).send();
     } catch (error: any) {
+      logger.error("Failed to delete pack", "api", error);
       res.status(500).json({ error: error.message || "Failed to delete pack" });
     }
   });
@@ -152,12 +174,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!pack.published && req.user?.role !== "admin") {
+        logger.warn(`Unauthorized access to flashcards: ${req.params.packId}`, "api");
         return res.status(403).json({ error: "This pack is not published" });
       }
 
       const flashcards = await storage.getFlashcardsByPackId(req.params.packId);
       res.json(flashcards);
     } catch (error: any) {
+      logger.error("Failed to fetch flashcards", "api", error);
       res.status(500).json({ error: error.message || "Failed to fetch flashcards" });
     }
   });
@@ -170,8 +194,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       const flashcard = await storage.createFlashcard(flashcardData);
       broadcastUpdate('flashcard-created', flashcard);
+      logger.info(`Flashcard created in pack ${req.params.packId}: ${flashcard.id}`, "api");
       res.status(201).json(flashcard);
     } catch (error: any) {
+      logger.error("Failed to create flashcard", "api", error);
       res.status(400).json({ error: error.message || "Failed to create flashcard" });
     }
   });
@@ -184,8 +210,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Flashcard not found" });
       }
       broadcastUpdate('flashcard-updated', flashcard);
+      logger.info(`Flashcard updated in pack ${req.params.packId}: ${req.params.id}`, "api");
       res.json(flashcard);
     } catch (error: any) {
+      logger.error("Failed to update flashcard", "api", error);
       res.status(400).json({ error: error.message || "Failed to update flashcard" });
     }
   });
@@ -194,8 +222,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.deleteFlashcard(req.params.id);
       broadcastUpdate('flashcard-deleted', { id: req.params.id, packId: req.params.packId });
+      logger.info(`Flashcard deleted in pack ${req.params.packId}: ${req.params.id}`, "api");
       res.status(204).send();
     } catch (error: any) {
+      logger.error("Failed to delete flashcard", "api", error);
       res.status(500).json({ error: error.message || "Failed to delete flashcard" });
     }
   });
