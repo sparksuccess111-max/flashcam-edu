@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, RotateCw, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCw, ArrowLeft, Download } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import jsPDF from "jspdf";
 import type { Flashcard, Pack } from "@shared/schema";
 
 export default function PackView() {
@@ -49,6 +50,71 @@ export default function PackView() {
   const handleReset = () => {
     setCurrentIndex(0);
     setIsFlipped(false);
+  };
+
+  const handleDownload = () => {
+    if (!pack || !flashcards) return;
+
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 10;
+    const contentWidth = pageWidth - 2 * margin;
+    let yPosition = margin;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(99, 102, 241); // violet-600
+    doc.text(pack.title, margin, yPosition);
+    yPosition += 15;
+
+    // Flashcards
+    flashcards.forEach((card, index) => {
+      // Check if we need a new page
+      if (yPosition > pageHeight - 40) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      // Card number
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Carte ${index + 1}`, margin, yPosition);
+      yPosition += 5;
+
+      // Question
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, "bold");
+      doc.text("Question:", margin, yPosition);
+      yPosition += 5;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(11);
+      const questionLines = doc.splitTextToSize(card.question, contentWidth);
+      doc.text(questionLines, margin, yPosition);
+      yPosition += questionLines.length * 5 + 3;
+
+      // Answer
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(12);
+      doc.text("Réponse:", margin, yPosition);
+      yPosition += 5;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(11);
+      const answerLines = doc.splitTextToSize(card.answer, contentWidth);
+      doc.text(answerLines, margin, yPosition);
+      yPosition += answerLines.length * 5 + 10;
+    });
+
+    // Save PDF
+    doc.save(`${pack.title.replace(/\s+/g, "_")}.pdf`);
   };
 
   if (isLoading) {
@@ -131,7 +197,7 @@ export default function PackView() {
             <Progress value={progress} />
           </div>
 
-          <div className="flex items-center justify-between gap-4 mt-4">
+          <div className="flex items-center justify-between gap-4 mt-4 flex-wrap">
             <Button
               variant="outline"
               onClick={handlePrevious}
@@ -141,15 +207,26 @@ export default function PackView() {
               <ChevronLeft className="h-4 w-4 mr-2" />
               Précédent
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              data-testid="button-reset"
-            >
-              <RotateCw className="h-4 w-4 mr-2" />
-              Réinitialiser
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                data-testid="button-reset"
+              >
+                <RotateCw className="h-4 w-4 mr-2" />
+                Réinitialiser
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDownload}
+                data-testid="button-download"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Télécharger PDF
+              </Button>
+            </div>
             <Button
               variant="outline"
               onClick={handleNext}
