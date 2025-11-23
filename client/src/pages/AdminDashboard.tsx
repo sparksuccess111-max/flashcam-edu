@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, BookOpen, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, BookOpen, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack } from "@shared/schema";
@@ -17,14 +17,8 @@ export default function AdminDashboard() {
   const [editingPack, setEditingPack] = useState<Pack | null>(null);
   const [isPackDialogOpen, setIsPackDialogOpen] = useState(false);
   const [managingPackId, setManagingPackId] = useState<string | null>(null);
-  const [draggedPackId, setDraggedPackId] = useState<string | null>(null);
   const [displayedPacks, setDisplayedPacks] = useState<Pack[] | null>(null);
-  const [dragOverPackId, setDragOverPackId] = useState<string | null>(null);
-  const [swappedPackId, setSwappedPackId] = useState<string | null>(null);
-  const [dragStartY, setDragStartY] = useState(0);
-  const [dragCurrentY, setDragCurrentY] = useState(0);
-  const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
-  const packRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [animatingPackId, setAnimatingPackId] = useState<string | null>(null);
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -109,90 +103,34 @@ export default function AdminDashboard() {
     },
   });
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, packId: string) => {
-    setDraggedPackId(packId);
-    setDragStartY(e.clientY);
-    setDragCurrentY(e.clientY);
-    setDraggedOverIndex(allPacks.findIndex(p => p.id === packId));
-    e.dataTransfer.effectAllowed = "move";
-  };
+  const handleMoveUp = (packId: string) => {
+    const index = packsToDisplay.findIndex(p => p.id === packId);
+    if (index === 0) return;
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, targetPackId: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    
-    setDragCurrentY(e.clientY);
-    
-    if (!draggedPackId || draggedPackId === targetPackId) {
-      return;
-    }
+    const newPacks = [...packsToDisplay];
+    [newPacks[index - 1], newPacks[index]] = [newPacks[index], newPacks[index - 1]];
+    setDisplayedPacks(newPacks);
+    setAnimatingPackId(packId);
+    setTimeout(() => setAnimatingPackId(null), 300);
 
-    // Get the target element to calculate its position
-    const targetElement = (e.currentTarget as HTMLElement);
-    const rect = targetElement.getBoundingClientRect();
-    const twoThirdsPoint = rect.top + (rect.height * 2 / 3);
-    
-    // Use 2/3 threshold to reduce jitter
-    if (e.clientY > twoThirdsPoint) {
-      // Cursor is in the lower third - should swap
-      const targetIndex = allPacks.findIndex(p => p.id === targetPackId);
-      if (draggedOverIndex !== null && targetIndex > draggedOverIndex) {
-        setDraggedOverIndex(targetIndex);
-      }
-      if (swappedPackId !== targetPackId) {
-        setSwappedPackId(targetPackId);
-      }
-    } else {
-      // Cursor is in the upper two-thirds - no swap yet
-      setSwappedPackId(null);
-    }
-    
-    setDragOverPackId(targetPackId);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetPack: Pack) => {
-    e.preventDefault();
-    if (!draggedPackId || draggedPackId === targetPack.id || swappedPackId !== targetPack.id) {
-      setDraggedPackId(null);
-      setDragOverPackId(null);
-      setSwappedPackId(null);
-      return;
-    }
-
-    const currentPacks = packsToDisplay;
-    const draggedIndex = currentPacks.findIndex(p => p.id === draggedPackId);
-    const targetIndex = currentPacks.findIndex(p => p.id === targetPack.id);
-
-    if (draggedIndex === -1 || targetIndex === -1) {
-      setDraggedPackId(null);
-      setDragOverPackId(null);
-      setSwappedPackId(null);
-      return;
-    }
-
-    // Simple swap - exchange the two packs
-    const newPacks = [...currentPacks];
-    [newPacks[draggedIndex], newPacks[targetIndex]] = [newPacks[targetIndex], newPacks[draggedIndex]];
-
-    // Update displayed packs with new order values
-    const reorderedPacks = newPacks.map((pack, idx) => ({
-      ...pack,
-      order: idx,
-    }));
-
-    setDisplayedPacks(reorderedPacks);
-
-    // Send updates to server
     reorderMutation.mutate(
-      reorderedPacks.map(pack => ({ id: pack.id, order: pack.order }))
+      newPacks.map((pack, i) => ({ id: pack.id, order: i }))
     );
+  };
 
-    setDraggedPackId(null);
-    setDragOverPackId(null);
-    setSwappedPackId(null);
-    setDragStartY(0);
-    setDragCurrentY(0);
-    setDraggedOverIndex(null);
+  const handleMoveDown = (packId: string) => {
+    const index = packsToDisplay.findIndex(p => p.id === packId);
+    if (index === packsToDisplay.length - 1) return;
+
+    const newPacks = [...packsToDisplay];
+    [newPacks[index], newPacks[index + 1]] = [newPacks[index + 1], newPacks[index]];
+    setDisplayedPacks(newPacks);
+    setAnimatingPackId(packId);
+    setTimeout(() => setAnimatingPackId(null), 300);
+
+    reorderMutation.mutate(
+      newPacks.map((pack, i) => ({ id: pack.id, order: i }))
+    );
   };
 
   const allPacks = packsToDisplay;
@@ -256,92 +194,94 @@ export default function AdminDashboard() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {allPacks.map((pack, idx) => {
-            const shouldShift = draggedOverIndex !== null && idx > draggedOverIndex;
-            
-            return (
+          {allPacks.map((pack, idx) => (
             <div
               key={pack.id}
-              ref={(el) => {
-                if (el) packRefs.current.set(pack.id, el);
-              }}
-              draggable
-              onDragStart={(e) => handleDragStart(e, pack.id)}
-              onDragOver={(e) => handleDragOver(e, pack.id)}
-              onDrop={(e) => handleDrop(e, pack)}
-              onDragLeave={() => {
-                setDragOverPackId(null);
-                setSwappedPackId(null);
-              }}
-              className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "relative z-50" : shouldShift ? "-translate-y-[132px]" : ""}`}
+              className={`transition-all duration-300 ease-out ${animatingPackId === pack.id ? "scale-95 opacity-75" : "scale-100 opacity-100"}`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600 fixed left-[50%] -translate-x-[50%] shadow-2xl scale-110" : "shadow-md"}`}
-              style={draggedPackId === pack.id ? { top: `${dragCurrentY - 66}px` } : {}}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
-                        {pack.title}
-                      </CardTitle>
-                      <Badge variant={pack.published ? "default" : "secondary"} data-testid={`badge-status-${pack.id}`}>
-                        {pack.published ? "Publié" : "Brouillon"}
-                      </Badge>
+              <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-300">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
+                          {pack.title}
+                        </CardTitle>
+                        <Badge variant={pack.published ? "default" : "secondary"} data-testid={`badge-status-${pack.id}`}>
+                          {pack.published ? "Publié" : "Brouillon"}
+                        </Badge>
+                      </div>
+                      <CardDescription className="break-words" data-testid={`text-pack-description-${pack.id}`}>
+                        {pack.description || "Pas de description"}
+                      </CardDescription>
                     </div>
-                    <CardDescription className="break-words" data-testid={`text-pack-description-${pack.id}`}>
-                      {pack.description || "Pas de description"}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Publier</span>
-                      <Switch
-                        checked={pack.published}
-                        onCheckedChange={() => handleTogglePublish(pack)}
-                        data-testid={`switch-publish-${pack.id}`}
-                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Publier</span>
+                        <Switch
+                          checked={pack.published}
+                          onCheckedChange={() => handleTogglePublish(pack)}
+                          data-testid={`switch-publish-${pack.id}`}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setManagingPackId(pack.id)}
-                    data-testid={`button-manage-cards-${pack.id}`}
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Gérer les cartes
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(pack)}
-                    data-testid={`button-edit-${pack.id}`}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Modifier
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(pack.id)}
-                    disabled={deleteMutation.isPending}
-                    data-testid={`button-delete-${pack.id}`}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Supprimer
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMoveUp(pack.id)}
+                      disabled={idx === 0}
+                      data-testid={`button-move-up-${pack.id}`}
+                    >
+                      <ChevronUp className="h-4 w-4 mr-2" />
+                      Monter
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMoveDown(pack.id)}
+                      disabled={idx === allPacks.length - 1}
+                      data-testid={`button-move-down-${pack.id}`}
+                    >
+                      <ChevronDown className="h-4 w-4 mr-2" />
+                      Descendre
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setManagingPackId(pack.id)}
+                      data-testid={`button-manage-cards-${pack.id}`}
+                    >
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Gérer les cartes
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(pack)}
+                      data-testid={`button-edit-${pack.id}`}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(pack.id)}
+                      disabled={deleteMutation.isPending}
+                      data-testid={`button-delete-${pack.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            );
-          })}
+          ))}
         </div>
       )}
 
