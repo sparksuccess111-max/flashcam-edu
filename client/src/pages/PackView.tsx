@@ -84,7 +84,7 @@ export default function PackView() {
     ) => {
       doc.setFontSize(size);
       const lines = doc.splitTextToSize(text, width - 2 * margin);
-      const lineHeight = size * 0.65;
+      const lineHeight = size * 0.45;
       const totalHeight = lines.length * lineHeight;
       const startY = cy - totalHeight / 2;
       
