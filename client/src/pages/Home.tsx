@@ -61,14 +61,14 @@ export default function Home() {
           {publishedPacks.map((pack) => (
             <Card
               key={pack.id}
-              className="h-full hover-elevate active-elevate-2 transition-all cursor-pointer"
+              className="gradient-card h-full hover-elevate active-elevate-2 transition-all cursor-pointer border-violet-200 dark:border-violet-800 shadow-md hover:shadow-lg"
               onClick={() => window.location.href = `/pack/${pack.id}`}
               data-testid={`card-pack-${pack.id}`}
             >
               <CardHeader>
                 <div className="flex items-start gap-3">
-                  <div className="bg-primary/10 p-2 rounded-md flex-shrink-0">
-                    <GraduationCap className="h-5 w-5 text-primary" />
+                  <div className="gradient-violet-accent p-2 rounded-md flex-shrink-0">
+                    <GraduationCap className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-lg mb-1 break-words" data-testid={`text-pack-title-${pack.id}`}>

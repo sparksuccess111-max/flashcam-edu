@@ -4,45 +4,45 @@
 
 /* LIGHT MODE */
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(124,58,255, .10);
+  --badge-outline: rgba(124,58,255, .05);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
-  --background: 0 0% 100%;
-  --foreground: 0 0% 9%;
-  --border: 0 0% 91%;
-  --card: 0 0% 98%;
-  --card-foreground: 0 0% 9%;
-  --card-border: 0 0% 95%;
-  --sidebar: 0 0% 96%;
-  --sidebar-foreground: 0 0% 9%;
-  --sidebar-border: 0 0% 93%;
-  --sidebar-primary: 217 91% 60%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 0 0% 92%;
-  --sidebar-accent-foreground: 0 0% 9%;
-  --sidebar-ring: 217 91% 60%;
-  --popover: 0 0% 94%;
-  --popover-foreground: 0 0% 9%;
-  --popover-border: 0 0% 91%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 90%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 92%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 217 15% 93%;
-  --accent-foreground: 0 0% 9%;
+  --elevate-1: rgba(124,58,255, .03);
+  --elevate-2: rgba(124,58,255, .08);
+  --background: 280 100% 99%;
+  --foreground: 270 10% 15%;
+  --border: 270 50% 90%;
+  --card: 270 100% 97%;
+  --card-foreground: 270 10% 15%;
+  --card-border: 270 70% 88%;
+  --sidebar: 270 80% 96%;
+  --sidebar-foreground: 270 10% 15%;
+  --sidebar-border: 270 60% 90%;
+  --sidebar-primary: 270 84% 55%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 280 70% 85%;
+  --sidebar-accent-foreground: 270 10% 15%;
+  --sidebar-ring: 270 84% 55%;
+  --popover: 270 100% 95%;
+  --popover-foreground: 270 10% 15%;
+  --popover-border: 270 70% 88%;
+  --primary: 270 84% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 280 70% 85%;
+  --secondary-foreground: 270 10% 20%;
+  --muted: 270 50% 88%;
+  --muted-foreground: 270 20% 45%;
+  --accent: 300 100% 70%;
+  --accent-foreground: 270 20% 15%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --input: 0 0% 80%;
-  --ring: 217 91% 60%;
-  --chart-1: 217 91% 45%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 45%;
-  --chart-4: 43 74% 49%;
-  --chart-5: 27 87% 55%;
+  --input: 270 50% 92%;
+  --ring: 270 84% 55%;
+  --chart-1: 270 84% 55%;
+  --chart-2: 310 100% 60%;
+  --chart-3: 240 70% 55%;
+  --chart-4: 290 100% 65%;
+  --chart-5: 260 90% 60%;
   --font-sans: Open Sans, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -88,45 +88,45 @@
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(196,181,253, .15);
+  --badge-outline: rgba(196,181,253, .08);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
-  --background: 0 0% 9%;
-  --foreground: 0 0% 98%;
-  --border: 0 0% 18%;
-  --card: 0 0% 11%;
-  --card-foreground: 0 0% 98%;
-  --card-border: 0 0% 14%;
-  --sidebar: 0 0% 13%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 0 0% 16%;
-  --sidebar-primary: 217 91% 60%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 0 0% 16%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 217 91% 60%;
-  --popover: 0 0% 15%;
-  --popover-foreground: 0 0% 98%;
-  --popover-border: 0 0% 18%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 17%;
-  --muted-foreground: 0 0% 65%;
-  --accent: 217 15% 18%;
-  --accent-foreground: 0 0% 98%;
+  --elevate-1: rgba(196,181,253, .05);
+  --elevate-2: rgba(196,181,253, .12);
+  --background: 270 30% 12%;
+  --foreground: 280 100% 95%;
+  --border: 270 50% 25%;
+  --card: 270 40% 17%;
+  --card-foreground: 280 100% 95%;
+  --card-border: 270 50% 28%;
+  --sidebar: 270 35% 15%;
+  --sidebar-foreground: 280 100% 95%;
+  --sidebar-border: 270 50% 26%;
+  --sidebar-primary: 270 84% 65%;
+  --sidebar-primary-foreground: 270 30% 10%;
+  --sidebar-accent: 270 50% 28%;
+  --sidebar-accent-foreground: 280 100% 95%;
+  --sidebar-ring: 270 84% 65%;
+  --popover: 270 40% 20%;
+  --popover-foreground: 280 100% 95%;
+  --popover-border: 270 50% 28%;
+  --primary: 270 84% 65%;
+  --primary-foreground: 270 30% 10%;
+  --secondary: 270 50% 28%;
+  --secondary-foreground: 280 100% 95%;
+  --muted: 270 40% 26%;
+  --muted-foreground: 280 70% 65%;
+  --accent: 300 100% 70%;
+  --accent-foreground: 270 30% 12%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --input: 0 0% 25%;
-  --ring: 217 91% 60%;
-  --chart-1: 217 91% 70%;
-  --chart-2: 173 58% 65%;
-  --chart-3: 197 37% 70%;
-  --chart-4: 43 74% 70%;
-  --chart-5: 27 87% 70%;
+  --input: 270 40% 22%;
+  --ring: 270 84% 65%;
+  --chart-1: 270 84% 65%;
+  --chart-2: 310 100% 70%;
+  --chart-3: 240 70% 65%;
+  --chart-4: 290 100% 75%;
+  --chart-5: 260 90% 70%;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
@@ -196,6 +196,22 @@
  * need to be distinguished from eachother visually.
  */
 @layer utilities {
+  /* Gradient utilities */
+  .gradient-violet {
+    @apply bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-purple-950 dark:via-violet-900 dark:to-purple-800;
+  }
+
+  .gradient-violet-accent {
+    @apply bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 dark:from-violet-600 dark:via-purple-600 dark:to-indigo-600;
+  }
+
+  .gradient-card {
+    @apply bg-gradient-to-br from-white via-purple-50 to-violet-100 dark:from-slate-950 dark:via-purple-950 dark:to-violet-900;
+  }
+
+  .gradient-header {
+    @apply bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 dark:from-violet-600 dark:via-purple-600 dark:to-indigo-600;
+  }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {

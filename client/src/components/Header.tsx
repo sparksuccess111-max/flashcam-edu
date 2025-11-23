@@ -13,21 +13,22 @@ export function Header() {
   };
 
   return (
-    <header className="border-b bg-card">
+    <header className="gradient-header border-b shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <button
             onClick={() => setLocation("/")}
-            className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md bg-transparent border-0 cursor-pointer"
+            className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md bg-white/10 backdrop-blur-sm border-0 cursor-pointer text-white"
           >
-            <GraduationCap className="h-6 w-6 text-primary" />
+            <GraduationCap className="h-6 w-6" />
             <h1 className="text-xl font-semibold">FlashLearn</h1>
           </button>
           
           <div className="flex items-center gap-2">
             {user && isAdmin && (
               <Button
-                variant="ghost"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                variant="outline"
                 onClick={() => setLocation("/admin")}
                 data-testid="button-admin-dashboard"
               >
@@ -37,7 +38,8 @@ export function Header() {
             )}
             {user ? (
               <Button
-                variant="ghost"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                variant="outline"
                 onClick={handleLogout}
                 data-testid="button-logout"
               >
@@ -46,6 +48,7 @@ export function Header() {
               </Button>
             ) : (
               <Button
+                className="bg-white text-violet-600 hover:bg-white/90"
                 variant="default"
                 onClick={() => setLocation("/login")}
                 data-testid="button-login"
