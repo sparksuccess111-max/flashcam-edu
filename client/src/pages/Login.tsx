@@ -21,6 +21,7 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       firstName: "",
+      lastName: "",
       password: "",
     },
   });
@@ -39,7 +40,7 @@ export default function Login() {
       setUser(data.user);
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue, ${data.user.username}!`,
+        description: `Bienvenue, ${data.user.firstName}!`,
       });
       setLocation("/");
     },
@@ -83,6 +84,23 @@ export default function Login() {
                       <Input
                         placeholder="Entrez votre prénom"
                         data-testid="input-firstName"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Entrez votre nom"
+                        data-testid="input-lastName"
                         {...field}
                       />
                     </FormControl>

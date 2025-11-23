@@ -43,7 +43,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/login", async (req, res) => {
     try {
       const credentials = loginSchema.parse(req.body);
-      const user = await storage.getUserByFirstName(credentials.firstName);
+      const users_list = await storage.getAllUsers();
+      const user = users_list.find(u => u.firstName === credentials.firstName && u.lastName === credentials.lastName);
 
       if (!user) {
         return res.status(401).json({ error: "Invalid credentials" });

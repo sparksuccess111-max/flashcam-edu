@@ -39,6 +39,7 @@ export const flashcardsRelations = relations(flashcards, ({ one }) => ({
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const loginSchema = z.object({
   firstName: z.string().min(1, "Prénom is required"),
+  lastName: z.string().min(1, "Nom is required"),
   password: z.string().min(1, "Password is required"),
 });
 
