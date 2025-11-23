@@ -109,7 +109,7 @@ export default function PackView() {
           >
             <CardContent className="p-4 sm:p-6 text-center h-full flex flex-col items-center justify-center">
               <div className="mb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isFlipped ? "text-green-500" : "text-yellow-500"}`}>
                   {isFlipped ? "Réponse" : "Question"}
                 </span>
               </div>
