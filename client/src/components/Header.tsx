@@ -33,7 +33,7 @@ export function Header() {
                 data-testid="button-admin-dashboard"
               >
                 <LayoutDashboard className="h-4 w-4 mr-2" />
-                Admin Dashboard
+                Tableau de bord
               </Button>
             )}
             {user ? (
@@ -44,7 +44,7 @@ export function Header() {
                 data-testid="button-logout"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                Déconnexion
               </Button>
             ) : (
               <Button
@@ -53,7 +53,7 @@ export function Header() {
                 onClick={() => setLocation("/login")}
                 data-testid="button-login"
               >
-                Login
+                Se connecter
               </Button>
             )}
           </div>

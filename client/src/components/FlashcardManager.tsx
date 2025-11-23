@@ -59,7 +59,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this flashcard?")) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette carte?")) {
       deleteMutation.mutate(id);
     }
   };
@@ -75,7 +75,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
         data-testid="button-back-to-dashboard"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Dashboard
+        Retour au tableau de bord
       </Button>
 
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">

@@ -27,15 +27,15 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
       toast({
-        title: "Pack deleted",
-        description: "The flashcard pack has been deleted successfully.",
+        title: "Paquet supprimé",
+        description: "Le paquet a été supprimé avec succès.",
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to delete pack. Please try again.",
+        title: "Erreur",
+        description: "Impossible de supprimer le paquet. Veuillez réessayer.",
       });
     },
   });
@@ -49,8 +49,8 @@ export default function AdminDashboard() {
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update pack status.",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut du paquet.",
       });
     },
   });
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this pack? This will also delete all its flashcards.")) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce paquet? Cela supprimera également toutes ses cartes.")) {
       deleteMutation.mutate(id);
     }
   };
@@ -103,14 +103,14 @@ export default function AdminDashboard() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">Tableau de bord</h1>
           <p className="text-muted-foreground">
-            Manage your flashcard packs and content
+            Gérez vos paquets de cartes et le contenu
           </p>
         </div>
-        <Button onClick={handleCreate} data-testid="button-create-pack">
+        <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-pack">
           <Plus className="h-4 w-4 mr-2" />
-          Create Pack
+          Créer un paquet
         </Button>
       </div>
 
@@ -123,13 +123,13 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-semibold mb-2">No Packs Yet</h3>
+              <h3 className="text-xl font-semibold mb-2">Aucun paquet pour le moment</h3>
               <p className="text-muted-foreground mb-4">
-                Get started by creating your first flashcard pack
+                Commencez par créer votre premier paquet de cartes
               </p>
-              <Button onClick={handleCreate} data-testid="button-create-first-pack">
+              <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-first-pack">
                 <Plus className="h-4 w-4 mr-2" />
-                Create Your First Pack
+                Créer votre premier paquet
               </Button>
             </div>
           </CardContent>
@@ -146,16 +146,16 @@ export default function AdminDashboard() {
                         {pack.title}
                       </CardTitle>
                       <Badge variant={pack.published ? "default" : "secondary"} data-testid={`badge-status-${pack.id}`}>
-                        {pack.published ? "Published" : "Draft"}
+                        {pack.published ? "Publié" : "Brouillon"}
                       </Badge>
                     </div>
                     <CardDescription className="break-words" data-testid={`text-pack-description-${pack.id}`}>
-                      {pack.description || "No description"}
+                      {pack.description || "Pas de description"}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Published</span>
+                      <span className="text-sm text-muted-foreground">Publier</span>
                       <Switch
                         checked={pack.published}
                         onCheckedChange={() => handleTogglePublish(pack)}
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
                     data-testid={`button-manage-cards-${pack.id}`}
                   >
                     <BookOpen className="h-4 w-4 mr-2" />
-                    Manage Flashcards
+                    Gérer les cartes
                   </Button>
                   <Button
                     variant="outline"
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                     data-testid={`button-edit-${pack.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    Modifier
                   </Button>
                   <Button
                     variant="outline"
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
                     data-testid={`button-delete-${pack.id}`}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    Supprimer
                   </Button>
                 </div>
               </CardContent>

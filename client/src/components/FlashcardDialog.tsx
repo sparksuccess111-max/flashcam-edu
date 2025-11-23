@@ -119,32 +119,13 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
               name="answer"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Answer</FormLabel>
+                  <FormLabel>Réponse</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter the answer..."
+                      placeholder="Entrez la réponse..."
                       rows={3}
                       data-testid="input-answer"
                       {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="order"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Order</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      data-testid="input-order"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -158,10 +139,10 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
                 onClick={() => onOpenChange(false)}
                 data-testid="button-cancel"
               >
-                Cancel
+                Annuler
               </Button>
-              <Button type="submit" disabled={isPending} data-testid="button-save-flashcard">
-                {isPending ? "Saving..." : isEditing ? "Update Flashcard" : "Create Flashcard"}
+              <Button type="submit" className="gradient-violet-accent text-white border-0" disabled={isPending} data-testid="button-save-flashcard">
+                {isPending ? "Enregistrement..." : isEditing ? "Modifier" : "Créer"}
               </Button>
             </div>
           </form>
