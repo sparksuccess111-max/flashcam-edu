@@ -248,7 +248,11 @@ export default function AdminDashboard() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {allPacks.map((pack) => (
+          {allPacks.map((pack, idx) => {
+            const draggedIndex = draggedPackId ? allPacks.findIndex(p => p.id === draggedPackId) : -1;
+            const shouldShift = draggedIndex !== -1 && idx > draggedIndex;
+            
+            return (
             <div
               key={pack.id}
               draggable
@@ -259,10 +263,11 @@ export default function AdminDashboard() {
                 setDragOverPackId(null);
                 setSwappedPackId(null);
               }}
-              style={draggedPackId === pack.id ? { transform: `translateY(${dragCurrentY - dragStartY}px)` } : {}}
-              className={`relative z-50 transition-all duration-300 ease-out`}
+              className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "relative z-50" : shouldShift ? "-translate-y-[132px]" : ""}`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 shadow-xl ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600" : ""}`}>
+            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 shadow-xl ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600 fixed left-[50%] -translate-x-[50%]" : ""}`}
+              style={draggedPackId === pack.id ? { top: `${dragCurrentY - 66}px` } : {}}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
@@ -325,7 +330,8 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
