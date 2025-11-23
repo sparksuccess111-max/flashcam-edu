@@ -99,7 +99,7 @@ export default function PackView() {
         </Button>
 
         <div className="flex-1 flex flex-col items-center justify-center w-full">
-          <div className="w-full max-w-2xl mb-2 text-center">
+          <div className="w-full max-w-2xl mb-4 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
           <Card
@@ -122,7 +122,7 @@ export default function PackView() {
             </CardContent>
           </Card>
 
-          <div className="space-y-0 mt-4">
+          <div className="w-full max-w-2xl space-y-0 mt-4">
             <div className="flex items-center justify-between mb-0">
               <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
                 Carte {currentIndex + 1} sur {flashcards.length}
