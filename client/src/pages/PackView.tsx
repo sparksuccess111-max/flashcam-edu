@@ -98,7 +98,7 @@ export default function PackView() {
           Retour
         </Button>
 
-        <div className="flex-1 flex flex-col items-center justify-center w-full">
+        <div className="flex-1 flex flex-col items-center justify-center w-full pb-40">
           <div className="w-full max-w-2xl mb-4 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
