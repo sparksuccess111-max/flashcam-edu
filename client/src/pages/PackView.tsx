@@ -56,91 +56,109 @@ export default function PackView() {
     if (!pack || !flashcards) return;
 
     const doc = new jsPDF({
-      orientation: "portrait",
+      orientation: "landscape",
       unit: "mm",
       format: "a4",
     });
 
-    const pageHeight = doc.internal.pageSize.getHeight();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     
-    // Dimensions pour 4x4 cartes par page
-    const cardWidth = pageWidth / 4;
-    const cardHeight = pageHeight / 4;
-    const cardPadding = 2;
+    const cols = 4;
+    const rows = 4;
+    const cardsPerPage = cols * rows;
+    const cardW = pageWidth / cols;
+    const cardH = pageHeight / rows;
+    const margin = 6;
+    const fontSize = 10;
+    const numFontSize = 14;
 
-    let cardCount = 0;
+    // Fonction pour afficher du texte centré multi-lignes
+    const drawMultilineText = (
+      text: string,
+      cx: number,
+      cy: number,
+      width: number,
+      height: number,
+      size: number
+    ) => {
+      doc.setFontSize(size);
+      const lines = doc.splitTextToSize(text, width - 2 * margin);
+      const lineHeight = size * 0.5;
+      const totalHeight = lines.length * lineHeight;
+      const startY = cy + totalHeight / 2;
+      
+      lines.slice(0, Math.floor(height / lineHeight)).forEach((line: string, idx: number) => {
+        doc.text(line, cx, startY - idx * lineHeight, { align: "center", maxWidth: width - 2 * margin });
+      });
+    };
 
-    // Flashcards - 16 cartes par page (4x4)
-    flashcards.forEach((card, index) => {
-      // Déterminer la position sur la page (4x4 = 16 cartes)
-      const positionOnPage = cardCount % 16;
-      const row = Math.floor(positionOnPage / 4);
-      const col = positionOnPage % 4;
+    // Fonction pour dessiner une page
+    const drawPage = (isRecto: boolean, pageStartIndex: number) => {
+      const pageCards = flashcards.slice(pageStartIndex, pageStartIndex + cardsPerPage);
+      
+      pageCards.forEach((card, i) => {
+        const idx = pageStartIndex + i;
+        let col = i % cols;
+        const row = rows - 1 - Math.floor(i / cols);
 
-      // Ajouter une nouvelle page si nécessaire
-      if (cardCount > 0 && positionOnPage === 0) {
-        doc.addPage();
+        // Miroir horizontal pour verso
+        if (!isRecto) {
+          col = cols - 1 - col;
+        }
+
+        const x = col * cardW;
+        const y = row * cardH;
+        const cx = x + cardW / 2;
+        const cy = y + cardH / 2;
+
+        // Numéro en haut-left
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(numFontSize);
+        doc.text(String(idx + 1), x + margin, y + cardH - margin);
+
+        // Texte centré (Question recto / Réponse verso)
+        const text = isRecto ? (card.question || "") : (card.answer || "");
+        doc.setFont("Helvetica", "normal");
+        drawMultilineText(text, cx, cy, cardW, cardH, fontSize);
+
+        // Signature en bas-droite
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(6);
+        doc.text("Camille", x + cardW - margin - 1, y + margin + 1, { align: "right" });
+      });
+
+      // Traits de découpe (lignes verticales et horizontales)
+      doc.setLineWidth(0.3);
+      doc.setDrawColor(0, 0, 0);
+
+      // Lignes verticales
+      for (let col = 1; col < cols; col++) {
+        doc.line(col * cardW, 0, col * cardW, pageHeight);
       }
 
-      const x = col * cardWidth + cardPadding;
-      const y = row * cardHeight + cardPadding;
-      const innerWidth = cardWidth - 2 * cardPadding;
-      const innerHeight = cardHeight - 2 * cardPadding;
+      // Lignes horizontales
+      for (let row = 1; row < rows; row++) {
+        doc.line(0, row * cardH, pageWidth, row * cardH);
+      }
+    };
 
-      // Dessiner la bordure de la carte
-      doc.setDrawColor(150, 100, 200);
-      doc.rect(x, y, innerWidth, innerHeight);
+    // Recto (Questions)
+    for (let pageStart = 0; pageStart < flashcards.length; pageStart += cardsPerPage) {
+      drawPage(true, pageStart);
+      doc.addPage();
+    }
 
-      // Diviser la carte en deux : question (haut) et réponse (bas)
-      const midHeight = innerHeight / 2;
-
-      // QUESTION SIDE (haut)
-      // Numéro et titre du pack
-      doc.setFontSize(7);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`#${index + 1} - ${pack?.title || "Pack"}`, x + 1, y + 3);
-
-      // Question text
-      doc.setFontSize(6);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont(undefined, "bold");
-      doc.text("Q:", x + 1, y + 6);
-      
-      doc.setFont(undefined, "normal");
-      const questionLines = doc.splitTextToSize(
-        card.question || "",
-        innerWidth - 2
-      );
-      const maxQuestionLines = 4;
-      const displayedQuestionLines = questionLines.slice(0, maxQuestionLines);
-      doc.text(displayedQuestionLines, x + 1, y + 9, { maxWidth: innerWidth - 2 });
-
-      // Ligne de séparation
-      doc.setDrawColor(200, 150, 255);
-      doc.line(x, y + midHeight, x + innerWidth, y + midHeight);
-
-      // ANSWER SIDE (bas)
-      // Answer text
-      doc.setFontSize(6);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont(undefined, "bold");
-      doc.text("R:", x + 1, y + midHeight + 3 as number);
-
-      doc.setFont(undefined, "normal");
-      const answerLines = doc.splitTextToSize(
-        card.answer || "",
-        innerWidth - 2
-      );
-      const maxAnswerLines = 4;
-      const displayedAnswerLines = answerLines.slice(0, maxAnswerLines);
-      doc.text(displayedAnswerLines, x + 1, y + midHeight + 6, { maxWidth: innerWidth - 2 });
-
-      cardCount++;
-    });
+    // Verso (Réponses)
+    for (let pageStart = 0; pageStart < flashcards.length; pageStart += cardsPerPage) {
+      drawPage(false, pageStart);
+      if (pageStart + cardsPerPage < flashcards.length) {
+        doc.addPage();
+      }
+    }
 
     // Save PDF
-    doc.save(`${(pack?.title || "cartes").replace(/\s+/g, "_")}_cartes.pdf`);
+    doc.save(`${(pack?.title || "cartes").replace(/\s+/g, "_")}_decoupables.pdf`);
   };
 
   if (isLoading) {
