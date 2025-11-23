@@ -47,6 +47,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Ping endpoint for internal keep-alive script
+  app.get("/ping", (_req, res) => {
+    res.json({ status: "alive" });
+  });
+
   app.post("/api/login", async (req, res) => {
     try {
       const credentials = loginSchema.parse(req.body);

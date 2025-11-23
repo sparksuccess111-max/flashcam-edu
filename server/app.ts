@@ -58,6 +58,35 @@ app.use((req, res, next) => {
   next();
 });
 
+// Internal keep-alive ping function
+function startAutoPing(port: number, env: string) {
+  if (env === "development") {
+    logger.debug("Auto-ping disabled in development mode", "server");
+    return;
+  }
+
+  const pingInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const pingUrl = `http://localhost:${port}/ping`;
+
+  const pingTask = setInterval(async () => {
+    try {
+      const response = await fetch(pingUrl);
+      if (response.ok) {
+        logger.debug(`Auto-ping successful (${response.status})`, "server");
+      } else {
+        logger.warn(`Auto-ping failed (${response.status})`, "server");
+      }
+    } catch (error: any) {
+      logger.error("Auto-ping error", "server", error);
+    }
+  }, pingInterval);
+
+  // Prevent process from keeping the interval alive if all other connections close
+  pingTask.unref?.();
+  
+  logger.info(`Auto-ping started (every ${pingInterval / 1000}s)`, "server");
+}
+
 export default async function runApp(
   setup: (app: Express, server: Server) => Promise<void>,
 ) {
@@ -90,6 +119,9 @@ export default async function runApp(
     log(`serving on port ${port} (${env})`);
     log("Database connected", "db");
     log("WebSocket server ready at /ws", "ws");
+    
+    // Start internal auto-ping to keep app alive on free tier
+    startAutoPing(port, env);
   });
 
   // Keep-alive: Prevent server timeout on free tier hosting
