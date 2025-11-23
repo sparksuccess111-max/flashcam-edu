@@ -1,0 +1,87 @@
+📋 PROMPT COMPLET À COPIER
+
+Plaintext
+
+Agis comme un Expert Full Stack Developer (Node.js, React, TypeScript, PostgreSQL) et crée une version Production-Ready, Multi-Utilisateurs, Sécurisée et Synchronisée en temps réel de mon application de Flashcards existante qui fonctionne actuellement uniquement en local (LocalStorage).
+
+1. OBJECTIFS PRINCIPAUX
+
+Backend & Base de Données : Remplace le localStorage par une vraie base de données PostgreSQL via drizzle-orm et expose une API Express. Les changements effectués par les admins doivent se synchroniser instantanément pour tous les utilisateurs.
+
+Authentification Multi-Admin & Rôles : Supporte plusieurs admins et différencie les utilisateurs admin / student. Les élèves ne peuvent que lire les flashcards. Les mots de passe doivent être hachés avec bcrypt et l’authentification sécurisée via JWT ou sessions avec expiration.
+
+Frontend : Conserve strictement le design actuel (Shadcn UI, Tailwind, Lucide React).
+
+Hébergement 24/7 : Configure un serveur Express qui sert l’API et le frontend statique sur le même port.
+
+2. BASE DE DONNÉES
+
+Crée les tables suivantes avec drizzle-orm :
+
+users : id, username, password, role (admin/student).
+
+packs : id, title, description, order, published.
+
+flashcards : id, pack_id (FK), question, answer, order.
+
+Relations : chaque flashcard appartient à un pack.
+
+3. AUTHENTIFICATION & SÉCURITÉ
+
+Authentification via JWT ou sessions sécurisées.
+
+Hachage des mots de passe admins avec bcrypt.
+
+Route /api/login vérifie si les identifiants correspondent à un admin ou étudiant.
+
+Vérification des droits sur chaque route (CRUD packs/flashcards).
+
+4. API & SYNCHRONISATION
+
+Packs :
+
+GET /api/packs (public : seulement publiés, admin : tous).
+
+POST /api/packs, PUT /api/packs/:id, DELETE /api/packs/:id.
+
+Flashcards :
+
+GET /api/packs/:id/cards, POST, PUT, DELETE.
+
+Temps réel : utilise WebSocket ou Server-Sent Events pour synchroniser automatiquement le frontend après chaque modification.
+
+Validation : chaque payload validé côté backend avec zod ou yup. Retour d’erreurs claires.
+
+5. FRONTEND (React / TypeScript)
+
+Remplace storage.ts par appels API avec TanStack Query.
+
+Gérer correctement les états loading, error, success.
+
+Pages clés à reproduire strictement :
+
+Home.tsx : Liste des packs publiés.
+
+PackView.tsx : FlashcardViewer (question → clic pour retourner → réponse).
+
+AdminDashboard.tsx : Liste tous les packs, permet créer/éditer/supprimer, switch "Publié".
+
+Header : affiche titre et boutons conditionnels Admin / Logout.
+
+6. DÉPLOIEMENT
+
+Crée server/index.ts qui sert le frontend build + API.
+
+Configuration .env pour JWT et secrets DB.
+
+Script start dans package.json pour lancement serveur 24/7.
+
+7. TESTS
+
+Vérifie auth, CRUD packs/flashcards, permissions multi-rôles.
+
+Teste la synchronisation temps réel.
+
+8. DESIGN & STYLE
+
+Strictement identique au code source actuel : Shadcn UI, Tailwind, Lucide React.
