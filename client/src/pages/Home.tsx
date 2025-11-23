@@ -21,9 +21,9 @@ export default function Home() {
           <Skeleton className="h-10 w-64 mb-2" />
           <Skeleton className="h-6 w-96" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-48" />
+            <Skeleton key={i} className="h-80" />
           ))}
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function Home() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {publishedPacks.map((pack) => (
             <PackCard key={pack.id} pack={pack} />
           ))}
@@ -79,11 +79,11 @@ function PackCard({ pack }: { pack: Pack }) {
 
   return (
     <Card
-      className="gradient-card h-full hover-elevate active-elevate-2 transition-all cursor-pointer border-violet-200 dark:border-violet-800 shadow-md hover:shadow-lg"
+      className="gradient-card min-h-80 flex flex-col hover-elevate active-elevate-2 transition-all cursor-pointer border-violet-200 dark:border-violet-800 shadow-md hover:shadow-lg"
       onClick={() => window.location.href = `/pack/${pack.id}`}
       data-testid={`card-pack-${pack.id}`}
     >
-      <CardHeader>
+      <CardHeader className="flex-1">
         <div className="flex items-start gap-3">
           <div className="gradient-violet-accent p-2 rounded-md flex-shrink-0">
             <GraduationCap className="h-5 w-5 text-white" />
