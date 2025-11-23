@@ -251,9 +251,9 @@ export default function AdminDashboard() {
                 setDragOverPackId(null);
                 setSwappedPackId(null);
               }}
-              className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "opacity-50 scale-95" : swappedPackId === pack.id ? "opacity-100 scale-100 -translate-y-16" : "opacity-100 scale-100"}`}
+              className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "relative z-50" : swappedPackId === pack.id ? "opacity-100 scale-100 -translate-y-16" : "opacity-100 scale-100"}`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 ${draggedPackId === pack.id ? "bg-violet-100 dark:bg-violet-950 border-violet-500" : ""}`}>
+            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600" : ""}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
