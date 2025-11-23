@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -23,11 +24,30 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
   const form = useForm<InsertPack>({
     resolver: zodResolver(insertPackSchema),
     defaultValues: {
-      title: pack?.title || "",
-      description: pack?.description || "",
-      published: pack?.published || false,
+      title: "",
+      description: "",
+      published: false,
     },
   });
+
+  // Mettre à jour les valeurs du formulaire quand le pack ou le dialog s'ouvre
+  useEffect(() => {
+    if (open) {
+      if (isEditing && pack) {
+        form.reset({
+          title: pack.title || "",
+          description: pack.description || "",
+          published: pack.published || false,
+        });
+      } else {
+        form.reset({
+          title: "",
+          description: "",
+          published: false,
+        });
+      }
+    }
+  }, [open, pack, isEditing, form]);
 
   const createMutation = useMutation({
     mutationFn: (data: InsertPack) => apiRequest("POST", "/api/packs", data),
