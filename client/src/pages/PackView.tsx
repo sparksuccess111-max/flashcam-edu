@@ -87,7 +87,7 @@ export default function PackView() {
 
   return (
     <div className="min-h-screen gradient-violet flex flex-col">
-      <div className="container mx-auto px-4 py-0 max-w-4xl flex-1 flex flex-col">
+      <div className="container mx-auto px-4 py-0 max-w-4xl flex flex-col">
         <Button
           variant="ghost"
           onClick={() => setLocation("/")}
@@ -98,7 +98,7 @@ export default function PackView() {
           Retour
         </Button>
 
-        <div className="flex-1 flex flex-col items-center justify-center py-0">
+        <div className="flex flex-col items-center w-full">
           <div className="w-full max-w-2xl mb-0 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
