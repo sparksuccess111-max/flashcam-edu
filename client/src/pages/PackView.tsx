@@ -87,19 +87,19 @@ export default function PackView() {
 
   return (
     <div className="min-h-screen gradient-violet flex flex-col">
-      <div className="container mx-auto px-4 py-2 max-w-4xl flex-1 flex flex-col">
+      <div className="container mx-auto px-4 py-0 max-w-4xl flex-1 flex flex-col">
         <Button
           variant="ghost"
           onClick={() => setLocation("/")}
-          className="mb-2 w-fit"
+          className="mb-0 w-fit"
           data-testid="button-back"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
 
-        <div className="flex-1 flex flex-col items-center justify-center py-1">
-          <div className="w-full max-w-2xl mb-1 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center py-0">
+          <div className="w-full max-w-2xl mb-0 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
           <Card
@@ -123,8 +123,8 @@ export default function PackView() {
           </Card>
         </div>
 
-        <div className="space-y-1 mt-1">
-          <div className="flex items-center justify-between mb-1">
+        <div className="space-y-0 mt-0">
+          <div className="flex items-center justify-between mb-0">
             <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
               Carte {currentIndex + 1} sur {flashcards.length}
             </span>
@@ -132,7 +132,7 @@ export default function PackView() {
           <Progress value={progress} />
         </div>
 
-        <div className="flex items-center justify-between gap-4 mt-2">
+        <div className="flex items-center justify-between gap-4 mt-1">
           <Button
             variant="outline"
             onClick={handlePrevious}
