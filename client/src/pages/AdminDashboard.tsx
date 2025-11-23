@@ -201,9 +201,9 @@ export default function AdminDashboard() {
             >
               <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-300">
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
                           {pack.title}
                         </CardTitle>
@@ -215,29 +215,29 @@ export default function AdminDashboard() {
                         {pack.description || "Pas de description"}
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Publier</span>
-                        <Switch
-                          checked={pack.published}
-                          onCheckedChange={() => handleTogglePublish(pack)}
-                          data-testid={`switch-publish-${pack.id}`}
-                        />
-                      </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">Publier</span>
+                      <Switch
+                        checked={pack.published}
+                        onCheckedChange={() => handleTogglePublish(pack)}
+                        data-testid={`switch-publish-${pack.id}`}
+                      />
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleMoveUp(pack.id)}
                       disabled={idx === 0}
                       data-testid={`button-move-up-${pack.id}`}
+                      className="w-full md:w-auto"
                     >
                       <ChevronUp className="h-4 w-4 mr-2" />
-                      Monter
+                      <span className="hidden sm:inline">Monter</span>
+                      <span className="sm:hidden">↑</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -245,27 +245,33 @@ export default function AdminDashboard() {
                       onClick={() => handleMoveDown(pack.id)}
                       disabled={idx === allPacks.length - 1}
                       data-testid={`button-move-down-${pack.id}`}
+                      className="w-full md:w-auto"
                     >
                       <ChevronDown className="h-4 w-4 mr-2" />
-                      Descendre
+                      <span className="hidden sm:inline">Descendre</span>
+                      <span className="sm:hidden">↓</span>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setManagingPackId(pack.id)}
                       data-testid={`button-manage-cards-${pack.id}`}
+                      className="w-full md:w-auto"
                     >
                       <BookOpen className="h-4 w-4 mr-2" />
-                      Gérer les cartes
+                      <span className="hidden sm:inline">Gérer</span>
+                      <span className="sm:hidden">📚</span>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(pack)}
                       data-testid={`button-edit-${pack.id}`}
+                      className="w-full md:w-auto"
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Modifier
+                      <span className="hidden sm:inline">Modifier</span>
+                      <span className="sm:hidden">✏️</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -273,9 +279,11 @@ export default function AdminDashboard() {
                       onClick={() => handleDelete(pack.id)}
                       disabled={deleteMutation.isPending}
                       data-testid={`button-delete-${pack.id}`}
+                      className="w-full md:w-auto"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Supprimer
+                      <span className="hidden sm:inline">Supprimer</span>
+                      <span className="sm:hidden">🗑️</span>
                     </Button>
                   </div>
                 </CardContent>
