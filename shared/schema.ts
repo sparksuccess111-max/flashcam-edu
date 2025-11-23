@@ -5,7 +5,8 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
+  firstName: text("first_name").notNull().unique(),
+  lastName: text("last_name").notNull(),
   password: text("password").notNull(),
   role: text("role", { enum: ["admin", "student"] }).notNull().default("student"),
 });
@@ -37,7 +38,7 @@ export const flashcardsRelations = relations(flashcards, ({ one }) => ({
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  firstName: z.string().min(1, "Prénom is required"),
   password: z.string().min(1, "Password is required"),
 });
 

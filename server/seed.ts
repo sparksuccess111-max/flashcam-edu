@@ -11,20 +11,22 @@ async function seed() {
   const stephenPassword = await bcrypt.hash("Stephen_histoire", SALT_ROUNDS);
 
   await db.insert(users).values({
-    username: "Camille Cordier",
+    firstName: "Camille",
+    lastName: "Cordier",
     password: camillePassword,
     role: "admin",
   });
 
   await db.insert(users).values({
-    username: "Stephen Dechelotte",
+    firstName: "Stephen",
+    lastName: "Dechelotte",
     password: stephenPassword,
     role: "admin",
   });
 
   console.log("Created users:");
-  console.log("  - Admin: username=Camille Cordier, password=CaMa_39.cAmA");
-  console.log("  - Admin: username=Stephen Dechelotte, password=Stephen_histoire");
+  console.log("  - Admin: Prénom=Camille, Nom=Cordier, password=CaMa_39.cAmA");
+  console.log("  - Admin: Prénom=Stephen, Nom=Dechelotte, password=Stephen_histoire");
 
   const [mathPack] = await db.insert(packs).values({
     title: "Basic Mathematics",
