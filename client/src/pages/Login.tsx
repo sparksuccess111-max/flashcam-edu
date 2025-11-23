@@ -79,10 +79,10 @@ export default function Login() {
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prénom</FormLabel>
+                    <FormLabel>Prénom :</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Entrez votre prénom"
+                        placeholder="Prénom :"
                         data-testid="input-firstName"
                         {...field}
                       />
@@ -96,10 +96,10 @@ export default function Login() {
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom</FormLabel>
+                    <FormLabel>Nom :</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Entrez votre nom"
+                        placeholder="Nom :"
                         data-testid="input-lastName"
                         {...field}
                       />
@@ -113,11 +113,11 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mot de passe</FormLabel>
+                    <FormLabel>Mot de passe :</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Entrez votre mot de passe"
+                        placeholder="Mot de passe :"
                         data-testid="input-password"
                         {...field}
                       />
