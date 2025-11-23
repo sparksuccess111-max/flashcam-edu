@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, BookOpen } from "lucide-react";
+import { Plus, Edit, Trash2, BookOpen, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack } from "@shared/schema";
@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [editingPack, setEditingPack] = useState<Pack | null>(null);
   const [isPackDialogOpen, setIsPackDialogOpen] = useState(false);
   const [managingPackId, setManagingPackId] = useState<string | null>(null);
+  const [draggedPackId, setDraggedPackId] = useState<string | null>(null);
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -73,6 +74,55 @@ export default function AdminDashboard() {
 
   const handleTogglePublish = (pack: Pack) => {
     togglePublishMutation.mutate({ id: pack.id, published: !pack.published });
+  };
+
+  const reorderMutation = useMutation({
+    mutationFn: ({ packId, newOrder }: { packId: string; newOrder: number }) =>
+      apiRequest("PATCH", "/api/packs/reorder", { packId, newOrder }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de réorganiser les packs.",
+      });
+    },
+  });
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, packId: string) => {
+    setDraggedPackId(packId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetPack: Pack) => {
+    e.preventDefault();
+    if (!draggedPackId || draggedPackId === targetPack.id) {
+      setDraggedPackId(null);
+      return;
+    }
+
+    const allPacks = packs || [];
+    const draggedPack = allPacks.find(p => p.id === draggedPackId);
+    if (!draggedPack) return;
+
+    const draggedIndex = allPacks.findIndex(p => p.id === draggedPackId);
+    const targetIndex = allPacks.findIndex(p => p.id === targetPack.id);
+
+    // Swap order values
+    const newOrder = targetPack.order;
+    reorderMutation.mutate({
+      packId: draggedPackId,
+      newOrder: draggedIndex > targetIndex ? newOrder - 0.5 : newOrder + 0.5,
+    });
+
+    setDraggedPackId(null);
   };
 
   const allPacks = packs || [];
@@ -137,9 +187,18 @@ export default function AdminDashboard() {
       ) : (
         <div className="space-y-4">
           {allPacks.map((pack) => (
-            <Card key={pack.id} data-testid={`card-pack-${pack.id}`}>
+            <div
+              key={pack.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, pack.id)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, pack)}
+              className={`cursor-move transition-opacity ${draggedPackId === pack.id ? "opacity-50" : "opacity-100"}`}
+            >
+            <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" data-testid="icon-drag-handle" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
@@ -198,6 +257,7 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           ))}
         </div>
       )}

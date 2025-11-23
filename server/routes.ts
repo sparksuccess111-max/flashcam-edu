@@ -68,10 +68,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allPacks = await storage.getAllPacks();
       const isAdmin = req.user?.role === "admin";
-      const packs = isAdmin ? allPacks : allPacks.filter(pack => pack.published);
-      res.json(packs);
+      const filteredPacks = isAdmin ? allPacks : allPacks.filter(pack => pack.published);
+      res.json(filteredPacks);
     } catch (error: any) {
       res.status(500).json({ error: error.message || "Failed to fetch packs" });
+    }
+  });
+
+  app.patch("/api/packs/reorder", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { packId, newOrder } = req.body;
+      if (!packId || typeof newOrder !== "number") {
+        return res.status(400).json({ error: "Invalid request" });
+      }
+      const pack = await storage.updatePack(packId, { order: newOrder });
+      if (!pack) {
+        return res.status(404).json({ error: "Pack not found" });
+      }
+      broadcastUpdate('pack-updated', pack);
+      res.json(pack);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Failed to reorder pack" });
     }
   });
 

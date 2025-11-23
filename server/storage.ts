@@ -12,7 +12,7 @@ import {
   type UpdateFlashcard,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -61,7 +61,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllPacks(): Promise<Pack[]> {
-    return await db.select().from(packs);
+    return await db.select().from(packs).orderBy(asc(packs.order));
   }
 
   async getPackById(id: string): Promise<Pack | undefined> {

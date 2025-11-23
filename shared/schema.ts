@@ -15,6 +15,7 @@ export const packs = pgTable("packs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
+  order: integer("order").notNull().default(0),
   published: boolean("published").notNull().default(false),
 });
 
