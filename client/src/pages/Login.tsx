@@ -67,7 +67,7 @@ export default function Login() {
           </div>
           <CardTitle className="text-2xl">FlashLearn</CardTitle>
           <CardDescription>
-            Connectezvous en tant qu'administrateur Pour gérer Les cartes
+            Connectez-vous en tant qu'administrateur pour gérer les cartes.
           </CardDescription>
         </CardHeader>
         <CardContent>
