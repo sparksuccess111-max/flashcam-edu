@@ -171,7 +171,7 @@ export default function PackView() {
     }
 
     // Save PDF
-    doc.save(`FlashCam_${(pack?.title || "cartes").replace(/\s+/g, "_")}.pdf`);
+    doc.save(`FlashCamEdu_${(pack?.title || "cartes").replace(/\s+/g, "_")}.pdf`);
   };
 
   if (isLoading) {

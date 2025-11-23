@@ -21,7 +21,7 @@ export function Header() {
             className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md bg-white/10 backdrop-blur-sm border-0 cursor-pointer text-white"
           >
             <GraduationCap className="h-6 w-6" />
-            <h1 className="text-xl font-semibold">FlashCam</h1>
+            <h1 className="text-xl font-semibold">FlashCamEdu</h1>
           </button>
           
           <div className="flex items-center gap-2">
