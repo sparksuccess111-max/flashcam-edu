@@ -8,16 +8,10 @@ import express, {
 } from "express";
 
 import { registerRoutes } from "./routes";
+import { logger } from "./logger";
 
 export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+  logger.info(message, source);
 }
 
 export const app = express();
@@ -48,16 +42,16 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      let extra = "";
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        let resp = JSON.stringify(capturedJsonResponse);
+        if (resp.length > 100) {
+          resp = resp.slice(0, 99) + "…";
+        }
+        extra = resp;
       }
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+      logger.api(req.method, path, res.statusCode, duration, extra);
     }
   });
 
@@ -73,8 +67,8 @@ export default async function runApp(
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    logger.error(`HTTP ${status}: ${message}`, "express", err);
     res.status(status).json({ message });
-    throw err;
   });
 
   // importantly run the final setup after setting up all the other routes so
@@ -86,11 +80,36 @@ export default async function runApp(
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
+  const env = process.env.NODE_ENV || "development";
+  
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`serving on port ${port} (${env})`);
+    log("Database connected", "db");
+    log("WebSocket server ready at /ws", "ws");
+  });
+
+  // Keep-alive: Prevent server timeout on free tier hosting
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
+
+  // Graceful shutdown on signals
+  process.on("SIGTERM", () => {
+    logger.warn("SIGTERM received, shutting down gracefully", "server");
+    server.close(() => {
+      logger.info("Server closed", "server");
+      process.exit(0);
+    });
+  });
+
+  process.on("SIGINT", () => {
+    logger.warn("SIGINT received, shutting down gracefully", "server");
+    server.close(() => {
+      logger.info("Server closed", "server");
+      process.exit(0);
+    });
   });
 }

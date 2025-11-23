@@ -3,21 +3,31 @@ import App from "./App";
 import "./index.css";
 
 // Suppress Vite HMR WebSocket errors that don't affect app functionality
-window.addEventListener("unhandledrejection", (event) => {
+const suppressViteErrors = (event: PromiseRejectionEvent) => {
   try {
-    const message = event.reason?.message || event.reason?.toString?.() || "";
-    const stack = event.reason?.stack || "";
+    const reason = event.reason;
+    const message = reason?.message || reason?.toString?.() || "";
+    const stack = reason?.stack || "";
     
-    // Check for Vite HMR WebSocket errors
+    // Vite HMR WebSocket errors in Replit
     if (
-      message.includes("Failed to construct 'WebSocket'") &&
-      (message.includes("localhost:undefined") || stack.includes("setupWebSocket"))
+      typeof message === "string" &&
+      message.includes("Failed to construct 'WebSocket'")
     ) {
       event.preventDefault();
+      return;
+    }
+    
+    // setupWebSocket error
+    if (typeof stack === "string" && stack.includes("setupWebSocket")) {
+      event.preventDefault();
+      return;
     }
   } catch (e) {
-    // Silently ignore any errors in the handler itself
+    // Ignore any errors in this handler
   }
-});
+};
+
+window.addEventListener("unhandledrejection", suppressViteErrors);
 
 createRoot(document.getElementById("root")!).render(<App />);
