@@ -109,13 +109,13 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
         <Card className="text-center py-12">
           <CardContent className="space-y-4">
             <div>
-              <h3 className="text-xl font-semibold mb-2">No Flashcards Yet</h3>
+              <h3 className="text-xl font-semibold mb-2">Aucune carte pour le moment</h3>
               <p className="text-muted-foreground mb-4">
-                Start adding flashcards to this pack
+                Commencez par ajouter des cartes à ce paquet
               </p>
-              <Button onClick={handleCreate} data-testid="button-create-first-flashcard">
+              <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-first-flashcard">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Your First Flashcard
+                Ajouter votre première carte
               </Button>
             </div>
           </CardContent>
@@ -141,7 +141,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
                     data-testid={`button-edit-${card.id}`}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    Modifier
                   </Button>
                   <Button
                     variant="outline"
@@ -151,7 +151,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
                     data-testid={`button-delete-${card.id}`}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    Supprimer
                   </Button>
                 </div>
               </CardContent>

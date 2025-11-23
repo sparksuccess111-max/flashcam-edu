@@ -98,33 +98,33 @@ export default function PackView() {
           Retour
         </Button>
 
-        <div className="flex-1 flex flex-col items-center justify-center py-8">
-          <div className="w-full max-w-2xl mb-6 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center py-4">
+          <div className="w-full max-w-2xl mb-3 text-center">
             <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
           </div>
           <Card
-            className="gradient-card w-full max-w-2xl min-h-[450px] flex items-center justify-center cursor-pointer hover:shadow-2xl active-elevate-2 transition-all shadow-xl border-2 border-violet-300 dark:border-violet-700"
+            className="gradient-card w-full max-w-2xl aspect-video flex items-center justify-center cursor-pointer hover:shadow-2xl active-elevate-2 transition-all shadow-xl border-2 border-violet-300 dark:border-violet-700"
             onClick={handleFlip}
             data-testid="card-flashcard"
           >
-            <CardContent className="p-16 text-center">
-              <div className="mb-8">
+            <CardContent className="p-8 text-center h-full flex flex-col items-center justify-center">
+              <div className="mb-4">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">
                   {isFlipped ? "Réponse" : "Question"}
                 </span>
               </div>
-              <p className="text-3xl font-semibold leading-relaxed text-foreground" data-testid={isFlipped ? "text-answer" : "text-question"}>
+              <p className="text-2xl font-semibold leading-relaxed text-foreground line-clamp-5" data-testid={isFlipped ? "text-answer" : "text-question"}>
                 {isFlipped ? currentCard?.answer : currentCard?.question}
               </p>
-              <div className="mt-12 text-xs text-muted-foreground/50">
+              <div className="mt-4 text-xs text-muted-foreground/50">
                 Cliquez pour {isFlipped ? "la question" : "la réponse"}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-4 mt-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="space-y-3 mt-4">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
               Carte {currentIndex + 1} sur {flashcards.length}
             </span>
@@ -132,7 +132,7 @@ export default function PackView() {
           <Progress value={progress} />
         </div>
 
-        <div className="flex items-center justify-between gap-4 mt-8">
+        <div className="flex items-center justify-between gap-4 mt-4">
           <Button
             variant="outline"
             onClick={handlePrevious}
