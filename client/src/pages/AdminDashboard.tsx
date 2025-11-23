@@ -75,7 +75,7 @@ export default function AdminDashboard() {
     togglePublishMutation.mutate({ id: pack.id, published: !pack.published });
   };
 
-  const sortedPacks = packs?.sort((a, b) => a.order - b.order) || [];
+  const allPacks = packs || [];
 
   if (isLoading) {
     return (
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
         </Button>
       </div>
 
-      {sortedPacks.length === 0 ? (
+      {allPacks.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent className="space-y-4">
             <div className="flex justify-center">
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {sortedPacks.map((pack) => (
+          {allPacks.map((pack) => (
             <Card key={pack.id} data-testid={`card-pack-${pack.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">

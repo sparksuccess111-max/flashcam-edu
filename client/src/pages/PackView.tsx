@@ -25,12 +25,11 @@ export default function PackView() {
 
   const isLoading = packLoading || cardsLoading;
 
-  const sortedCards = flashcards?.sort((a, b) => a.order - b.order) || [];
-  const currentCard = sortedCards[currentIndex];
-  const progress = sortedCards.length > 0 ? ((currentIndex + 1) / sortedCards.length) * 100 : 0;
+  const currentCard = flashcards?.[currentIndex];
+  const progress = flashcards && flashcards.length > 0 ? ((currentIndex + 1) / flashcards.length) * 100 : 0;
 
   const handleNext = () => {
-    if (currentIndex < sortedCards.length - 1) {
+    if (flashcards && currentIndex < flashcards.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
     }
@@ -62,7 +61,7 @@ export default function PackView() {
     );
   }
 
-  if (!pack || sortedCards.length === 0) {
+  if (!pack || !flashcards || flashcards.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Button
@@ -87,81 +86,85 @@ export default function PackView() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Button
-        variant="ghost"
-        onClick={() => setLocation("/")}
-        className="mb-6"
-        data-testid="button-back"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Packs
-      </Button>
+    <div className="min-h-screen gradient-violet flex flex-col">
+      <div className="container mx-auto px-4 py-8 max-w-4xl flex-1 flex flex-col">
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/")}
+          className="mb-6 w-fit"
+          data-testid="button-back"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Packs
+        </Button>
 
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2" data-testid="text-pack-title">{pack.title}</h1>
-        {pack.description && (
-          <p className="text-muted-foreground" data-testid="text-pack-description">{pack.description}</p>
-        )}
-      </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent" data-testid="text-pack-title">{pack.title}</h1>
+          {pack.description && (
+            <p className="text-muted-foreground" data-testid="text-pack-description">{pack.description}</p>
+          )}
+        </div>
 
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground" data-testid="text-progress">
-            Card {currentIndex + 1} of {sortedCards.length}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            data-testid="button-reset"
+        <div className="flex-1 flex flex-col items-center justify-center py-8">
+          <Card
+            className="gradient-card w-full max-w-2xl min-h-[400px] flex items-center justify-center cursor-pointer hover-elevate active-elevate-2 transition-all shadow-lg border-violet-300 dark:border-violet-700"
+            onClick={handleFlip}
+            data-testid="card-flashcard"
           >
-            <RotateCw className="h-4 w-4 mr-2" />
-            Reset
+            <CardContent className="p-12 text-center">
+              <div className="mb-4">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {isFlipped ? "Answer" : "Question"}
+                </span>
+              </div>
+              <p className="text-2xl font-medium leading-relaxed" data-testid={isFlipped ? "text-answer" : "text-question"}>
+                {isFlipped ? currentCard?.answer : currentCard?.question}
+              </p>
+              <div className="mt-8 text-sm text-muted-foreground">
+                Click card to {isFlipped ? "see question" : "reveal answer"}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-muted-foreground" data-testid="text-progress">
+              Card {currentIndex + 1} of {flashcards.length}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              data-testid="button-reset"
+            >
+              <RotateCw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+          <Progress value={progress} />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 mt-6">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentIndex === 0}
+            data-testid="button-previous"
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleNext}
+            disabled={currentIndex === flashcards.length - 1}
+            data-testid="button-next"
+          >
+            Next
+            <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
-        <Progress value={progress} />
-      </div>
-
-      <Card
-        className="mb-6 min-h-[400px] flex items-center justify-center cursor-pointer hover-elevate active-elevate-2 transition-all"
-        onClick={handleFlip}
-        data-testid="card-flashcard"
-      >
-        <CardContent className="p-12 text-center">
-          <div className="mb-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {isFlipped ? "Answer" : "Question"}
-            </span>
-          </div>
-          <p className="text-2xl font-medium leading-relaxed" data-testid={isFlipped ? "text-answer" : "text-question"}>
-            {isFlipped ? currentCard.answer : currentCard.question}
-          </p>
-          <div className="mt-8 text-sm text-muted-foreground">
-            Click card to {isFlipped ? "see question" : "reveal answer"}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center justify-between gap-4">
-        <Button
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentIndex === 0}
-          data-testid="button-previous"
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleNext}
-          disabled={currentIndex === sortedCards.length - 1}
-          data-testid="button-next"
-        >
-          Next
-          <ChevronRight className="h-4 w-4 ml-2" />
-        </Button>
       </div>
     </div>
   );

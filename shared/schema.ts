@@ -14,7 +14,6 @@ export const packs = pgTable("packs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
-  order: integer("order").notNull().default(0),
   published: boolean("published").notNull().default(false),
 });
 
@@ -23,7 +22,6 @@ export const flashcards = pgTable("flashcards", {
   packId: varchar("pack_id").notNull().references(() => packs.id, { onDelete: "cascade" }),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
-  order: integer("order").notNull().default(0),
 });
 
 export const packsRelations = relations(packs, ({ many }) => ({

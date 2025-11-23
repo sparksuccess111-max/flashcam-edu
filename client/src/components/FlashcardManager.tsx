@@ -62,7 +62,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     }
   };
 
-  const sortedCards = flashcards?.sort((a, b) => a.order - b.order) || [];
+  const cards = flashcards || [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,7 +97,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
             <Skeleton key={i} className="h-32" />
           ))}
         </div>
-      ) : sortedCards.length === 0 ? (
+      ) : cards.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent className="space-y-4">
             <div>
@@ -114,7 +114,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
         </Card>
       ) : (
         <div className="space-y-4">
-          {sortedCards.map((card) => (
+          {cards.map((card: Flashcard) => (
             <Card key={card.id} data-testid={`card-flashcard-${card.id}`}>
               <CardHeader>
                 <CardTitle className="text-lg" data-testid={`text-question-${card.id}`}>
@@ -157,7 +157,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
         flashcard={editingCard}
         open={isCardDialogOpen}
         onOpenChange={setIsCardDialogOpen}
-        nextOrder={sortedCards.length}
+        nextOrder={cards.length}
       />
     </div>
   );
