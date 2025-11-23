@@ -157,7 +157,7 @@ export default function PackView() {
     }
 
     // Save PDF
-    doc.save(`${(pack?.title || "cartes").replace(/\s+/g, "_")}_decoupables.pdf`);
+    doc.save(`FlashCam_${(pack?.title || "cartes").replace(/\s+/g, "_")}.pdf`);
   };
 
   if (isLoading) {
