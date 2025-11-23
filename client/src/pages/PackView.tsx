@@ -250,26 +250,15 @@ export default function PackView() {
               <ChevronLeft className="h-4 w-4 mr-2" />
               Précédent
             </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                data-testid="button-reset"
-              >
-                <RotateCw className="h-4 w-4 mr-2" />
-                Réinitialiser
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDownload}
-                data-testid="button-download"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Télécharger PDF
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              data-testid="button-reset"
+            >
+              <RotateCw className="h-4 w-4 mr-2" />
+              Réinitialiser
+            </Button>
             <Button
               variant="outline"
               onClick={handleNext}
@@ -280,6 +269,16 @@ export default function PackView() {
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
+
+          <Button
+            variant="default"
+            className="mt-8 bg-violet-600 hover:bg-violet-700"
+            onClick={handleDownload}
+            data-testid="button-download"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Télécharger le pack version papier
+          </Button>
         </div>
       </div>
     </div>
