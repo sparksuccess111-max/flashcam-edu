@@ -200,91 +200,85 @@ export default function AdminDashboard() {
               className={`transition-all duration-300 ease-out ${animatingPackId === pack.id ? "scale-95 opacity-75" : "scale-100 opacity-100"}`}
             >
               <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-300">
-                <CardHeader>
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
-                          {pack.title}
-                        </CardTitle>
-                        <Badge variant={pack.published ? "default" : "secondary"} data-testid={`badge-status-${pack.id}`}>
-                          {pack.published ? "Publié" : "Brouillon"}
-                        </Badge>
+                <CardHeader className="pb-3">
+                  <div className="space-y-2">
+                    <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
+                      {pack.title}
+                    </CardTitle>
+                    <CardDescription className="break-words" data-testid={`text-pack-description-${pack.id}`}>
+                      {pack.description || "Pas de description"}
+                    </CardDescription>
+                    <div className="flex items-center justify-between pt-2">
+                      <Badge variant={pack.published ? "default" : "secondary"} data-testid={`badge-status-${pack.id}`}>
+                        {pack.published ? "Publié" : "Brouillon"}
+                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground hidden sm:inline">Publier</span>
+                        <Switch
+                          checked={pack.published}
+                          onCheckedChange={() => handleTogglePublish(pack)}
+                          data-testid={`switch-publish-${pack.id}`}
+                        />
                       </div>
-                      <CardDescription className="break-words" data-testid={`text-pack-description-${pack.id}`}>
-                        {pack.description || "Pas de description"}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">Publier</span>
-                      <Switch
-                        checked={pack.published}
-                        onCheckedChange={() => handleTogglePublish(pack)}
-                        data-testid={`switch-publish-${pack.id}`}
-                      />
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMoveUp(pack.id)}
-                      disabled={idx === 0}
-                      data-testid={`button-move-up-${pack.id}`}
-                      className="w-full md:w-auto"
-                    >
-                      <ChevronUp className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Monter</span>
-                      <span className="sm:hidden">↑</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMoveDown(pack.id)}
-                      disabled={idx === allPacks.length - 1}
-                      data-testid={`button-move-down-${pack.id}`}
-                      className="w-full md:w-auto"
-                    >
-                      <ChevronDown className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Descendre</span>
-                      <span className="sm:hidden">↓</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setManagingPackId(pack.id)}
-                      data-testid={`button-manage-cards-${pack.id}`}
-                      className="w-full md:w-auto"
-                    >
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Gérer</span>
-                      <span className="sm:hidden">📚</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(pack)}
-                      data-testid={`button-edit-${pack.id}`}
-                      className="w-full md:w-auto"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Modifier</span>
-                      <span className="sm:hidden">✏️</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(pack.id)}
-                      disabled={deleteMutation.isPending}
-                      data-testid={`button-delete-${pack.id}`}
-                      className="w-full md:w-auto"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Supprimer</span>
-                      <span className="sm:hidden">🗑️</span>
-                    </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMoveUp(pack.id)}
+                        disabled={idx === 0}
+                        data-testid={`button-move-up-${pack.id}`}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-2">Monter</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMoveDown(pack.id)}
+                        disabled={idx === allPacks.length - 1}
+                        data-testid={`button-move-down-${pack.id}`}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                        <span className="hidden sm:inline ml-2">Descendre</span>
+                      </Button>
+                    </div>
+                    <div className="flex gap-2 flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setManagingPackId(pack.id)}
+                        data-testid={`button-manage-cards-${pack.id}`}
+                        className="flex-1"
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        <span className="hidden sm:inline">Gérer les cartes</span>
+                        <span className="sm:hidden">Cartes</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(pack)}
+                        data-testid={`button-edit-${pack.id}`}
+                        className="flex-1"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        <span>Modifier</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(pack.id)}
+                        disabled={deleteMutation.isPending}
+                        data-testid={`button-delete-${pack.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
