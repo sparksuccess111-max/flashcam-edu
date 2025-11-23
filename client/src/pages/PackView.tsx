@@ -63,58 +63,84 @@ export default function PackView() {
 
     const pageHeight = doc.internal.pageSize.getHeight();
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 10;
-    const contentWidth = pageWidth - 2 * margin;
-    let yPosition = margin;
+    
+    // Dimensions pour 4x4 cartes par page
+    const cardWidth = pageWidth / 4;
+    const cardHeight = pageHeight / 4;
+    const cardPadding = 2;
 
-    // Title
-    doc.setFontSize(18);
-    doc.setTextColor(99, 102, 241); // violet-600
-    doc.text(pack.title, margin, yPosition);
-    yPosition += 15;
+    let cardCount = 0;
 
-    // Flashcards
+    // Flashcards - 16 cartes par page (4x4)
     flashcards.forEach((card, index) => {
-      // Check if we need a new page
-      if (yPosition > pageHeight - 40) {
+      // Déterminer la position sur la page (4x4 = 16 cartes)
+      const positionOnPage = cardCount % 16;
+      const row = Math.floor(positionOnPage / 4);
+      const col = positionOnPage % 4;
+
+      // Ajouter une nouvelle page si nécessaire
+      if (cardCount > 0 && positionOnPage === 0) {
         doc.addPage();
-        yPosition = margin;
       }
 
-      // Card number
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Carte ${index + 1}`, margin, yPosition);
-      yPosition += 5;
+      const x = col * cardWidth + cardPadding;
+      const y = row * cardHeight + cardPadding;
+      const innerWidth = cardWidth - 2 * cardPadding;
+      const innerHeight = cardHeight - 2 * cardPadding;
 
-      // Question
-      doc.setFontSize(12);
+      // Dessiner la bordure de la carte
+      doc.setDrawColor(150, 100, 200);
+      doc.rect(x, y, innerWidth, innerHeight);
+
+      // Diviser la carte en deux : question (haut) et réponse (bas)
+      const midHeight = innerHeight / 2;
+
+      // QUESTION SIDE (haut)
+      // Numéro et titre du pack
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`#${index + 1} - ${pack?.title || "Pack"}`, x + 1, y + 3);
+
+      // Question text
+      doc.setFontSize(6);
       doc.setTextColor(0, 0, 0);
       doc.setFont(undefined, "bold");
-      doc.text("Question:", margin, yPosition);
-      yPosition += 5;
-
+      doc.text("Q:", x + 1, y + 6);
+      
       doc.setFont(undefined, "normal");
-      doc.setFontSize(11);
-      const questionLines = doc.splitTextToSize(card.question, contentWidth);
-      doc.text(questionLines, margin, yPosition);
-      yPosition += questionLines.length * 5 + 3;
+      const questionLines = doc.splitTextToSize(
+        card.question || "",
+        innerWidth - 2
+      );
+      const maxQuestionLines = 4;
+      const displayedQuestionLines = questionLines.slice(0, maxQuestionLines);
+      doc.text(displayedQuestionLines, x + 1, y + 9, { maxWidth: innerWidth - 2 });
 
-      // Answer
+      // Ligne de séparation
+      doc.setDrawColor(200, 150, 255);
+      doc.line(x, y + midHeight, x + innerWidth, y + midHeight);
+
+      // ANSWER SIDE (bas)
+      // Answer text
+      doc.setFontSize(6);
+      doc.setTextColor(0, 0, 0);
       doc.setFont(undefined, "bold");
-      doc.setFontSize(12);
-      doc.text("Réponse:", margin, yPosition);
-      yPosition += 5;
+      doc.text("R:", x + 1, y + midHeight + 3 as number);
 
       doc.setFont(undefined, "normal");
-      doc.setFontSize(11);
-      const answerLines = doc.splitTextToSize(card.answer, contentWidth);
-      doc.text(answerLines, margin, yPosition);
-      yPosition += answerLines.length * 5 + 10;
+      const answerLines = doc.splitTextToSize(
+        card.answer || "",
+        innerWidth - 2
+      );
+      const maxAnswerLines = 4;
+      const displayedAnswerLines = answerLines.slice(0, maxAnswerLines);
+      doc.text(displayedAnswerLines, x + 1, y + midHeight + 6, { maxWidth: innerWidth - 2 });
+
+      cardCount++;
     });
 
     // Save PDF
-    doc.save(`${pack.title.replace(/\s+/g, "_")}.pdf`);
+    doc.save(`${(pack?.title || "cartes").replace(/\s+/g, "_")}_cartes.pdf`);
   };
 
   if (isLoading) {
