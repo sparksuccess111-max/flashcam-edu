@@ -34,8 +34,8 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
       toast({
-        title: "Paquet créé",
-        description: "Votre paquet de cartes a été créé avec succès.",
+        title: "Pack créé",
+        description: "Votre pack de flashcard a été créé avec succès.",
       });
       onOpenChange(false);
       form.reset();
@@ -44,7 +44,7 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de créer le paquet. Veuillez réessayer.",
+        description: "Impossible de créer le pack. Veuillez réessayer.",
       });
     },
   });
@@ -55,8 +55,8 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
       toast({
-        title: "Paquet mis à jour",
-        description: "Votre paquet de cartes a été mis à jour avec succès.",
+        title: "Pack mis à jour",
+        description: "Votre pack de flashcard a été mis à jour avec succès.",
       });
       onOpenChange(false);
     },
@@ -64,7 +64,7 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le paquet. Veuillez réessayer.",
+        description: "Impossible de mettre à jour le pack. Veuillez réessayer.",
       });
     },
   });

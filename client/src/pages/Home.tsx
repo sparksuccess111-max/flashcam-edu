@@ -35,10 +35,10 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">Paquets de Cartes Flash</h1>
+        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">Packs de Flashcard</h1>
         {user && (
           <p className="text-muted-foreground">
-            Bienvenue, {user.username}!
+            Bienvenue, {user.firstName}!
           </p>
         )}
       </div>
@@ -52,9 +52,9 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-semibold mb-2">Aucun paquet disponible</h3>
+              <h3 className="text-xl font-semibold mb-2">Aucun pack disponible</h3>
               <p className="text-muted-foreground">
-                Il n'y a pas de paquets de cartes publiés pour le moment. Revenez bientôt!
+                Il n'y a pas de packs de flashcard publiés pour le moment. Revenez bientôt!
               </p>
             </div>
           </CardContent>

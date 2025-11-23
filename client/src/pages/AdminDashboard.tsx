@@ -27,15 +27,15 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
       toast({
-        title: "Paquet supprimé",
-        description: "Le paquet a été supprimé avec succès.",
+        title: "Pack supprimé",
+        description: "Le pack a été supprimé avec succès.",
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de supprimer le paquet. Veuillez réessayer.",
+        description: "Impossible de supprimer le pack. Veuillez réessayer.",
       });
     },
   });
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut du paquet.",
+        description: "Impossible de mettre à jour le statut du pack.",
       });
     },
   });
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce paquet? Cela supprimera également toutes ses cartes.")) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce pack? Cela supprimera également toutes ses cartes.")) {
       deleteMutation.mutate(id);
     }
   };
@@ -105,12 +105,12 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">Tableau de bord</h1>
           <p className="text-muted-foreground">
-            Gérez vos paquets de cartes et le contenu
+            Gérez vos packs de flashcard et le contenu
           </p>
         </div>
         <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-pack">
           <Plus className="h-4 w-4 mr-2" />
-          Créer un paquet
+          Créer un pack
         </Button>
       </div>
 
