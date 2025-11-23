@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -26,10 +27,29 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
     resolver: zodResolver(insertFlashcardSchema),
     defaultValues: {
       packId,
-      question: flashcard?.question || "",
-      answer: flashcard?.answer || "",
+      question: "",
+      answer: "",
     },
   });
+
+  // Mettre à jour les valeurs du formulaire quand la flashcard ou le dialog s'ouvre
+  useEffect(() => {
+    if (open) {
+      if (isEditing && flashcard) {
+        form.reset({
+          packId,
+          question: flashcard.question || "",
+          answer: flashcard.answer || "",
+        });
+      } else {
+        form.reset({
+          packId,
+          question: "",
+          answer: "",
+        });
+      }
+    }
+  }, [open, flashcard, isEditing, packId, form]);
 
   const createMutation = useMutation({
     mutationFn: (data: InsertFlashcard) =>
