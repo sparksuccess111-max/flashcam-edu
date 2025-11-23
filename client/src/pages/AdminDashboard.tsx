@@ -23,6 +23,8 @@ export default function AdminDashboard() {
   const [swappedPackId, setSwappedPackId] = useState<string | null>(null);
   const [dragStartY, setDragStartY] = useState(0);
   const [dragCurrentY, setDragCurrentY] = useState(0);
+  const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
+  const packRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -111,6 +113,7 @@ export default function AdminDashboard() {
     setDraggedPackId(packId);
     setDragStartY(e.clientY);
     setDragCurrentY(e.clientY);
+    setDraggedOverIndex(allPacks.findIndex(p => p.id === packId));
     e.dataTransfer.effectAllowed = "move";
   };
 
@@ -132,6 +135,10 @@ export default function AdminDashboard() {
     // Use 2/3 threshold to reduce jitter
     if (e.clientY > twoThirdsPoint) {
       // Cursor is in the lower third - should swap
+      const targetIndex = allPacks.findIndex(p => p.id === targetPackId);
+      if (draggedOverIndex !== null && targetIndex > draggedOverIndex) {
+        setDraggedOverIndex(targetIndex);
+      }
       if (swappedPackId !== targetPackId) {
         setSwappedPackId(targetPackId);
       }
@@ -185,6 +192,7 @@ export default function AdminDashboard() {
     setSwappedPackId(null);
     setDragStartY(0);
     setDragCurrentY(0);
+    setDraggedOverIndex(null);
   };
 
   const allPacks = packsToDisplay;
@@ -249,12 +257,14 @@ export default function AdminDashboard() {
       ) : (
         <div className="space-y-4">
           {allPacks.map((pack, idx) => {
-            const draggedIndex = draggedPackId ? allPacks.findIndex(p => p.id === draggedPackId) : -1;
-            const shouldShift = draggedIndex !== -1 && idx > draggedIndex;
+            const shouldShift = draggedOverIndex !== null && idx > draggedOverIndex;
             
             return (
             <div
               key={pack.id}
+              ref={(el) => {
+                if (el) packRefs.current.set(pack.id, el);
+              }}
               draggable
               onDragStart={(e) => handleDragStart(e, pack.id)}
               onDragOver={(e) => handleDragOver(e, pack.id)}
@@ -265,7 +275,7 @@ export default function AdminDashboard() {
               }}
               className={`transition-all duration-300 ease-out ${draggedPackId === pack.id ? "relative z-50" : shouldShift ? "-translate-y-[132px]" : ""}`}
             >
-            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 shadow-xl ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600 fixed left-[50%] -translate-x-[50%]" : ""}`}
+            <Card data-testid={`card-pack-${pack.id}`} className={`hover:shadow-md transition-all duration-300 ${draggedPackId === pack.id ? "bg-violet-500 dark:bg-violet-600 text-white dark:text-white border-violet-600 fixed left-[50%] -translate-x-[50%] shadow-2xl scale-110" : "shadow-md"}`}
               style={draggedPackId === pack.id ? { top: `${dragCurrentY - 66}px` } : {}}
             >
               <CardHeader>

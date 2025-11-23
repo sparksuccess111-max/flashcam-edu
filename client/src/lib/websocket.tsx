@@ -15,7 +15,8 @@ export function useWebSocket() {
     
     // Fallback: if host is empty or still invalid, use current location
     if (!host || host === "localhost") {
-      host = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
+      const port = window.location.port && window.location.port !== "undefined" ? ":" + window.location.port : "";
+      host = window.location.hostname + port;
     }
     
     const wsUrl = `${protocol}//${host}/ws`;
