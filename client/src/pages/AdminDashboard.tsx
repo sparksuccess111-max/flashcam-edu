@@ -199,7 +199,11 @@ export default function AdminDashboard() {
               key={pack.id}
               className={`transition-all duration-300 ease-out ${animatingPackId === pack.id ? "scale-95 opacity-75" : "scale-100 opacity-100"}`}
             >
-              <Card data-testid={`card-pack-${pack.id}`} className="hover:shadow-md transition-all duration-300">
+              <Card 
+                data-testid={`card-pack-${pack.id}`} 
+                className="hover:shadow-md transition-all duration-300 cursor-pointer"
+                onClick={() => setManagingPackId(pack.id)}
+              >
                 <CardHeader className="pb-3">
                   <div className="space-y-2">
                     <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
@@ -212,7 +216,7 @@ export default function AdminDashboard() {
                       <Badge variant={pack.published ? "default" : "secondary"} data-testid={`badge-status-${pack.id}`}>
                         {pack.published ? "Publié" : "Brouillon"}
                       </Badge>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <span className="text-xs text-muted-foreground hidden sm:inline">Publier</span>
                         <Switch
                           checked={pack.published}
@@ -229,7 +233,10 @@ export default function AdminDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleMoveUp(pack.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMoveUp(pack.id);
+                        }}
                         disabled={idx === 0}
                         data-testid={`button-move-up-${pack.id}`}
                       >
@@ -239,7 +246,10 @@ export default function AdminDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleMoveDown(pack.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMoveDown(pack.id);
+                        }}
                         disabled={idx === allPacks.length - 1}
                         data-testid={`button-move-down-${pack.id}`}
                       >
@@ -251,18 +261,10 @@ export default function AdminDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setManagingPackId(pack.id)}
-                        data-testid={`button-manage-cards-${pack.id}`}
-                        className="flex-1"
-                      >
-                        <BookOpen className="h-4 w-4 mr-2" />
-                        <span className="hidden sm:inline">Gérer les cartes</span>
-                        <span className="sm:hidden">Cartes</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(pack)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(pack);
+                        }}
                         data-testid={`button-edit-${pack.id}`}
                         className="flex-1"
                       >
@@ -272,7 +274,10 @@ export default function AdminDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDelete(pack.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(pack.id);
+                        }}
                         disabled={deleteMutation.isPending}
                         data-testid={`button-delete-${pack.id}`}
                       >
