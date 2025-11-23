@@ -4,11 +4,13 @@ import "./index.css";
 
 // Suppress Vite HMR WebSocket errors that don't affect app functionality
 window.addEventListener("unhandledrejection", (event) => {
+  const message = event.reason?.message || event.reason?.toString?.() || "";
   if (
-    event.reason?.message?.includes("Failed to construct 'WebSocket'") &&
-    event.reason?.message?.includes("localhost:undefined")
+    message.includes("Failed to construct 'WebSocket'") &&
+    message.includes("localhost:undefined")
   ) {
     event.preventDefault();
+    return;
   }
 });
 
