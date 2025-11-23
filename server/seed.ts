@@ -7,26 +7,24 @@ const SALT_ROUNDS = 10;
 async function seed() {
   console.log("Seeding database...");
 
-  const adminPassword = await bcrypt.hash("CaMa_39.cAmA", SALT_ROUNDS);
-  const tempPassword = await bcrypt.hash("temp", SALT_ROUNDS);
+  const camillePassword = await bcrypt.hash("CaMa_39.cAmA", SALT_ROUNDS);
+  const stephenPassword = await bcrypt.hash("Stephen_histoire", SALT_ROUNDS);
 
-  const [admin] = await db.insert(users).values({
+  await db.insert(users).values({
     username: "Camille Cordier",
-    password: adminPassword,
+    password: camillePassword,
     role: "admin",
-    passwordSet: true,
-  }).returning();
+  });
 
   await db.insert(users).values({
     username: "Stephen Dechelotte",
-    password: tempPassword,
+    password: stephenPassword,
     role: "admin",
-    passwordSet: false,
   });
 
   console.log("Created users:");
   console.log("  - Admin: username=Camille Cordier, password=CaMa_39.cAmA");
-  console.log("  - Admin: username=Stephen Dechelotte, password=temp (change on first login)");
+  console.log("  - Admin: username=Stephen Dechelotte, password=Stephen_histoire");
 
   const [mathPack] = await db.insert(packs).values({
     title: "Basic Mathematics",
@@ -85,7 +83,7 @@ async function seed() {
   console.log("\nSeed completed successfully!");
   console.log("\nLogin credentials:");
   console.log("  Admin: Camille Cordier / CaMa_39.cAmA");
-  console.log("  Admin: Stephen Dechelotte / temp (will set password on first login)");
+  console.log("  Admin: Stephen Dechelotte / Stephen_histoire");
 }
 
 seed()

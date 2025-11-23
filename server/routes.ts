@@ -57,32 +57,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const token = generateToken(user);
       const { password: _, ...userWithoutPassword } = user;
 
-      res.json({ user: userWithoutPassword, token, needsPasswordSetup: !user.passwordSet });
+      res.json({ user: userWithoutPassword, token });
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Login failed" });
-    }
-  });
-
-  app.post("/api/set-password", authenticate, async (req: AuthRequest, res) => {
-    try {
-      const { newPassword } = req.body;
-      if (!newPassword || newPassword.length < 6) {
-        return res.status(400).json({ error: "Password must be at least 6 characters" });
-      }
-
-      const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
-      const user = await storage.updateUser(req.user!.id, {
-        password: hashedPassword,
-        passwordSet: true,
-      });
-
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      res.json({ success: true });
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Failed to set password" });
     }
   });
 
