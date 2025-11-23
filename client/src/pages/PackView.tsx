@@ -122,8 +122,8 @@ export default function PackView() {
         const text = isRecto ? (card.question || "") : (card.answer || "");
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(12);
-        const contentStartY = isRecto ? (y + margin + 8) : y;
-        const contentHeight = isRecto ? (cardH - margin - 8) : cardH;
+        const contentStartY = y + margin + 8;
+        const contentHeight = cardH - margin - 8;
         drawMultilineText(text, cx, contentStartY + contentHeight / 2, cardW, contentHeight, 12);
       });
 
