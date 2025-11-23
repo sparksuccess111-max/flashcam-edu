@@ -39,16 +39,16 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       setUser(data.user);
       toast({
-        title: "Login successful",
-        description: `Welcome back, ${data.user.username}!`,
+        title: "Connexion réussie",
+        description: `Bienvenue, ${data.user.username}!`,
       });
       setLocation("/");
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Login failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        title: "Erreur de connexion",
+        description: error.message || "Identifiants invalides. Veuillez réessayer.",
       });
     },
   });
@@ -62,13 +62,13 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-2">
-            <div className="bg-primary/10 p-3 rounded-lg">
-              <GraduationCap className="h-8 w-8 text-primary" />
+            <div className="gradient-violet-accent p-3 rounded-lg">
+              <GraduationCap className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to FlashLearn</CardTitle>
+          <CardTitle className="text-2xl">FlashLearn</CardTitle>
           <CardDescription>
-            Enter your credentials to access your flashcards
+            Connectez-vous pour apprendre avec les cartes flash
           </CardDescription>
         </CardHeader>
         <CardContent>

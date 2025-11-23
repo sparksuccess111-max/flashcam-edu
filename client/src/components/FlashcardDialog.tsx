@@ -28,7 +28,6 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
       packId,
       question: flashcard?.question || "",
       answer: flashcard?.answer || "",
-      order: flashcard?.order ?? nextOrder,
     },
   });
 
@@ -38,8 +37,8 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs", packId, "flashcards"] });
       toast({
-        title: "Flashcard created",
-        description: "Your flashcard has been created successfully.",
+        title: "Carte créée",
+        description: "La carte a été créée avec succès.",
       });
       onOpenChange(false);
       form.reset();
@@ -47,8 +46,8 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to create flashcard.",
+        title: "Erreur",
+        description: "Impossible de créer la carte.",
       });
     },
   });
@@ -59,16 +58,16 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs", packId, "flashcards"] });
       toast({
-        title: "Flashcard updated",
-        description: "Your flashcard has been updated successfully.",
+        title: "Carte mise à jour",
+        description: "La carte a été mise à jour avec succès.",
       });
       onOpenChange(false);
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update flashcard.",
+        title: "Erreur",
+        description: "Impossible de mettre à jour la carte.",
       });
     },
   });
@@ -88,11 +87,11 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Flashcard" : "Create New Flashcard"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Modifier la carte" : "Créer une nouvelle carte"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the question and answer for this flashcard."
-              : "Add a new flashcard to your pack."}
+              ? "Mettez à jour la question et la réponse."
+              : "Ajoutez une nouvelle carte à votre paquet."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

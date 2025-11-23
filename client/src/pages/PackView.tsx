@@ -95,42 +95,38 @@ export default function PackView() {
           data-testid="button-back"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Packs
+          Retour
         </Button>
 
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent" data-testid="text-pack-title">{pack.title}</h1>
-          {pack.description && (
-            <p className="text-muted-foreground" data-testid="text-pack-description">{pack.description}</p>
-          )}
-        </div>
-
         <div className="flex-1 flex flex-col items-center justify-center py-8">
+          <div className="w-full max-w-2xl mb-6 text-center">
+            <h2 className="text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">{pack.title}</h2>
+          </div>
           <Card
-            className="gradient-card w-full max-w-2xl min-h-[400px] flex items-center justify-center cursor-pointer hover-elevate active-elevate-2 transition-all shadow-lg border-violet-300 dark:border-violet-700"
+            className="gradient-card w-full max-w-2xl min-h-[450px] flex items-center justify-center cursor-pointer hover:shadow-2xl active-elevate-2 transition-all shadow-xl border-2 border-violet-300 dark:border-violet-700"
             onClick={handleFlip}
             data-testid="card-flashcard"
           >
-            <CardContent className="p-12 text-center">
-              <div className="mb-4">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {isFlipped ? "Answer" : "Question"}
+            <CardContent className="p-16 text-center">
+              <div className="mb-8">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">
+                  {isFlipped ? "Réponse" : "Question"}
                 </span>
               </div>
-              <p className="text-2xl font-medium leading-relaxed" data-testid={isFlipped ? "text-answer" : "text-question"}>
+              <p className="text-3xl font-semibold leading-relaxed text-foreground" data-testid={isFlipped ? "text-answer" : "text-question"}>
                 {isFlipped ? currentCard?.answer : currentCard?.question}
               </p>
-              <div className="mt-8 text-sm text-muted-foreground">
-                Click card to {isFlipped ? "see question" : "reveal answer"}
+              <div className="mt-12 text-xs text-muted-foreground/50">
+                Cliquez pour {isFlipped ? "la question" : "la réponse"}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 mt-8">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-muted-foreground" data-testid="text-progress">
-              Card {currentIndex + 1} of {flashcards.length}
+            <span className="text-sm text-muted-foreground/70" data-testid="text-progress">
+              Carte {currentIndex + 1} sur {flashcards.length}
             </span>
             <Button
               variant="ghost"
@@ -139,13 +135,13 @@ export default function PackView() {
               data-testid="button-reset"
             >
               <RotateCw className="h-4 w-4 mr-2" />
-              Reset
+              Réinitialiser
             </Button>
           </div>
           <Progress value={progress} />
         </div>
 
-        <div className="flex items-center justify-between gap-4 mt-6">
+        <div className="flex items-center justify-between gap-4 mt-8">
           <Button
             variant="outline"
             onClick={handlePrevious}
@@ -153,7 +149,7 @@ export default function PackView() {
             data-testid="button-previous"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous
+            Précédent
           </Button>
           <Button
             variant="outline"
@@ -161,7 +157,7 @@ export default function PackView() {
             disabled={currentIndex === flashcards.length - 1}
             data-testid="button-next"
           >
-            Next
+            Suivant
             <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         </div>

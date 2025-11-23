@@ -3,11 +3,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, Flashcard } from "@shared/schema";
 import { FlashcardDialog } from "./FlashcardDialog";
+import { BulkImportDialog } from "./BulkImportDialog";
 
 interface FlashcardManagerProps {
   packId: string;
@@ -18,6 +19,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
   const { toast } = useToast();
   const [editingCard, setEditingCard] = useState<Flashcard | null>(null);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
 
   const { data: pack } = useQuery<Pack>({
     queryKey: ["/api/packs", packId],
@@ -78,17 +80,23 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
 
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold mb-2" data-testid="text-pack-title">
-            {pack?.title || "Manage Flashcards"}
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent" data-testid="text-pack-title">
+            {pack?.title || "Gérer les cartes"}
           </h1>
           <p className="text-muted-foreground">
-            Add, edit, or remove flashcards from this pack
+            Ajouter, modifier ou supprimer des cartes
           </p>
         </div>
-        <Button onClick={handleCreate} data-testid="button-create-flashcard">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Flashcard
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsBulkImportOpen(true)} data-testid="button-bulk-import">
+            <Upload className="h-4 w-4 mr-2" />
+            Import
+          </Button>
+          <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-flashcard">
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -158,6 +166,11 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
         open={isCardDialogOpen}
         onOpenChange={setIsCardDialogOpen}
         nextOrder={cards.length}
+      />
+      <BulkImportDialog
+        packId={packId}
+        open={isBulkImportOpen}
+        onOpenChange={setIsBulkImportOpen}
       />
     </div>
   );
