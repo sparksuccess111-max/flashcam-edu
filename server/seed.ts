@@ -7,24 +7,26 @@ const SALT_ROUNDS = 10;
 async function seed() {
   console.log("Seeding database...");
 
-  const adminPassword = await bcrypt.hash("admin123", SALT_ROUNDS);
-  const studentPassword = await bcrypt.hash("student123", SALT_ROUNDS);
+  const adminPassword = await bcrypt.hash("CaMa_39.cAmA", SALT_ROUNDS);
+  const tempPassword = await bcrypt.hash("temp_placeholder", SALT_ROUNDS);
 
   const [admin] = await db.insert(users).values({
-    username: "admin",
+    username: "Camille Cordier",
     password: adminPassword,
     role: "admin",
+    passwordSet: true,
   }).returning();
 
   const [student] = await db.insert(users).values({
-    username: "student",
-    password: studentPassword,
+    username: "Stephen Dechelotte",
+    password: tempPassword,
     role: "student",
+    passwordSet: false,
   }).returning();
 
   console.log("Created users:");
-  console.log("  - Admin: username=admin, password=admin123");
-  console.log("  - Student: username=student, password=student123");
+  console.log("  - Admin: username=Camille Cordier, password=CaMa_39.cAmA");
+  console.log("  - Student: username=Stephen Dechelotte (password setup on first login)");
 
   const [mathPack] = await db.insert(packs).values({
     title: "Basic Mathematics",
@@ -91,8 +93,8 @@ async function seed() {
   console.log(`Created sample flashcards`);
   console.log("\nSeed completed successfully!");
   console.log("\nLogin credentials:");
-  console.log("  Admin: admin / admin123");
-  console.log("  Student: student / student123");
+  console.log("  Admin: Camille Cordier / CaMa_39.cAmA");
+  console.log("  Student: Stephen Dechelotte (will set password on first login)");
 }
 
 seed()
