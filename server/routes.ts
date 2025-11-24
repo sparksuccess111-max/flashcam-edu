@@ -376,9 +376,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Teachers can only create packs in their subject
       if (req.user!.role === "teacher") {
-        if (packData.subject !== req.user!.subject) {
-          logger.warn(`Unauthorized pack creation: teacher ${req.user!.id} tried to create pack in subject ${packData.subject}`, "api");
-          return res.status(403).json({ error: "You can only create packs in your assigned subject" });
+        // Get current user from database to check latest subject assignment
+        const currentUser = await storage.db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.id, req.user!.id),
+        });
+        
+        if (!currentUser || currentUser.subject !== packData.subject) {
+          const userSubject = currentUser?.subject || "Non assigné";
+          logger.warn(`Unauthorized pack creation: teacher ${req.user!.id} tried to create pack in subject ${packData.subject} (assigned: ${userSubject})`, "api");
+          return res.status(403).json({ error: `You can only create packs in your assigned subject: ${userSubject}` });
         }
       }
       
@@ -402,9 +408,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Teachers can only update packs in their subject
-      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
-        logger.warn(`Unauthorized pack update: teacher ${req.user!.id} tried to modify pack in subject ${pack.subject}`, "api");
-        return res.status(403).json({ error: "You can only modify packs in your assigned subject" });
+      if (req.user!.role === "teacher") {
+        // Get current user from database to check latest subject assignment
+        const currentUser = await storage.db.query.users.findFirst({
+          where: (users, { eq }) => eq(users.id, req.user!.id),
+        });
+        
+        if (!currentUser || pack.subject !== currentUser.subject) {
+          logger.warn(`Unauthorized pack update: teacher ${req.user!.id} tried to modify pack in subject ${pack.subject}`, "api");
+          return res.status(403).json({ error: "You can only modify packs in your assigned subject" });
+        }
       }
 
       const updatedPack = await storage.updatePack(req.params.id, packData);
