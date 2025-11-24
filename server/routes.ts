@@ -532,17 +532,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/packs/:packId/flashcards/:id/reorder", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
-      const { newOrder } = req.body;
-      if (typeof newOrder !== "number") {
-        return res.status(400).json({ error: "Invalid order value" });
+      const { direction } = req.body;
+      if (direction !== "up" && direction !== "down") {
+        return res.status(400).json({ error: "Direction must be 'up' or 'down'" });
       }
-      const flashcard = await storage.updateFlashcard(req.params.id, { order: newOrder });
-      if (!flashcard) {
+      
+      const allFlashcards = await storage.getFlashcardsByPackId(req.params.packId);
+      const sorted = allFlashcards.sort((a, b) => a.order - b.order);
+      const currentIdx = sorted.findIndex(f => f.id === req.params.id);
+      
+      if (currentIdx === -1) {
         return res.status(404).json({ error: "Flashcard not found" });
       }
-      broadcastUpdate('flashcard-reordered', flashcard);
-      logger.info(`Flashcard reordered in pack ${req.params.packId}: ${req.params.id} to position ${newOrder}`, "api");
-      res.json(flashcard);
+      
+      if (direction === "up" && currentIdx === 0) {
+        return res.status(400).json({ error: "Cannot move up - already at top" });
+      }
+      
+      if (direction === "down" && currentIdx === sorted.length - 1) {
+        return res.status(400).json({ error: "Cannot move down - already at bottom" });
+      }
+      
+      const swapIdx = direction === "up" ? currentIdx - 1 : currentIdx + 1;
+      const current = sorted[currentIdx];
+      const swapWith = sorted[swapIdx];
+      
+      await storage.updateFlashcard(current.id, { order: swapWith.order });
+      const updated = await storage.updateFlashcard(swapWith.id, { order: current.order });
+      
+      const refreshed = await storage.getFlashcardsByPackId(req.params.packId);
+      broadcastUpdate('flashcard-reordered', { packId: req.params.packId, flashcards: refreshed });
+      logger.info(`Flashcard reordered in pack ${req.params.packId}: moved ${req.params.id} ${direction}`, "api");
+      res.json(updated);
     } catch (error: any) {
       logger.error("Failed to reorder flashcard", "api", error);
       res.status(400).json({ error: error.message || "Failed to reorder flashcard" });

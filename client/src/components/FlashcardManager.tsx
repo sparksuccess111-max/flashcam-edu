@@ -32,8 +32,8 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
   });
 
   const reorderMutation = useMutation({
-    mutationFn: ({ id, newOrder }: { id: string; newOrder: number }) =>
-      apiRequest("PATCH", `/api/packs/${packId}/flashcards/${id}/reorder`, { newOrder }),
+    mutationFn: ({ id, direction }: { id: string; direction: "up" | "down" }) =>
+      apiRequest("PATCH", `/api/packs/${packId}/flashcards/${id}/reorder`, { direction }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs", packId, "flashcards"] });
     },
@@ -267,8 +267,7 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const newOrder = cards[idx - 1]?.order ?? 0;
-                      reorderMutation.mutate({ id: card.id, newOrder: newOrder - 1 });
+                      reorderMutation.mutate({ id: card.id, direction: "up" });
                     }}
                     disabled={idx === 0 || reorderMutation.isPending}
                     data-testid={`button-move-up-${card.id}`}
@@ -280,8 +279,7 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const newOrder = cards[idx + 1]?.order ?? 0;
-                      reorderMutation.mutate({ id: card.id, newOrder: newOrder + 1 });
+                      reorderMutation.mutate({ id: card.id, direction: "down" });
                     }}
                     disabled={idx === cards.length - 1 || reorderMutation.isPending}
                     data-testid={`button-move-down-${card.id}`}
