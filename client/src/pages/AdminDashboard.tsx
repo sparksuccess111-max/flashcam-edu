@@ -271,7 +271,7 @@ export default function AdminDashboard() {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="admins">Gestion des comptes</TabsTrigger>
+          <TabsTrigger value="admins">Comptes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="packs" className="space-y-4">
@@ -492,7 +492,7 @@ export default function AdminDashboard() {
 
         <TabsContent value="admins" className="space-y-4">
           <div className="mb-8">
-            <h2 className="text-xl font-semibold">Membres</h2>
+            <h2 className="text-xl font-semibold">Gestion des comptes</h2>
           </div>
 
           {usersLoading ? (
@@ -504,7 +504,7 @@ export default function AdminDashboard() {
           ) : !allUsers || allUsers.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
-                <p className="text-muted-foreground">Aucun membre pour l'instant</p>
+                <p className="text-muted-foreground">Aucun compte pour l'instant</p>
               </CardContent>
             </Card>
           ) : (
