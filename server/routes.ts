@@ -382,9 +382,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const pack = await storage.createPack(packData);
+      const pack = await storage.createPack({ ...packData, createdByUserId: req.user!.id });
       broadcastUpdate('pack-created', pack);
-      logger.info(`Pack created: ${pack.id} - "${pack.title}" (${pack.subject})`, "api");
+      logger.info(`Pack created: ${pack.id} - "${pack.title}" (${pack.subject}) by ${req.user!.firstName}`, "api");
       res.status(201).json(pack);
     } catch (error: any) {
       logger.error("Failed to create pack", "api", error);

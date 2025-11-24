@@ -57,6 +57,12 @@ function Router() {
           <Route path="/messages">
             {() => <ProtectedRoute component={Messages} />}
           </Route>
+          <Route path="/teacher/flashcards">
+            {() => <ProtectedRoute component={TeacherFlashcards} teacherOrAdminOnly />}
+          </Route>
+          <Route path="/admin/flashcards">
+            {() => <ProtectedRoute component={AdminFlashcards} adminOnly />}
+          </Route>
           <Route component={NotFound} />
         </Switch>
       </main>
