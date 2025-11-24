@@ -76,7 +76,9 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     }
 
     try {
-      const response = await fetch(`/api/packs/${packId}/export`);
+      const response = await fetch(`/api/packs/${packId}/export`, {
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Export failed");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
