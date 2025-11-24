@@ -1,0 +1,157 @@
+Je veux ajouter un système complet de notifications de nouveaux messages, avec des pastilles rouges visibles partout dans l’application. Merci de lire tout le projet et de modifier proprement le frontend + backend. Voici exactement ce que je veux :
+
+🔴 1. Pastille rouge globale (icône “Messages”)
+
+Mettre un indicateur rouge (badge) sur l’icône “Messages” partout où elle apparaît dans l’application.
+Cette pastille doit apparaître si :
+
+au moins une conversation contient un message non lu par l’utilisateur connecté.
+
+Le badge doit être synchronisé :
+
+sur la page d’accueil
+
+dans la navbar
+
+dans le dashboard prof/admin/élève
+
+dans tout endroit contenant l’icône “Messages”
+
+Dès que tout est lu, la pastille rouge doit disparaître partout instantanément.
+
+📩 2. Pastille rouge sur chaque conversation
+
+Dans la liste des conversations :
+
+afficher une pastille rouge sur chaque conversation qui contient au moins un message non lu par l’utilisateur connecté.
+
+Les règles :
+
+si l’utilisateur ouvre la conversation, tous les messages non lus de cette conversation deviennent lus
+
+la pastille disparaît immédiatement
+
+l’icône globale "Messages" doit se mettre à jour automatiquement
+
+📥 3. Marquage des messages comme lus
+Ajouter dans la base de données (Drizzle) :
+
+Une table message_reads ou un champ similaire permettant de savoir si un utilisateur a lu un message.
+
+Structure suggérée :
+message_reads
+
+id
+
+messageId
+
+userId
+
+readAt (timestamp)
+
+À chaque message reçu par un utilisateur :
+
+il est “non lu” tant qu’il n’est pas dans message_reads
+
+À l’ouverture d’une conversation :
+
+tous les messages de l’autre participant sont marqués comme lus
+
+suppression immédiate des pastilles
+
+🌐 4. API à ajouter
+GET /notifications/unread-count
+
+Retourne :
+
+le nombre total de conversations non lues
+
+le nombre total de messages non lus
+
+GET /notifications/conversations
+
+Retourne la liste des conversations avec :
+
+conversationId
+
+hasUnread: true/false
+
+POST /notifications/mark-conversation-read
+
+Body : { conversationId }
+Marque tous les messages de cette conversation comme lus pour l’utilisateur courant.
+
+⚡ 5. Mise à jour temps réel (Socket.IO)
+
+Quand un message est envoyé :
+
+le destinataire reçoit un événement message:new
+
+mettre à jour automatiquement :
+
+la pastille globale
+
+la pastille sur la conversation
+
+la liste de conversations
+
+Quand une conversation est ouverte :
+
+envoyer un événement conversation:read
+
+le backend met à jour les message_reads
+
+renvoie immédiatement la nouvelle valeur des pastilles
+
+🎨 6. Intégration front-end (React/Tailwind ou stack du projet)
+
+Ajouter un composant global <MessageNotificationsProvider> qui écoute les sockets
+
+Stocker les conversations non lues dans un contexte global
+
+Rafraîchir les badges sur :
+
+la navbar
+
+les pages dashboard
+
+la liste de conversations
+
+Pastille minimaliste : petit cercle rouge (Tailwind: bg-red-500 w-2 h-2 rounded-full)
+
+🔐 7. Permissions (à conserver)
+
+Garder toutes les règles précédemment implémentées :
+
+students peuvent contacter teachers + admins
+
+teachers peuvent contacter admins
+
+admins peuvent contacter students + teachers
+
+teachers ne peuvent pas lancer une conversation avec students
+
+etc.
+
+Aucune modification de permissions.
+Juste les notifications.
+
+🧩 8. À fournir
+
+Je veux que tu :
+
+lises le code existant
+
+ajoutes proprement les nouvelles tables Drizzle
+
+modifies les routes nécessaires
+
+mettes à jour les sockets
+
+ajoutes les badges dans le frontend
+
+fournisses les diffs complets puis modifies les fichiers
+
+gardes toute la structure propre et cohérente
+
+Merci de réaliser tout cela proprement, étape par étape.

@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth-context";
+import { useNotifications } from "@/lib/notification-context";
 import { insertMessageSchema } from "@shared/schema";
 import type { User, Message } from "@shared/schema";
 import { Send, MessageSquare, Search } from "lucide-react";
@@ -22,9 +23,11 @@ const sendMessageSchema = insertMessageSchema.extend({
 
 export default function Messages() {
   const { user: currentUser } = useAuth();
+  const { setUnreadCount } = useNotifications();
   const { toast } = useToast();
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [unreadByUser, setUnreadByUser] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: recipients = [] } = useQuery<User[]>({
@@ -35,6 +38,11 @@ export default function Messages() {
   const { data: allMessages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages"],
     refetchInterval: 1000,
+  });
+
+  const { data: unreadCount = 0 } = useQuery<number>({
+    queryKey: ["/api/notifications/unread-count"],
+    refetchInterval: 2000,
   });
 
   const form = useForm({
@@ -59,6 +67,17 @@ export default function Messages() {
         title: "Erreur",
         description: "Impossible d'envoyer le message.",
       });
+    },
+  });
+
+  const markConversationReadMutation = useMutation({
+    mutationFn: (otherUserId: string) =>
+      apiRequest("POST", "/api/notifications/mark-conversation-read", { otherUserId }),
+    onSuccess: (data: any) => {
+      setUnreadByUser(prev => ({ ...prev, [selectedUserId]: false }));
+      setUnreadCount(data.unreadCount);
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
     },
   });
 
@@ -96,9 +115,21 @@ export default function Messages() {
     return role === "admin" ? "Administrateur" : role === "teacher" ? "Professeur" : "Étudiant";
   };
 
+  const getUnreadForUser = (userId: string): number => {
+    return allMessages.filter(m =>
+      m.fromUserId === userId && m.toUserId === currentUser?.id && !m.read
+    ).length;
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversationMessages]);
+
+  useEffect(() => {
+    if (selectedUserId && getUnreadForUser(selectedUserId) > 0) {
+      markConversationReadMutation.mutate(selectedUserId);
+    }
+  }, [selectedUserId]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -133,24 +164,35 @@ export default function Messages() {
                     {recipients.length === 0 ? "Aucun contact" : "Pas de résultats"}
                   </p>
                 ) : (
-                  filteredRecipients.map(contact => (
-                    <button
-                      key={contact.id}
-                      onClick={() => {
-                        setSelectedUserId(contact.id);
-                        form.setValue("toUserId", contact.id);
-                      }}
-                      className={`w-full text-left p-2 rounded-md transition-colors border text-sm ${
-                        selectedUserId === contact.id
-                          ? "bg-violet-100 dark:bg-violet-900 border-violet-300 dark:border-violet-700"
-                          : "border-transparent hover:bg-muted"
-                      }`}
-                      data-testid={`button-select-user-${contact.id}`}
-                    >
-                      <div className="font-medium truncate">{contact.firstName} {contact.lastName}</div>
-                      <div className="text-xs text-muted-foreground">{getRoleLabel(contact.role)}</div>
-                    </button>
-                  ))
+                  filteredRecipients.map(contact => {
+                    const unread = getUnreadForUser(contact.id);
+                    return (
+                      <button
+                        key={contact.id}
+                        onClick={() => {
+                          setSelectedUserId(contact.id);
+                          form.setValue("toUserId", contact.id);
+                        }}
+                        className={`w-full text-left p-2 rounded-md transition-colors border text-sm relative ${
+                          selectedUserId === contact.id
+                            ? "bg-violet-100 dark:bg-violet-900 border-violet-300 dark:border-violet-700"
+                            : "border-transparent hover:bg-muted"
+                        }`}
+                        data-testid={`button-select-user-${contact.id}`}
+                      >
+                        <div className="font-medium truncate">{contact.firstName} {contact.lastName}</div>
+                        <div className="text-xs text-muted-foreground flex justify-between">
+                          <span>{getRoleLabel(contact.role)}</span>
+                          {unread > 0 && (
+                            <span className="inline-flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+                              {unread}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </CardContent>

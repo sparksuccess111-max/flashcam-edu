@@ -2,10 +2,12 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useNotifications } from "@/lib/notification-context";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
+  const { unreadCount } = useNotifications();
   const isTeacher = user?.role === "teacher";
 
   const handleLogout = () => {
@@ -38,15 +40,23 @@ export function Header() {
               </Button>
             )}
             {user && (
-              <Button
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-                variant="outline"
-                onClick={() => setLocation("/messages")}
-                data-testid="button-messages"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Messages
-              </Button>
+              <div className="relative">
+                <Button
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                  variant="outline"
+                  onClick={() => setLocation("/messages")}
+                  data-testid="button-messages"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                </Button>
+                {unreadCount > 0 && (
+                  <div
+                    className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"
+                    data-testid="badge-unread-messages"
+                  />
+                )}
+              </div>
             )}
             {user ? (
               <Button

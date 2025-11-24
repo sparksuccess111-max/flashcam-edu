@@ -4,6 +4,7 @@ import {
   flashcards,
   accountRequests,
   messages,
+  messageReads,
   type User,
   type InsertUser,
   type Pack,
@@ -16,6 +17,8 @@ import {
   type InsertAccountRequest,
   type Message,
   type InsertMessage,
+  type MessageRead,
+  type InsertMessageRead,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc, or, and, sql } from "drizzle-orm";
@@ -50,6 +53,11 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   markMessageAsRead(id: string): Promise<void>;
   getValidMessageRecipients(userId: string, userRole: string): Promise<User[]>;
+  
+  getUnreadConversations(userId: string): Promise<{ conversationWith: string; unreadCount: number }[]>;
+  getTotalUnreadCount(userId: string): Promise<number>;
+  markConversationAsRead(userId: string, otherUserId: string): Promise<void>;
+  recordMessageRead(messageId: string, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -208,6 +216,55 @@ export class DatabaseStorage implements IStorage {
   async getUnreadMessageCount(userId: string): Promise<number> {
     const result = await db.select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(messages).where(and(eq(messages.toUserId, userId), eq(messages.read, false)));
     return result[0]?.count || 0;
+  }
+
+  async getUnreadConversations(userId: string): Promise<{ conversationWith: string; unreadCount: number }[]> {
+    const unreadMessages = await db
+      .select({
+        otherUserId: sql<string>`CASE WHEN ${messages.fromUserId} = ${userId} THEN ${messages.toUserId} ELSE ${messages.fromUserId} END`,
+        count: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+      })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.toUserId, userId),
+          eq(messages.read, false)
+        )
+      )
+      .groupBy(
+        sql`CASE WHEN ${messages.fromUserId} = ${userId} THEN ${messages.toUserId} ELSE ${messages.fromUserId} END`
+      );
+    
+    return unreadMessages.map(m => ({ conversationWith: m.otherUserId, unreadCount: m.count }));
+  }
+
+  async getTotalUnreadCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` })
+      .from(messages)
+      .where(and(eq(messages.toUserId, userId), eq(messages.read, false)));
+    return result[0]?.count || 0;
+  }
+
+  async markConversationAsRead(userId: string, otherUserId: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ read: true })
+      .where(
+        and(
+          eq(messages.toUserId, userId),
+          eq(messages.fromUserId, otherUserId),
+          eq(messages.read, false)
+        )
+      );
+  }
+
+  async recordMessageRead(messageId: string, userId: string): Promise<void> {
+    try {
+      await db.insert(messageReads).values({ messageId, userId });
+    } catch (error) {
+      // Ignore duplicate key errors
+    }
   }
 }
 

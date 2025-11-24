@@ -30,6 +30,13 @@ export const messages = pgTable("messages", {
   read: boolean("read").notNull().default(false),
 });
 
+export const messageReads = pgTable("message_reads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: varchar("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  readAt: text("read_at").notNull().default(sql`now()`),
+});
+
 export const packs = pgTable("packs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -108,3 +115,10 @@ export const insertMessageSchema = z.object({
   content: z.string().min(1, "Message is required"),
 });
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
+
+export type MessageRead = typeof messageReads.$inferSelect;
+export const insertMessageReadSchema = z.object({
+  messageId: z.string(),
+  userId: z.string(),
+});
+export type InsertMessageRead = z.infer<typeof insertMessageReadSchema>;

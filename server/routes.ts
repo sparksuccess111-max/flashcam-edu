@@ -306,15 +306,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/messages/mark-read/:userId", authenticate, async (req: AuthRequest, res) => {
+  app.post("/api/notifications/mark-conversation-read", authenticate, async (req: AuthRequest, res) => {
     try {
-      const otherUserId = req.params.userId;
+      const { otherUserId } = req.body;
       await storage.markConversationAsRead(req.user!.id, otherUserId);
+      const unreadCount = await storage.getTotalUnreadCount(req.user!.id);
+      broadcastUpdate('notifications-updated', { userId: req.user!.id, unreadCount });
       logger.info(`Conversation marked as read for ${req.user!.id}`, "api");
-      res.json({ success: true });
+      res.json({ success: true, unreadCount });
     } catch (error: any) {
       logger.error("Failed to mark conversation as read", "api", error);
       res.status(400).json({ error: error.message || "Failed to mark conversation as read" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const count = await storage.getTotalUnreadCount(req.user!.id);
+      res.json({ count });
+    } catch (error: any) {
+      logger.error("Failed to fetch unread count", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch unread count" });
     }
   });
 
@@ -339,7 +351,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const message = await storage.createMessage(messageData);
-      broadcastUpdate('message-received', message);
+      const unreadCount = await storage.getTotalUnreadCount(messageData.toUserId);
+      broadcastUpdate('message-received', { ...message, totalUnreadCount: unreadCount });
+      broadcastUpdate('notifications-updated', { userId: messageData.toUserId, unreadCount });
       logger.info(`Message sent from ${req.user!.firstName} to ${req.body.toUserId}`, "api");
       res.status(201).json(message);
     } catch (error: any) {
