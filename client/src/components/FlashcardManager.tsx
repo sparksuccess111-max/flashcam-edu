@@ -231,7 +231,12 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
       ) : (
         <div className="space-y-4">
           {cards.map((card: Flashcard) => (
-            <Card key={card.id} data-testid={`card-flashcard-${card.id}`}>
+            <Card 
+              key={card.id} 
+              data-testid={`card-flashcard-${card.id}`}
+              className="cursor-pointer hover-elevate"
+              onClick={() => handleEdit(card)}
+            >
               <CardHeader>
                 <CardTitle className="text-lg" data-testid={`text-question-${card.id}`}>
                   {card.question}
@@ -245,7 +250,10 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEdit(card)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(card);
+                    }}
                     data-testid={`button-edit-${card.id}`}
                     className="gap-2"
                   >
@@ -256,7 +264,7 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                     variant="outline"
                     size="sm"
                     onClick={(e) => {
-                      e.stopPropagation?.();
+                      e.stopPropagation();
                       handleDeleteCard(card.id);
                     }}
                     disabled={deleteCardMutation.isPending}
