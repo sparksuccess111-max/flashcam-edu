@@ -48,8 +48,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ping endpoint for internal keep-alive script
+  // Performs a micro-action (timestamp update in memory) to signal server is active
   app.get("/ping", (_req, res) => {
-    res.json({ status: "alive" });
+    // Micro-action: Update last ping timestamp
+    const now = new Date().toISOString();
+    (global as any).__lastPingTime = now;
+    (global as any).__pingCount = ((global as any).__pingCount || 0) + 1;
+    
+    res.json({ 
+      status: "alive",
+      lastPingTime: now,
+      totalPings: (global as any).__pingCount
+    });
   });
 
   app.post("/api/login", async (req, res) => {

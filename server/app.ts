@@ -1,4 +1,6 @@
 import { type Server } from "node:http";
+import { spawn } from "child_process";
+import { join } from "path";
 
 import express, {
   type Express,
@@ -58,43 +60,39 @@ app.use((req, res, next) => {
   next();
 });
 
-// Internal keep-alive ping function
-function startAutoPing(port: number) {
-  const pingInterval = 3 * 60 * 1000; // 3 minutes in milliseconds (for Replit keep-alive)
-  const pingUrl = `http://localhost:${port}/ping`;
-  let pingCount = 0;
-
-  const doPing = async () => {
-    pingCount++;
+// Launch standalone ping.js process with auto-restart
+function startPingProcess(port: number) {
+  const pingScriptPath = join(process.cwd(), "ping.js");
+  
+  function launchPing() {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await fetch(pingUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        logger.info(`✓ Auto-ping #${pingCount} successful (${response.status})`, "server");
-      } else {
-        logger.warn(`✗ Auto-ping #${pingCount} failed (${response.status})`, "server");
-      }
-    } catch (error: any) {
-      logger.error(`✗ Auto-ping #${pingCount} error: ${error.message}`, "server", error);
+      const pingProcess = spawn("node", [pingScriptPath], {
+        stdio: "inherit",
+        detached: false,
+        env: { ...process.env, PORT: port.toString() }
+      });
+
+      pingProcess.on("error", (err) => {
+        logger.error(`Ping process error: ${err.message}`, "server", err);
+        // Restart in 5 seconds
+        setTimeout(launchPing, 5000);
+      });
+
+      pingProcess.on("exit", (code) => {
+        logger.warn(`Ping process exited with code ${code}, restarting...`, "server");
+        // Restart in 5 seconds
+        setTimeout(launchPing, 5000);
+      });
+
+      logger.info(`✓ Ping process started (PID: ${pingProcess.pid})`, "server");
+    } catch (err: any) {
+      logger.error(`Failed to start ping process: ${err.message}`, "server", err);
+      // Retry in 5 seconds
+      setTimeout(launchPing, 5000);
     }
-  };
-
-  // Immediate ping on startup
-  doPing();
-  
-  // Then ping every 3 minutes
-  const pingTask = setInterval(doPing, pingInterval);
-
-  // Prevent process from keeping the interval alive if all other connections close
-  if (pingTask.unref) {
-    pingTask.unref();
   }
-  
-  logger.info(`✓ Auto-ping system STARTED (keeps app alive every ${pingInterval / 1000}s)`, "server");
+
+  launchPing();
 }
 
 export default async function runApp(
@@ -130,9 +128,9 @@ export default async function runApp(
     log("Database connected", "db");
     log("WebSocket server ready at /ws", "ws");
     
-    // Start internal auto-ping to keep app alive on free tier
+    // Start standalone ping.js process to keep app alive on free tier
     // This helps prevent Replit free tier (15 min inactivity timeout)
-    startAutoPing(port);
+    startPingProcess(port);
   });
 
   // Keep-alive: Prevent server timeout on free tier hosting
