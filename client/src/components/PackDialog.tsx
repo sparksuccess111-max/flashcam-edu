@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { insertPackSchema, type InsertPack, type Pack } from "@shared/schema";
+import { insertPackSchema, type InsertPack, type Pack, SUBJECTS } from "@shared/schema";
 
 interface PackDialogProps {
   pack: Pack | null;
@@ -19,6 +20,7 @@ interface PackDialogProps {
 
 export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const isEditing = !!pack;
 
   const form = useForm<InsertPack>({
@@ -27,6 +29,7 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
       title: "",
       description: "",
       published: false,
+      subject: user?.subject || "Maths",
     },
   });
 
@@ -38,16 +41,18 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
           title: pack.title || "",
           description: pack.description || "",
           published: pack.published || false,
+          subject: pack.subject,
         });
       } else {
         form.reset({
           title: "",
           description: "",
           published: false,
+          subject: user?.subject || "Maths",
         });
       }
     }
-  }, [open, pack, isEditing, form]);
+  }, [open, pack, isEditing, form, user]);
 
   const createMutation = useMutation({
     mutationFn: (data: InsertPack) => apiRequest("POST", "/api/packs", data),
@@ -147,6 +152,31 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
                 </FormItem>
               )}
             />
+            {(user?.role === "admin" || isEditing) && (
+              <FormField
+                control={form.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sujet</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        data-testid="select-pack-subject"
+                        className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
+                      >
+                        {SUBJECTS.map((subject) => (
+                          <option key={subject} value={subject}>
+                            {subject}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"
