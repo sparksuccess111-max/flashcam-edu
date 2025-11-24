@@ -252,19 +252,6 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleEdit(card);
-                    }}
-                    data-testid={`button-edit-${card.id}`}
-                    className="gap-2"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Modifier
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
                       handleDeleteCard(card.id);
                     }}
                     disabled={deleteCardMutation.isPending}
