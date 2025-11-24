@@ -172,8 +172,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { role } = req.body;
       
-      if (!role || !["admin", "student"].includes(role)) {
+      if (!role || !["admin", "teacher", "student"].includes(role)) {
         return res.status(400).json({ error: "Invalid role" });
+      }
+
+      // Prevent removing admin role from the current user (Camille Cordier)
+      if (id === req.user!.id && role !== "admin") {
+        return res.status(403).json({ error: "Cannot remove your own admin role" });
       }
 
       const user = await storage.updateUser(id, { role });

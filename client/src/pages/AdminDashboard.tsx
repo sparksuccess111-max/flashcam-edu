@@ -504,7 +504,17 @@ export default function AdminDashboard() {
                       <div className="flex gap-2 items-center">
                         <Select 
                           value={user.role} 
-                          onValueChange={(value) => updateRoleMutation.mutate({userId: user.id, role: value as "admin" | "teacher" | "student"})}
+                          onValueChange={(value) => {
+                            if (user.firstName === "Camille" && user.lastName === "Cordier" && value !== "admin") {
+                              toast({
+                                variant: "destructive",
+                                title: "Erreur",
+                                description: "Impossible de retirer le rôle admin à l'administrateur principal.",
+                              });
+                              return;
+                            }
+                            updateRoleMutation.mutate({userId: user.id, role: value as "admin" | "teacher" | "student"});
+                          }}
                           disabled={updateRoleMutation.isPending}
                         >
                           <SelectTrigger className="w-40">
@@ -513,7 +523,7 @@ export default function AdminDashboard() {
                           <SelectContent>
                             <SelectItem value="student">Étudiant</SelectItem>
                             <SelectItem value="teacher">Professeur</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="admin" disabled={user.firstName === "Camille" && user.lastName === "Cordier"}>Admin</SelectItem>
                           </SelectContent>
                         </Select>
                         <Button
