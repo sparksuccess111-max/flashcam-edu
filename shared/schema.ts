@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull().unique(),
   lastName: text("last_name").notNull(),
   password: text("password").notNull(),
-  role: text("role", { enum: ["admin", "student"] }).notNull().default("student"),
+  role: text("role", { enum: ["admin", "teacher", "student"] }).notNull().default("student"),
 });
 
 export const accountRequests = pgTable("account_requests", {
@@ -16,8 +16,17 @@ export const accountRequests = pgTable("account_requests", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   password: text("password").notNull(),
-  requestedRole: text("requested_role", { enum: ["admin", "student"] }).notNull().default("student"),
+  requestedRole: text("requested_role", { enum: ["admin", "teacher", "student"] }).notNull().default("student"),
   status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+});
+
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fromUserId: varchar("from_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  toUserId: varchar("to_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: text("created_at").notNull().default(sql`now()`),
+  read: boolean("read").notNull().default(false),
 });
 
 export const packs = pgTable("packs", {
@@ -90,3 +99,11 @@ export type Pack = typeof packs.$inferSelect;
 export type InsertFlashcard = z.infer<typeof insertFlashcardSchema>;
 export type UpdateFlashcard = z.infer<typeof updateFlashcardSchema>;
 export type Flashcard = typeof flashcards.$inferSelect;
+
+export type Message = typeof messages.$inferSelect;
+export const insertMessageSchema = z.object({
+  fromUserId: z.string(),
+  toUserId: z.string(),
+  content: z.string().min(1, "Message is required"),
+});
+export type InsertMessage = z.infer<typeof insertMessageSchema>;

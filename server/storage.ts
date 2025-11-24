@@ -3,6 +3,7 @@ import {
   packs,
   flashcards,
   accountRequests,
+  messages,
   type User,
   type InsertUser,
   type Pack,
@@ -13,9 +14,11 @@ import {
   type UpdateFlashcard,
   type AccountRequest,
   type InsertAccountRequest,
+  type Message,
+  type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -42,6 +45,10 @@ export interface IStorage {
   createFlashcard(flashcard: InsertFlashcard): Promise<Flashcard>;
   updateFlashcard(id: string, flashcard: UpdateFlashcard): Promise<Flashcard | undefined>;
   deleteFlashcard(id: string): Promise<void>;
+
+  getMessages(userId: string): Promise<Message[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  markMessageAsRead(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -162,8 +169,24 @@ export class DatabaseStorage implements IStorage {
     await db.delete(users).where(eq(users.id, id));
   }
 
-  async getUsersByRole(role: "admin" | "student"): Promise<User[]> {
+  async getUsersByRole(role: "admin" | "teacher" | "student"): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, role));
+  }
+
+  async getMessages(userId: string): Promise<Message[]> {
+    return await db.select().from(messages).where(eq(messages.toUserId, userId)).orderBy(desc(messages.createdAt));
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+    return newMessage;
+  }
+
+  async markMessageAsRead(id: string): Promise<void> {
+    await db.update(messages).set({ read: true }).where(eq(messages.id, id));
   }
 }
 

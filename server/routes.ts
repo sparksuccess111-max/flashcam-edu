@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
-import { authenticate, requireAdmin, optionalAuth, generateToken, type AuthRequest } from "./middleware/auth";
+import { authenticate, requireAdmin, requireTeacherOrAdmin, optionalAuth, generateToken, type AuthRequest } from "./middleware/auth";
 import { logger } from "./logger";
 import {
   loginSchema,
@@ -13,6 +13,7 @@ import {
   insertFlashcardSchema,
   updateFlashcardSchema,
   insertAccountRequestSchema,
+  insertMessageSchema,
 } from "@shared/schema";
 
 const SALT_ROUNDS = 10;
@@ -256,7 +257,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/packs", authenticate, requireAdmin, async (req, res) => {
+  app.get("/api/messages", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const messages = await storage.getMessages(req.user!.id);
+      res.json(messages);
+    } catch (error: any) {
+      logger.error("Failed to fetch messages", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch messages" });
+    }
+  });
+
+  app.post("/api/messages", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const messageData = insertMessageSchema.parse({...req.body, fromUserId: req.user!.id});
+      const message = await storage.createMessage(messageData);
+      broadcastUpdate('message-received', message);
+      logger.info(`Message sent from ${req.user!.firstName} to ${req.body.toUserId}`, "api");
+      res.status(201).json(message);
+    } catch (error: any) {
+      logger.error("Failed to create message", "api", error);
+      res.status(400).json({ error: error.message || "Failed to create message" });
+    }
+  });
+
+  app.post("/api/packs", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
       const packData = insertPackSchema.parse(req.body);
       const pack = await storage.createPack(packData);
@@ -269,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/packs/:id", authenticate, requireAdmin, async (req, res) => {
+  app.patch("/api/packs/:id", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
       const packData = updatePackSchema.parse(req.body);
       const pack = await storage.updatePack(req.params.id, packData);
@@ -317,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/packs/:packId/flashcards", authenticate, requireAdmin, async (req, res) => {
+  app.post("/api/packs/:packId/flashcards", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
       const flashcardData = insertFlashcardSchema.parse({
         ...req.body,
@@ -333,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/packs/:packId/flashcards/:id", authenticate, requireAdmin, async (req, res) => {
+  app.patch("/api/packs/:packId/flashcards/:id", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
       const flashcardData = updateFlashcardSchema.parse(req.body);
       const flashcard = await storage.updateFlashcard(req.params.id, flashcardData);
@@ -349,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/packs/:packId/flashcards/:id", authenticate, requireAdmin, async (req, res) => {
+  app.delete("/api/packs/:packId/flashcards/:id", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
       await storage.deleteFlashcard(req.params.id);
       broadcastUpdate('flashcard-deleted', { id: req.params.id, packId: req.params.packId });
