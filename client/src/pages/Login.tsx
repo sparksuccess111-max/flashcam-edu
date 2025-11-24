@@ -13,6 +13,17 @@ import { apiRequest } from "@/lib/queryClient";
 import { loginSchema, type LoginCredentials } from "@shared/schema";
 import { GraduationCap, Eye, EyeOff } from "lucide-react";
 
+/**
+ * Normalizes a name string for intelligent login
+ * Trims whitespace, converts to lowercase, removes consecutive spaces
+ */
+function normalizeName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -55,7 +66,13 @@ export default function Login() {
   });
 
   const onSubmit = (data: LoginCredentials) => {
-    loginMutation.mutate(data);
+    // Normalize name fields before sending to backend
+    const normalizedData = {
+      ...data,
+      firstName: normalizeName(data.firstName),
+      lastName: normalizeName(data.lastName),
+    };
+    loginMutation.mutate(normalizedData);
   };
 
   return (

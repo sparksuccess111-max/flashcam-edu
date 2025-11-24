@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { authenticate, requireAdmin, requireTeacherOrAdmin, optionalAuth, generateToken, type AuthRequest } from "./middleware/auth";
 import { logger } from "./logger";
+import { normalizeName, findUserByNormalizedName } from "./utils/normalize";
 import {
   loginSchema,
   signupBackendSchema,
@@ -69,16 +70,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const credentials = loginSchema.parse(req.body);
       const users_list = await storage.getAllUsers();
-      const user = users_list.find(u => u.firstName === credentials.firstName && u.lastName === credentials.lastName);
+      
+      let user;
+      try {
+        user = findUserByNormalizedName(users_list, credentials.firstName, credentials.lastName);
+      } catch (err: any) {
+        logger.warn(`Login failed: ${err.message}`, "api");
+        return res.status(401).json({ error: err.message });
+      }
 
       if (!user) {
-        logger.warn(`Login failed: user not found (${credentials.firstName} ${credentials.lastName})`, "api");
+        logger.warn(`Login failed: user not found (${normalizeName(credentials.firstName)} ${normalizeName(credentials.lastName)})`, "api");
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       const isValid = await bcrypt.compare(credentials.password, user.password);
       if (!isValid) {
-        logger.warn(`Login failed: invalid password for ${credentials.firstName} ${credentials.lastName}`, "api");
+        logger.warn(`Login failed: invalid password for ${user.firstName} ${user.lastName}`, "api");
         return res.status(401).json({ error: "Invalid credentials" });
       }
 

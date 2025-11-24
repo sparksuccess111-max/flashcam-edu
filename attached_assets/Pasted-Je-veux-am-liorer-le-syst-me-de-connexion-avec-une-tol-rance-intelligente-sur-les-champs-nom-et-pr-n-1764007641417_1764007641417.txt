@@ -1,0 +1,93 @@
+Je veux améliorer le système de connexion avec une tolérance intelligente sur les champs nom et prénom.
+Merci de lire le code du projet (backend + frontend) et d’appliquer les modifications suivantes :
+
+🎯 OBJECTIF
+
+Faciliter la connexion :
+
+ignorer les espaces inutiles
+
+ignorer les majuscules/minuscules
+
+accepter les variations d’écriture tant que le nom et prénom correspondent réellement à l’utilisateur
+
+Actuellement, l’utilisateur doit taper exactement son nom et prénom.
+Je veux supprimer cette contrainte inutile.
+
+🔧 1. Normalisation des champs (backend)
+
+Lors de la connexion :
+
+prendre firstname et lastname envoyés par le client
+
+appliquer automatiquement :
+
+.trim() (supprimer les espaces début/fin)
+
+.toLowerCase()
+
+supprimer les doubles espaces intercalaires
+
+remplacer plusieurs espaces par un seul
+
+ignorer les majuscules/minuscules
+
+Exemple de valeurs acceptées :
+
+Camille, camille, CAMILLE, " camille "
+
+Jean pierre, jean Pierre, JEAN PIERRE
+
+Dans tous les cas → correspond à l’utilisateur “Jean Pierre”.
+
+🗃️ 2. Correspondance avec la base (Drizzle ORM)
+
+Modifier la requête d’authentification :
+
+normaliser aussi les champs stockés en base
+
+comparer l’utilisateur via :
+LOWER(TRIM(colonne)) = LOWER(TRIM(valeur envoyée))
+
+Pas de changement sur la structure de base de données.
+
+🔐 3. Aucun changement sur le mot de passe
+
+Le mot de passe doit rester strictement vérifié via bcrypt (ou équivalent), sans tolérance.
+
+🖥️ 4. Frontend
+
+Avant l’envoi :
+
+appliquer aussi normalisation côté client (optionnel, mais recommandé)
+
+éviter que l’utilisateur voie un message d’erreur “identifiants incorrects” juste à cause d’un espace ou d’une majuscule
+
+⚠️ 5. Sécurité
+
+Ne jamais relâcher la sécurité sur le mot de passe
+
+La tolérance ne concerne que firstname et lastname
+
+Si plusieurs utilisateurs ont le même nom/prénom normalized → retourner une erreur propre (du style “plusieurs comptes trouvés, contactez l’administration”)
+
+🧩 6. Ce que j’attends de toi
+
+Lire tout le code d’authentification déjà existant
+
+Ajouter une fonction centralisée normalizeName()
+
+L’utiliser dans :
+
+le backend API login
+
+éventuellement le frontend (avant submit)
+
+Modifier proprement la requête Drizzle
+
+Montrer les diffs
+
+Mettre à jour le code final proprement
+
+Merci de procéder étape par étape.
+»**
