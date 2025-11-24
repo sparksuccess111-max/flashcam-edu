@@ -28,6 +28,8 @@ export interface IStorage {
   createAccountRequest(request: InsertAccountRequest): Promise<AccountRequest>;
   approveAccountRequest(id: string, firstName: string, lastName: string, password: string, role: string): Promise<{ user: User; deleted: boolean }>;
   rejectAccountRequest(id: string): Promise<void>;
+  deleteUser(id: string): Promise<void>;
+  getUsersByRole(role: "admin" | "student"): Promise<User[]>;
 
   getAllPacks(): Promise<Pack[]>;
   getPackById(id: string): Promise<Pack | undefined>;
@@ -154,6 +156,14 @@ export class DatabaseStorage implements IStorage {
 
   async rejectAccountRequest(id: string): Promise<void> {
     await db.delete(accountRequests).where(eq(accountRequests.id, id));
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  async getUsersByRole(role: "admin" | "student"): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.role, role));
   }
 }
 

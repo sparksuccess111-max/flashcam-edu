@@ -122,6 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/requests/:id/approve", authenticate, requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
+      const { role } = req.body;
       const request = await storage.getAccountRequest(id);
       if (!request) {
         return res.status(404).json({ error: "Request not found" });
@@ -131,10 +132,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         request.firstName,
         request.lastName,
         request.password,
-        "student"
+        role || request.requestedRole || "student"
       );
       broadcastUpdate('account-approved', { id });
-      logger.info(`Account approved: ${request.firstName} ${request.lastName}`, "api");
+      logger.info(`Account approved: ${request.firstName} ${request.lastName} as ${role || request.requestedRole}`, "api");
       res.json({ user: result.user });
     } catch (error: any) {
       logger.error("Failed to approve account request", "api", error);
@@ -152,6 +153,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       logger.error("Failed to reject account request", "api", error);
       res.status(400).json({ error: error.message || "Failed to reject request" });
+    }
+  });
+
+  app.get("/api/admin/users", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const users_list = await storage.getAllUsers();
+      res.json(users_list.map(u => ({ ...u, password: undefined })));
+    } catch (error: any) {
+      logger.error("Failed to fetch users", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch users" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      await storage.deleteUser(id);
+      broadcastUpdate('user-deleted', { id });
+      logger.info(`User deleted: ${user.firstName} ${user.lastName}`, "api");
+      res.status(204).send();
+    } catch (error: any) {
+      logger.error("Failed to delete user", "api", error);
+      res.status(400).json({ error: error.message || "Failed to delete user" });
     }
   });
 

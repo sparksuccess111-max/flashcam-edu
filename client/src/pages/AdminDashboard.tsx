@@ -6,10 +6,11 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Trash2, BookOpen, ChevronUp, ChevronDown, Check, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Edit, Trash2, BookOpen, ChevronUp, ChevronDown, Check, X, Trash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Pack, AccountRequest } from "@shared/schema";
+import type { Pack, AccountRequest, User } from "@shared/schema";
 import { PackDialog } from "@/components/PackDialog";
 import { FlashcardManager } from "@/components/FlashcardManager";
 
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
   const [displayedPacks, setDisplayedPacks] = useState<Pack[] | null>(null);
   const [animatingPackId, setAnimatingPackId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("packs");
+  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: "admin" | "student" }>({});
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -28,6 +30,10 @@ export default function AdminDashboard() {
 
   const { data: accountRequests, isLoading: requestsLoading } = useQuery<AccountRequest[]>({
     queryKey: ["/api/admin/requests"],
+  });
+
+  const { data: allUsers, isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ["/api/admin/users"],
   });
 
   // Sync displayed packs with server data
@@ -140,9 +146,11 @@ export default function AdminDashboard() {
   };
 
   const approveMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("POST", `/api/admin/requests/${id}/approve`),
+    mutationFn: ({ id, role }: { id: string; role: "admin" | "student" }) => 
+      apiRequest("POST", `/api/admin/requests/${id}/approve`, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: "Compte approuvé",
         description: "Le compte a été approuvé avec succès.",
@@ -175,6 +183,24 @@ export default function AdminDashboard() {
     },
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: string) => apiRequest("DELETE", `/api/admin/users/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Utilisateur supprimé",
+        description: "L'utilisateur a été supprimé avec succès.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer l'utilisateur.",
+      });
+    },
+  });
+
   const allPacks = packsToDisplay;
 
   if (managingPackId) {
@@ -196,16 +222,17 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="packs">Packs</TabsTrigger>
           <TabsTrigger value="requests">
-            Demandes d'inscription
+            Demandes
             {accountRequests && accountRequests.length > 0 && (
               <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center">
                 {accountRequests.length}
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="admins">Administrateurs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="packs" className="space-y-4">
@@ -378,17 +405,31 @@ export default function AdminDashboard() {
                         </CardDescription>
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => approveMutation.mutate(request.id)}
-                          disabled={approveMutation.isPending}
-                          data-testid={`button-approve-${request.id}`}
-                          className="gap-2"
-                        >
-                          <Check className="h-4 w-4" />
-                          Approuver
-                        </Button>
+                        <div className="flex gap-2 items-center">
+                          <Select 
+                            value={selectedRoles[request.id] || "student"} 
+                            onValueChange={(value) => setSelectedRoles({...selectedRoles, [request.id]: value as "admin" | "student"})}
+                          >
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="student">Étudiant</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => approveMutation.mutate({id: request.id, role: selectedRoles[request.id] || "student"})}
+                            disabled={approveMutation.isPending}
+                            data-testid={`button-approve-${request.id}`}
+                            className="gap-2"
+                          >
+                            <Check className="h-4 w-4" />
+                            Approuver
+                          </Button>
+                        </div>
                         <Button
                           size="sm"
                           variant="outline"
@@ -401,6 +442,60 @@ export default function AdminDashboard() {
                           Refuser
                         </Button>
                       </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="admins" className="space-y-4">
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold">Gestion des administrateurs</h2>
+          </div>
+
+          {usersLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20" />
+              ))}
+            </div>
+          ) : !allUsers || allUsers.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <p className="text-muted-foreground">Aucun utilisateur</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {allUsers.map((user) => (
+                <Card key={user.id} data-testid={`card-user-${user.id}`}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg" data-testid={`text-user-name-${user.id}`}>
+                          {user.firstName} {user.lastName}
+                        </CardTitle>
+                        <CardDescription>
+                          Rôle: <Badge variant={user.role === "admin" ? "default" : "secondary"}>{user.role === "admin" ? "Administrateur" : "Étudiant"}</Badge>
+                        </CardDescription>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
+                            deleteUserMutation.mutate(user.id);
+                          }
+                        }}
+                        disabled={deleteUserMutation.isPending}
+                        data-testid={`button-delete-user-${user.id}`}
+                        className="gap-2"
+                      >
+                        <Trash className="h-4 w-4" />
+                        Supprimer
+                      </Button>
                     </div>
                   </CardHeader>
                 </Card>

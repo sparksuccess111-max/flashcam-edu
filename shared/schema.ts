@@ -16,6 +16,7 @@ export const accountRequests = pgTable("account_requests", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   password: text("password").notNull(),
+  requestedRole: text("requested_role", { enum: ["admin", "student"] }).notNull().default("student"),
   status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
 });
 
