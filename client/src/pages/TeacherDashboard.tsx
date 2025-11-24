@@ -203,15 +203,16 @@ export default function TeacherDashboard() {
                 </div>
                 <div className="flex items-center gap-4 pt-4 border-t">
                   <span className="text-sm font-medium">Publier ce pack</span>
-                  <Switch
-                    checked={pack.published}
-                    onCheckedChange={(e) => {
-                      e.stopPropagation?.();
-                      togglePublishMutation.mutate({ id: pack.id, published: !pack.published });
-                    }}
-                    disabled={togglePublishMutation.isPending}
-                    data-testid={`switch-publish-pack-${pack.id}`}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={pack.published}
+                      onCheckedChange={(checked) => {
+                        togglePublishMutation.mutate({ id: pack.id, published: checked });
+                      }}
+                      disabled={togglePublishMutation.isPending}
+                      data-testid={`switch-publish-pack-${pack.id}`}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
