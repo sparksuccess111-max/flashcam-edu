@@ -13,9 +13,10 @@ import { BulkImportDialog } from "./BulkImportDialog";
 interface FlashcardManagerProps {
   packId: string;
   onClose: () => void;
+  onEditPack?: (pack: Pack) => void;
 }
 
-export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
+export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManagerProps) {
   const { toast } = useToast();
   const [editingCard, setEditingCard] = useState<Flashcard | null>(null);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
@@ -30,7 +31,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     queryKey: ["/api/packs", packId, "flashcards"],
   });
 
-  const deleteMutation = useMutation({
+  const deleteCardMutation = useMutation({
     mutationFn: (id: string) =>
       apiRequest("DELETE", `/api/packs/${packId}/flashcards/${id}`),
     onSuccess: () => {
@@ -49,6 +50,26 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     },
   });
 
+  const deletePackMutation = useMutation({
+    mutationFn: () =>
+      apiRequest("DELETE", `/api/packs/${packId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
+      toast({
+        title: "Pack supprimé",
+        description: "Le pack a été supprimé avec succès.",
+      });
+      onClose();
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer le pack.",
+      });
+    },
+  });
+
   const handleEdit = (card: Flashcard) => {
     setEditingCard(card);
     setIsCardDialogOpen(true);
@@ -59,9 +80,15 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     setIsCardDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDeleteCard = (id: string) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer cette carte?")) {
-      deleteMutation.mutate(id);
+      deleteCardMutation.mutate(id);
+    }
+  };
+
+  const handleDeletePack = () => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce pack? Cette action est irréversible.")) {
+      deletePackMutation.mutate();
     }
   };
 
@@ -140,6 +167,17 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
           </p>
         </div>
         <div className="flex gap-2">
+          {onEditPack && (
+            <Button
+              variant="outline"
+              onClick={() => pack && onEditPack(pack)}
+              className="gap-2"
+              data-testid="button-edit-pack-info"
+            >
+              <Edit className="h-4 w-4" />
+              Modifier
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={handleExport}
@@ -156,6 +194,15 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
           <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-flashcard">
             <Plus className="h-4 w-4 mr-2" />
             Ajouter
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleDeletePack}
+            disabled={deletePackMutation.isPending}
+            data-testid="button-delete-pack"
+            size="sm"
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -207,7 +254,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDelete(card.id)}
+                    onClick={() => handleDeleteCard(card.id)}
                     disabled={deleteMutation.isPending}
                     data-testid={`button-delete-${card.id}`}
                   >

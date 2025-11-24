@@ -76,7 +76,13 @@ export default function TeacherDashboard() {
         >
           Retour aux packs
         </Button>
-        <FlashcardManager packId={managingPackId} />
+        <FlashcardManager packId={managingPackId} onEditPack={handleEdit} onClose={() => {
+            setAnimatingPackId(managingPackId);
+            setTimeout(() => {
+              setManagingPackId(null);
+              setDisplayedPacks(null);
+            }, 300);
+          }} />
       </div>
     );
   }
@@ -123,7 +129,7 @@ export default function TeacherDashboard() {
                 animatingPackId === pack.id ? "scale-95 opacity-50" : ""
               }`}
               data-testid={`card-pack-${pack.id}`}
-              onClick={() => handleEdit(pack)}
+              onClick={() => handleManage(pack.id)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-4">
