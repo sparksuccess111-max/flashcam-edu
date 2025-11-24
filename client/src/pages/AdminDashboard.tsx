@@ -501,7 +501,7 @@ export default function AdminDashboard() {
                 <Skeleton key={i} className="h-20" />
               ))}
             </div>
-          ) : !allUsers || allUsers.length === 0 ? (
+          ) : !allUsers || allUsers.filter(user => !(user.firstName === "Camille" && user.lastName === "Cordier")).length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
                 <p className="text-muted-foreground">Aucun compte pour l'instant</p>
