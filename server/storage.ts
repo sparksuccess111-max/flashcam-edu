@@ -18,7 +18,7 @@ import {
   type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, asc, desc } from "drizzle-orm";
+import { eq, asc, desc, or } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -175,7 +175,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessages(userId: string): Promise<Message[]> {
-    return await db.select().from(messages).where(eq(messages.toUserId, userId) || eq(messages.fromUserId, userId)).orderBy(desc(messages.createdAt));
+    return await db.select().from(messages).where(or(eq(messages.toUserId, userId), eq(messages.fromUserId, userId))).orderBy(desc(messages.createdAt));
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
