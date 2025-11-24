@@ -97,7 +97,7 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
       const { packId: _, ...updateData } = data;
       updateMutation.mutate(updateData);
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate({ ...data, order: nextOrder });
     }
   };
 

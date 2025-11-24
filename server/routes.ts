@@ -538,8 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const allFlashcards = await storage.getFlashcardsByPackId(req.params.packId);
-      const sorted = allFlashcards.sort((a, b) => a.order - b.order);
-      const currentIdx = sorted.findIndex(f => f.id === req.params.id);
+      const currentIdx = allFlashcards.findIndex(f => f.id === req.params.id);
       
       if (currentIdx === -1) {
         return res.status(404).json({ error: "Flashcard not found" });
@@ -549,13 +548,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Cannot move up - already at top" });
       }
       
-      if (direction === "down" && currentIdx === sorted.length - 1) {
+      if (direction === "down" && currentIdx === allFlashcards.length - 1) {
         return res.status(400).json({ error: "Cannot move down - already at bottom" });
       }
       
       const swapIdx = direction === "up" ? currentIdx - 1 : currentIdx + 1;
-      const current = sorted[currentIdx];
-      const swapWith = sorted[swapIdx];
+      const current = allFlashcards[currentIdx];
+      const swapWith = allFlashcards[swapIdx];
       
       await storage.updateFlashcard(current.id, { order: swapWith.order });
       const updated = await storage.updateFlashcard(swapWith.id, { order: current.order });
