@@ -370,12 +370,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/packs", authenticate, requireTeacherOrAdmin, async (req, res) => {
+  app.post("/api/packs", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
     try {
       const packData = insertPackSchema.parse(req.body);
+      
+      // Teachers can only create packs in their subject
+      if (req.user!.role === "teacher") {
+        if (packData.subject !== req.user!.subject) {
+          logger.warn(`Unauthorized pack creation: teacher ${req.user!.id} tried to create pack in subject ${packData.subject}`, "api");
+          return res.status(403).json({ error: "You can only create packs in your assigned subject" });
+        }
+      }
+      
       const pack = await storage.createPack(packData);
       broadcastUpdate('pack-created', pack);
-      logger.info(`Pack created: ${pack.id} - "${pack.title}"`, "api");
+      logger.info(`Pack created: ${pack.id} - "${pack.title}" (${pack.subject})`, "api");
       res.status(201).json(pack);
     } catch (error: any) {
       logger.error("Failed to create pack", "api", error);
@@ -383,24 +392,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/packs/:id", authenticate, requireTeacherOrAdmin, async (req, res) => {
+  app.patch("/api/packs/:id", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
     try {
       const packData = updatePackSchema.parse(req.body);
-      const pack = await storage.updatePack(req.params.id, packData);
+      const pack = await storage.getPackById(req.params.id);
+      
       if (!pack) {
         return res.status(404).json({ error: "Pack not found" });
       }
-      broadcastUpdate('pack-updated', pack);
-      logger.info(`Pack updated: ${req.params.id} - "${pack.title}"`, "api");
-      res.json(pack);
+
+      // Teachers can only update packs in their subject
+      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
+        logger.warn(`Unauthorized pack update: teacher ${req.user!.id} tried to modify pack in subject ${pack.subject}`, "api");
+        return res.status(403).json({ error: "You can only modify packs in your assigned subject" });
+      }
+
+      const updatedPack = await storage.updatePack(req.params.id, packData);
+      broadcastUpdate('pack-updated', updatedPack);
+      logger.info(`Pack updated: ${req.params.id} - "${updatedPack?.title}"`, "api");
+      res.json(updatedPack);
     } catch (error: any) {
       logger.error("Failed to update pack", "api", error);
       res.status(400).json({ error: error.message || "Failed to update pack" });
     }
   });
 
-  app.delete("/api/packs/:id", authenticate, requireAdmin, async (req, res) => {
+  app.delete("/api/packs/:id", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
     try {
+      const pack = await storage.getPackById(req.params.id);
+      
+      if (!pack) {
+        return res.status(404).json({ error: "Pack not found" });
+      }
+
+      // Teachers can only delete packs in their subject
+      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
+        logger.warn(`Unauthorized pack deletion: teacher ${req.user!.id} tried to delete pack in subject ${pack.subject}`, "api");
+        return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
+      }
+
       await storage.deletePack(req.params.id);
       broadcastUpdate('pack-deleted', { id: req.params.id });
       logger.info(`Pack deleted: ${req.params.id}`, "api");
@@ -411,6 +441,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/packs", authenticate, async (req: AuthRequest, res) => {
+    try {
+      let packs;
+      if (req.user!.role === "teacher") {
+        packs = await storage.getPacksByTeacher(req.user!.subject!);
+      } else if (req.user!.role === "admin") {
+        packs = await storage.getAllPacks();
+      } else {
+        const allPacks = await storage.getAllPacks();
+        packs = allPacks.filter(p => p.published);
+      }
+      res.json(packs);
+    } catch (error: any) {
+      logger.error("Failed to fetch packs", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch packs" });
+    }
+  });
+
+  app.get("/api/subjects", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const subjects = ["Histoire-Géo", "Maths", "Français", "SVT", "Anglais", "Physique-Chimie", "Technologie", "Éducation Physique"];
+      res.json(subjects);
+    } catch (error: any) {
+      logger.error("Failed to fetch subjects", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch subjects" });
+    }
+  });
+
   app.get("/api/packs/:packId/flashcards", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const pack = await storage.getPackById(req.params.packId);
@@ -418,7 +476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Pack not found" });
       }
 
-      if (!pack.published && req.user?.role !== "admin") {
+      if (!pack.published && req.user?.role !== "admin" && req.user?.role !== "teacher") {
         logger.warn(`Unauthorized access to flashcards: ${req.params.packId}`, "api");
         return res.status(403).json({ error: "This pack is not published" });
       }

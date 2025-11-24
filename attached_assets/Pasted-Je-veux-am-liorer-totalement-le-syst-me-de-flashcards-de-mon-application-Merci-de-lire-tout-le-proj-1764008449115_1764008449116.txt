@@ -1,0 +1,174 @@
+Je veux améliorer totalement le système de flashcards de mon application. Merci de lire tout le projet (backend + frontend + base Drizzle) et d’implémenter proprement les fonctionnalités suivantes :
+
+🎯 1. Structure des rôles
+
+Un utilisateur possède déjà un rôle dans son profil :
+
+admin
+
+teacher
+
+student
+
+Un utilisateur de rôle teacher possède aussi une matière (ex : “histoire-géo”, “maths”, “SVT”, etc.).
+
+Les étudiants et les admins n’ont pas de matière.
+
+🗃️ 2. Modifications à la base de données (Drizzle ORM)
+a) Table users
+
+S’assurer qu’un champ subject existe :
+
+subject: string | null
+
+null pour admin et student
+
+non-null pour teacher
+
+b) Table card_packs
+
+Ajouter un champ obligatoire :
+
+subject: string
+Cela permet de lier chaque pack à une matière.
+
+c) Table flashcards
+
+Aucune modification, sauf si nécessaire pour la cohérence.
+
+🔒 3. Permissions nouvelles et obligatoires
+✔ Ce que chaque rôle peut gérer :
+Teacher
+
+Doit voir uniquement les packs dont subject = son propre subject
+
+Peut créer / modifier / supprimer ses propres packs et leurs cartes
+
+Ne doit pas voir les packs des autres matières
+
+Ne doit pas voir les packs d'autres professeurs
+
+Si plusieurs profs ont la même matière → ils partagent les packs de cette matière (très important)
+
+Admin
+
+Peut voir absolument tous les packs, toutes matières confondues
+
+L’interface doit les afficher triés par matière, sous forme :
+
+Histoire-géo  
+  → pack 1  
+  → pack 2  
+Mathématiques  
+  → pack 1  
+Physique  
+  → pack 1  
+
+
+L'admin peut modifier tous les packs, toutes matières
+
+Student
+
+Peut voir seulement les packs à usage élève (logique déjà existante)
+
+Les permissions actuelles pour les élèves restent inchangées
+
+🧩 4. Backend (routes API)
+Ajouter / modifier les endpoints suivants :
+GET /card-packs/list
+
+Retourne :
+
+Pour teacher : uniquement les packs où subject == teacher.subject
+
+Pour admin : tous les packs triés par matière
+
+Pour student : packs selon la logique actuelle
+
+POST /card-packs/create
+
+Teacher : peut créer uniquement dans sa matière
+
+Admin : peut créer dans n’importe quelle matière
+
+Student : refusé
+
+PUT /card-packs/:id
+
+Teacher : uniquement si pack.subject == teacher.subject
+
+Admin : toujours autorisé
+
+DELETE /card-packs/:id
+
+Même logique que PUT.
+
+GET /subjects/list
+
+Retourner la liste des matières existantes
+
+Utile pour l’interface admin
+
+🎨 5. Interface front-end
+A) Côté professeur
+
+Créer une page “Mes flashcards” :
+
+voir uniquement les packs de sa matière
+
+interface simple :
+
+liste des packs
+
+bouton “Créer un pack”
+
+modification / suppression possible
+
+mention visible :
+“Votre matière : Histoire-géo” (ou autre)
+
+B) Côté administrateur
+
+Créer une page “Flashcards (admin)” :
+
+afficher une liste par matière, chaque matière = un bloc
+
+cliquez sur une matière → montrer les packs
+
+possibilité de tout modifier
+
+C) Côté élève
+
+Aucun changement structurel demandé ici.
+
+🔐 6. Validation & sécurité
+
+Interdire qu'un professeur modifie un pack dont la matière ≠ la sienne
+
+Interdire qu’un étudiant crée/modifie un pack
+
+Interdire qu’un prof change la matière de son pack (c’est l’admin qui gère les attributions)
+
+Si une matière est modifiée pour un professeur → son interface doit automatiquement afficher les packs de la nouvelle matière
+
+⚡ 7. Ce que j’attends de toi
+
+Lire tout le code existant
+
+Ajouter les champs nécessaires dans Drizzle
+
+Mettre à jour les routes backend côté serveur
+
+Mettre à jour tous les contrôles de permissions
+
+Mettre en place les nouvelles interfaces côté frontend pour teacher & admin
+
+Rendre la structure scalable pour ajouter facilement de nouvelles matières
+
+Faire les diffs puis intégrer le code dans les fichiers
+
+Ne rien casser dans les fonctionnalités existantes
+
+Garder le code propre, bien organisé et commenté
+
+Merci de procéder étape par étape.

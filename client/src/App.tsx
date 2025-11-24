@@ -15,6 +15,8 @@ import PackView from "@/pages/PackView";
 import AdminDashboard from "@/pages/AdminDashboard";
 import TeacherDashboard from "@/pages/TeacherDashboard";
 import Messages from "@/pages/Messages";
+import TeacherFlashcards from "@/pages/TeacherFlashcards";
+import AdminFlashcards from "@/pages/AdminFlashcards";
 
 function ProtectedRoute({ component: Component, adminOnly = false, teacherOrAdminOnly = false }: { component: () => JSX.Element; adminOnly?: boolean; teacherOrAdminOnly?: boolean }) {
   const { user, isAdmin } = useAuth();

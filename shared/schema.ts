@@ -43,6 +43,7 @@ export const packs = pgTable("packs", {
   description: text("description").notNull().default(""),
   order: integer("order").notNull().default(0),
   published: boolean("published").notNull().default(false),
+  subject: text("subject", { enum: ["Histoire-Géo", "Maths", "Français", "SVT", "Anglais", "Physique-Chimie", "Technologie", "Éducation Physique"] }).notNull(),
 });
 
 export const flashcards = pgTable("flashcards", {
@@ -88,7 +89,9 @@ export const signupBackendSchema = z.object({
 
 export const insertAccountRequestSchema = createInsertSchema(accountRequests).omit({ id: true, status: true });
 export const insertPackSchema = createInsertSchema(packs).omit({ id: true });
-export const updatePackSchema = insertPackSchema.partial();
+export const updatePackSchema = insertPackSchema.partial().omit({ subject: true });
+
+export const SUBJECTS = ["Histoire-Géo", "Maths", "Français", "SVT", "Anglais", "Physique-Chimie", "Technologie", "Éducation Physique"] as const;
 
 export const insertFlashcardSchema = createInsertSchema(flashcards).omit({ id: true });
 export const updateFlashcardSchema = insertFlashcardSchema.partial().omit({ packId: true });
