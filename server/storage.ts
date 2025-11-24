@@ -95,8 +95,8 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(packs).where(eq(packs.subject, subject)).orderBy(asc(packs.order));
   }
 
-  async getPacksByTeacher(subject: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(eq(packs.subject, subject)).orderBy(asc(packs.order));
+  async getPacksByTeacher(subject: string, teacherId: string): Promise<Pack[]> {
+    return await db.select().from(packs).where(and(eq(packs.subject, subject), eq(packs.createdByUserId, teacherId))).orderBy(asc(packs.order));
   }
 
   async getPackById(id: string): Promise<Pack | undefined> {

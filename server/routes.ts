@@ -454,7 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       let packs;
       if (req.user!.role === "teacher") {
-        packs = await storage.getPacksByTeacher(req.user!.subject!);
+        packs = await storage.getPacksByTeacher(req.user!.subject!, req.user!.id);
       } else if (req.user!.role === "admin") {
         packs = await storage.getAllPacks();
       } else {
@@ -465,6 +465,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       logger.error("Failed to fetch packs", "api", error);
       res.status(500).json({ error: error.message || "Failed to fetch packs" });
+    }
+  });
+
+  app.get("/api/packs/by-subject/:subject", async (req: AuthRequest, res) => {
+    try {
+      const subject = req.params.subject;
+      const packs = await storage.getPacksBySubject(subject);
+      const publishedPacks = packs.filter(p => p.published);
+      res.json(publishedPacks);
+    } catch (error: any) {
+      logger.error("Failed to fetch packs by subject", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch packs by subject" });
     }
   });
 
