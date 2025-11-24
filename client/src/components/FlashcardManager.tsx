@@ -247,19 +247,22 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                     size="sm"
                     onClick={() => handleEdit(card)}
                     data-testid={`button-edit-${card.id}`}
+                    className="gap-2"
                   >
-                    <Edit className="h-4 w-4 mr-2" />
+                    <Edit className="h-4 w-4" />
                     Modifier
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDeleteCard(card.id)}
+                    onClick={(e) => {
+                      e.stopPropagation?.();
+                      handleDeleteCard(card.id);
+                    }}
                     disabled={deleteCardMutation.isPending}
                     data-testid={`button-delete-${card.id}`}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Supprimer
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
