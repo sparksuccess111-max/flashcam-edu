@@ -76,12 +76,18 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     }
 
     try {
+      const token = localStorage.getItem("token");
+      const headers: Record<string, string> = {
+        "Accept": "text/plain",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/packs/${packId}/export`, {
         method: "GET",
-        credentials: "include",
-        headers: {
-          "Accept": "text/plain",
-        },
+        headers,
       });
       
       if (!response.ok) {
