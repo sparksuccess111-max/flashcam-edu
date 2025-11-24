@@ -183,6 +183,25 @@ export default function AdminDashboard() {
     },
   });
 
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: "admin" | "student" }) =>
+      apiRequest("PATCH", `/api/admin/users/${userId}/role`, { role }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Rôle mis à jour",
+        description: "Le rôle de l'utilisateur a été mis à jour avec succès.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le rôle de l'utilisateur.",
+      });
+    },
+  });
+
   const deleteUserMutation = useMutation({
     mutationFn: (userId: string) => apiRequest("DELETE", `/api/admin/users/${userId}`),
     onSuccess: () => {
@@ -481,21 +500,36 @@ export default function AdminDashboard() {
                           Rôle: <Badge variant={user.role === "admin" ? "default" : "secondary"}>{user.role === "admin" ? "Administrateur" : "Étudiant"}</Badge>
                         </CardDescription>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
-                            deleteUserMutation.mutate(user.id);
-                          }
-                        }}
-                        disabled={deleteUserMutation.isPending}
-                        data-testid={`button-delete-user-${user.id}`}
-                        className="gap-2"
-                      >
-                        <Trash className="h-4 w-4" />
-                        Supprimer
-                      </Button>
+                      <div className="flex gap-2 items-center">
+                        <Select 
+                          value={user.role} 
+                          onValueChange={(value) => updateRoleMutation.mutate({userId: user.id, role: value as "admin" | "student"})}
+                          disabled={updateRoleMutation.isPending}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="student">Étudiant</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
+                              deleteUserMutation.mutate(user.id);
+                            }
+                          }}
+                          disabled={deleteUserMutation.isPending}
+                          data-testid={`button-delete-user-${user.id}`}
+                          className="gap-2"
+                        >
+                          <Trash className="h-4 w-4" />
+                          Supprimer
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                 </Card>

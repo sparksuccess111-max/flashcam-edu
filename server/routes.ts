@@ -166,6 +166,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/users/:id/role", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { role } = req.body;
+      
+      if (!role || !["admin", "student"].includes(role)) {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+
+      const user = await storage.updateUser(id, { role });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      broadcastUpdate('user-updated', { id, role });
+      logger.info(`User role updated: ${user.firstName} ${user.lastName} to ${role}`, "api");
+      res.json(user);
+    } catch (error: any) {
+      logger.error("Failed to update user role", "api", error);
+      res.status(400).json({ error: error.message || "Failed to update user role" });
+    }
+  });
+
   app.delete("/api/admin/users/:id", authenticate, requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
