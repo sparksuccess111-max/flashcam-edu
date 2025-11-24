@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, Edit, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Upload, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, Flashcard } from "@shared/schema";
@@ -20,6 +20,7 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
   const [editingCard, setEditingCard] = useState<Flashcard | null>(null);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: pack } = useQuery<Pack>({
     queryKey: ["/api/packs", packId],
@@ -64,6 +65,39 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
     }
   };
 
+  const handleExport = async () => {
+    if (!pack || !flashcards || flashcards.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Aucune carte à exporter",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/packs/${packId}/export`);
+      if (!response.ok) throw new Error("Export failed");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${pack.title}-flashcards.txt`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast({
+        title: "Succès",
+        description: `${flashcards.length} flashcard${flashcards.length > 1 ? "s" : ""} exportée${flashcards.length > 1 ? "s" : ""}!`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'exporter les flashcards",
+      });
+    }
+  };
+
   const cards = flashcards || [];
 
   return (
@@ -88,9 +122,18 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={cards.length === 0}
+            data-testid="button-export-flashcards"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exporter
+          </Button>
           <Button variant="outline" onClick={() => setIsBulkImportOpen(true)} data-testid="button-bulk-import">
             <Upload className="h-4 w-4 mr-2" />
-            Import
+            Importer
           </Button>
           <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-flashcard">
             <Plus className="h-4 w-4 mr-2" />
