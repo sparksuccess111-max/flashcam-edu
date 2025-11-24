@@ -255,7 +255,7 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteCard(card.id)}
-                    disabled={deleteMutation.isPending}
+                    disabled={deleteCardMutation.isPending}
                     data-testid={`button-delete-${card.id}`}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
