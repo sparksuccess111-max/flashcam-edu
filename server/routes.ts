@@ -296,6 +296,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/messages/unread-count", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const count = await storage.getUnreadMessageCount(req.user!.id);
+      res.json({ count });
+    } catch (error: any) {
+      logger.error("Failed to fetch unread count", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch unread count" });
+    }
+  });
+
   app.get("/api/messages/recipients", authenticate, async (req: AuthRequest, res) => {
     try {
       const recipients = await storage.getValidMessageRecipients(req.user!.id, req.user!.role);

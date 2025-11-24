@@ -18,7 +18,7 @@ import {
   type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, asc, desc, or } from "drizzle-orm";
+import { eq, asc, desc, or, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -199,6 +199,11 @@ export class DatabaseStorage implements IStorage {
       if (userRole === "student") return u.role === "admin" || u.role === "teacher"; // Students can message admins and teachers
       return false;
     });
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`CAST(COUNT(*) AS INTEGER)` }).from(messages).where(and(eq(messages.toUserId, userId), eq(messages.read, false)));
+    return result[0]?.count || 0;
   }
 }
 
