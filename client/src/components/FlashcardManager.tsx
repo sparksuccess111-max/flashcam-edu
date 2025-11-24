@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, Edit, Trash2, Upload, Download } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Upload, Download, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, Flashcard } from "@shared/schema";
@@ -30,6 +30,24 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
   const { data: flashcards, isLoading } = useQuery<Flashcard[]>({
     queryKey: ["/api/packs", packId, "flashcards"],
   });
+
+  const [displayedCards, setDisplayedCards] = useState<Flashcard[] | null>(null);
+
+  const handleMoveUp = (index: number) => {
+    const cards = displayedCards || flashcards || [];
+    if (index === 0) return;
+    const newCards = [...cards];
+    [newCards[index - 1], newCards[index]] = [newCards[index], newCards[index - 1]];
+    setDisplayedCards(newCards);
+  };
+
+  const handleMoveDown = (index: number) => {
+    const cards = displayedCards || flashcards || [];
+    if (index === cards.length - 1) return;
+    const newCards = [...cards];
+    [newCards[index], newCards[index + 1]] = [newCards[index + 1], newCards[index]];
+    setDisplayedCards(newCards);
+  };
 
   const deleteCardMutation = useMutation({
     mutationFn: (id: string) =>
@@ -143,7 +161,7 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
     }
   };
 
-  const cards = flashcards || [];
+  const cards = displayedCards || flashcards || [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -230,7 +248,7 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
         </Card>
       ) : (
         <div className="space-y-4">
-          {cards.map((card: Flashcard) => (
+          {cards.map((card: Flashcard, idx: number) => (
             <Card 
               key={card.id} 
               data-testid={`card-flashcard-${card.id}`}
@@ -247,6 +265,30 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveUp(idx);
+                    }}
+                    disabled={idx === 0}
+                    data-testid={`button-move-up-${card.id}`}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMoveDown(idx);
+                    }}
+                    disabled={idx === cards.length - 1}
+                    data-testid={`button-move-down-${card.id}`}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
