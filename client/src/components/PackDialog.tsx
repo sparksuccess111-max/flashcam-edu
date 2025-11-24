@@ -162,7 +162,7 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
                 </FormItem>
               )}
             />
-            {(user?.role === "admin" || isEditing) && (
+            {isEditing && (
               <FormField
                 control={form.control}
                 name="subject"
