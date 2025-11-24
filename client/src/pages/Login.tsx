@@ -1,5 +1,4 @@
 import { useLocation } from "wouter";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -8,56 +7,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 import { apiRequest } from "@/lib/queryClient";
-import { signupSchema, type SignupData } from "@shared/schema";
-import { GraduationCap, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { loginSchema, type LoginCredentials } from "@shared/schema";
+import { GraduationCap } from "lucide-react";
 
-export default function Signup() {
+export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const { login } = useAuth();
 
-  const form = useForm<SignupData>({
-    resolver: zodResolver(signupSchema),
+  const form = useForm<LoginCredentials>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
-  const signupMutation = useMutation({
-    mutationFn: async (data: SignupData) => {
-      return await apiRequest<{ status: string }>(
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginCredentials) => {
+      return await apiRequest<{ user: any; token: string }>(
         "POST",
-        "/api/signup",
-        {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          password: data.password,
-        }
+        "/api/login",
+        data
       );
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      login(data.user, data.token);
       toast({
-        title: "Compte créé avec succès",
-        description: "Votre demande a été envoyée à l'administrateur. Veuillez attendre son approbation.",
+        title: "Connexion réussie",
+        description: `Bienvenue, ${data.user.firstName}!`,
       });
-      setLocation("/login");
+      setLocation("/");
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erreur d'inscription",
-        description: error.message || "Impossible de créer le compte. Veuillez réessayer.",
+        title: "Erreur de connexion",
+        description: error.message || "Les identifiants sont invalides.",
       });
     },
   });
 
-  const onSubmit = (data: SignupData) => {
-    signupMutation.mutate(data);
+  const onSubmit = (data: LoginCredentials) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -71,7 +66,7 @@ export default function Signup() {
           </div>
           <CardTitle className="text-2xl">FlashCamEdu</CardTitle>
           <CardDescription>
-            Créez votre compte pour commencer à apprendre
+            Connectez-vous à votre compte
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,7 +81,7 @@ export default function Signup() {
                     <FormControl>
                       <Input
                         placeholder="Entrez votre prénom"
-                        data-testid="input-signup-firstName"
+                        data-testid="input-login-firstName"
                         {...field}
                       />
                     </FormControl>
@@ -103,7 +98,7 @@ export default function Signup() {
                     <FormControl>
                       <Input
                         placeholder="Entrez votre nom"
-                        data-testid="input-signup-lastName"
+                        data-testid="input-login-lastName"
                         {...field}
                       />
                     </FormControl>
@@ -118,58 +113,12 @@ export default function Signup() {
                   <FormItem>
                     <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Entrez votre mot de passe"
-                          data-testid="input-signup-password"
-                          {...field}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          data-testid="button-toggle-password"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirmer le mot de passe</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showConfirm ? "text" : "password"}
-                          placeholder="Confirmer votre mot de passe"
-                          data-testid="input-signup-confirmPassword"
-                          {...field}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirm(!showConfirm)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          data-testid="button-toggle-confirmPassword"
-                        >
-                          {showConfirm ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
+                      <Input
+                        type="password"
+                        placeholder="Entrez votre mot de passe"
+                        data-testid="input-login-password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,22 +127,24 @@ export default function Signup() {
               <Button
                 type="submit"
                 className="gradient-violet-accent text-white border-0 w-full"
-                disabled={signupMutation.isPending}
-                data-testid="button-submit-signup"
+                disabled={loginMutation.isPending}
+                data-testid="button-submit-login"
               >
-                {signupMutation.isPending ? "Création..." : "Créer un compte"}
+                {loginMutation.isPending ? "Connexion..." : "Se connecter"}
               </Button>
             </form>
           </Form>
           <div className="mt-6 pt-6 border-t">
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Pas encore de compte?
+            </p>
             <Button
-              variant="ghost"
+              variant="outline"
               className="w-full"
-              onClick={() => setLocation("/login")}
-              data-testid="button-back-to-login"
+              onClick={() => setLocation("/signup")}
+              data-testid="button-go-to-signup"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour à la connexion
+              Créer un compte
             </Button>
           </div>
         </CardContent>

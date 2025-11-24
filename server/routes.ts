@@ -7,10 +7,12 @@ import { authenticate, requireAdmin, optionalAuth, generateToken, type AuthReque
 import { logger } from "./logger";
 import {
   loginSchema,
+  signupSchema,
   insertPackSchema,
   updatePackSchema,
   insertFlashcardSchema,
   updateFlashcardSchema,
+  insertAccountRequestSchema,
 } from "@shared/schema";
 
 const SALT_ROUNDS = 10;
@@ -87,6 +89,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       logger.error("Login error", "api", error);
       res.status(400).json({ error: error.message || "Login failed" });
+    }
+  });
+
+  app.post("/api/signup", async (req, res) => {
+    try {
+      const signupData = signupSchema.omit({ confirmPassword: true }).parse(req.body);
+      const hashedPassword = await bcrypt.hash(signupData.password, SALT_ROUNDS);
+      const request = await storage.createAccountRequest({
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        password: hashedPassword,
+      });
+      logger.info(`Signup request created: ${signupData.firstName} ${signupData.lastName}`, "api");
+      res.status(201).json({ status: "pending", id: request.id });
+    } catch (error: any) {
+      logger.error("Signup error", "api", error);
+      res.status(400).json({ error: error.message || "Signup failed" });
+    }
+  });
+
+  app.get("/api/admin/requests", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const requests = await storage.getAllAccountRequests();
+      res.json(requests);
+    } catch (error: any) {
+      logger.error("Failed to fetch account requests", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch requests" });
+    }
+  });
+
+  app.post("/api/admin/requests/:id/approve", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const request = await storage.getAccountRequest(id);
+      if (!request) {
+        return res.status(404).json({ error: "Request not found" });
+      }
+      const result = await storage.approveAccountRequest(
+        id,
+        request.firstName,
+        request.lastName,
+        request.password,
+        "student"
+      );
+      broadcastUpdate('account-approved', { id });
+      logger.info(`Account approved: ${request.firstName} ${request.lastName}`, "api");
+      res.json({ user: result.user });
+    } catch (error: any) {
+      logger.error("Failed to approve account request", "api", error);
+      res.status(400).json({ error: error.message || "Failed to approve request" });
+    }
+  });
+
+  app.post("/api/admin/requests/:id/reject", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.rejectAccountRequest(id);
+      broadcastUpdate('account-rejected', { id });
+      logger.info(`Account request rejected: ${id}`, "api");
+      res.status(204).send();
+    } catch (error: any) {
+      logger.error("Failed to reject account request", "api", error);
+      res.status(400).json({ error: error.message || "Failed to reject request" });
     }
   });
 

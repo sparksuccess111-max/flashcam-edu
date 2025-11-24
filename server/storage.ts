@@ -24,6 +24,7 @@ export interface IStorage {
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
 
   getAllAccountRequests(): Promise<AccountRequest[]>;
+  getAccountRequest(id: string): Promise<AccountRequest | undefined>;
   createAccountRequest(request: InsertAccountRequest): Promise<AccountRequest>;
   approveAccountRequest(id: string, firstName: string, lastName: string, password: string, role: string): Promise<{ user: User; deleted: boolean }>;
   rejectAccountRequest(id: string): Promise<void>;
@@ -127,6 +128,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAllAccountRequests(): Promise<AccountRequest[]> {
     return await db.select().from(accountRequests).where(eq(accountRequests.status, "pending"));
+  }
+
+  async getAccountRequest(id: string): Promise<AccountRequest | undefined> {
+    const [request] = await db.select().from(accountRequests).where(eq(accountRequests.id, id));
+    return request || undefined;
   }
 
   async createAccountRequest(request: InsertAccountRequest): Promise<AccountRequest> {
