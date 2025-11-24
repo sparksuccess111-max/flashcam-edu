@@ -41,9 +41,33 @@ export default function TeacherDashboard() {
     },
   });
 
+  const deletePackMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/packs/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
+      toast({
+        title: "Pack supprimé",
+        description: "Le pack a été supprimé avec succès.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer le pack.",
+      });
+    },
+  });
+
   const handleEdit = (pack: Pack) => {
     setEditingPack(pack);
     setIsPackDialogOpen(true);
+  };
+
+  const handleDeletePack = (packId: string) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce pack? Cette action est irréversible.")) {
+      deletePackMutation.mutate(packId);
+    }
   };
 
   const handleNewPack = () => {
@@ -163,6 +187,18 @@ export default function TeacherDashboard() {
                   >
                     <BookOpen className="h-4 w-4" />
                     Gérer les cartes
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePack(pack.id);
+                    }}
+                    disabled={deletePackMutation.isPending}
+                    data-testid={`button-delete-pack-${pack.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4 border-t">
