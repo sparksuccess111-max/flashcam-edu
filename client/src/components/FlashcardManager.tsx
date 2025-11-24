@@ -77,9 +77,18 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
 
     try {
       const response = await fetch(`/api/packs/${packId}/export`, {
+        method: "GET",
         credentials: "include",
+        headers: {
+          "Accept": "text/plain",
+        },
       });
-      if (!response.ok) throw new Error("Export failed");
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Export failed");
+      }
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -91,11 +100,12 @@ export function FlashcardManager({ packId, onClose }: FlashcardManagerProps) {
         title: "Succès",
         description: `${flashcards.length} flashcard${flashcards.length > 1 ? "s" : ""} exportée${flashcards.length > 1 ? "s" : ""}!`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Export error:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d'exporter les flashcards",
+        description: error.message || "Impossible d'exporter les flashcards",
       });
     }
   };
