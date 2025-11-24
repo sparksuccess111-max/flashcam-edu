@@ -306,6 +306,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/messages/mark-read/:userId", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const otherUserId = req.params.userId;
+      await storage.markConversationAsRead(req.user!.id, otherUserId);
+      logger.info(`Conversation marked as read for ${req.user!.id}`, "api");
+      res.json({ success: true });
+    } catch (error: any) {
+      logger.error("Failed to mark conversation as read", "api", error);
+      res.status(400).json({ error: error.message || "Failed to mark conversation as read" });
+    }
+  });
+
   app.get("/api/messages/recipients", authenticate, async (req: AuthRequest, res) => {
     try {
       const recipients = await storage.getValidMessageRecipients(req.user!.id, req.user!.role);
