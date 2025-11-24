@@ -1,23 +1,17 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, RotateCw, ArrowLeft, Download, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCw, ArrowLeft, Download } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/lib/auth-context";
 import jsPDF from "jspdf";
 import type { Flashcard, Pack } from "@shared/schema";
 
 export default function PackView() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -56,51 +50,6 @@ export default function PackView() {
   const handleReset = () => {
     setCurrentIndex(0);
     setIsFlipped(false);
-  };
-
-  const importMutation = useMutation({
-    mutationFn: (content: string) =>
-      apiRequest("POST", `/api/packs/${id}/import`, { content }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/packs", id, "flashcards"] });
-      toast({ title: "Succès", description: "Flashcards importées!" });
-    },
-    onError: (error: Error) => {
-      toast({ variant: "destructive", title: "Erreur", description: error.message });
-    },
-  });
-
-  const handleExport = async () => {
-    if (!pack || !flashcards) return;
-    try {
-      const response = await fetch(`/api/packs/${id}/export`);
-      if (!response.ok) throw new Error("Export failed");
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${pack.title}-flashcards.txt`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast({ title: "Succès", description: "Fichier téléchargé!" });
-    } catch (error) {
-      toast({ variant: "destructive", title: "Erreur", description: "Impossible d'exporter le fichier" });
-    }
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      importMutation.mutate(content);
-    };
-    reader.readAsText(file);
   };
 
   const handleDownload = () => {
@@ -335,49 +284,15 @@ export default function PackView() {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-3 mt-8 w-full max-w-2xl">
-            <Button
-              variant="default"
-              className="bg-violet-600 hover:bg-violet-700"
-              onClick={handleDownload}
-              data-testid="button-download"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Télécharger le pack version papier
-            </Button>
-            
-            {(user?.role === "teacher" || user?.role === "admin") && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleExport}
-                  data-testid="button-export-flashcards"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Exporter les flashcards
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleImportClick}
-                  disabled={importMutation.isPending}
-                  data-testid="button-import-flashcards"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importer des flashcards
-                </Button>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".txt"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  data-testid="input-import-file"
-                />
-              </>
-            )}
-          </div>
+          <Button
+            variant="default"
+            className="mt-8 bg-violet-600 hover:bg-violet-700"
+            onClick={handleDownload}
+            data-testid="button-download"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Télécharger le pack version papier
+          </Button>
         </div>
       </div>
     </div>
