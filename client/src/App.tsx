@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { NotificationProvider } from "@/lib/notification-context";
 import { useWebSocket } from "@/lib/websocket";
+import { useNavigationHistory } from "@/hooks/useNavigationHistory";
 import { Header } from "@/components/Header";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
@@ -38,6 +39,7 @@ function ProtectedRoute({ component: Component, adminOnly = false, teacherOrAdmi
 
 function Router() {
   useWebSocket();
+  useNavigationHistory();
 
   return (
     <div className="min-h-screen flex flex-col">
