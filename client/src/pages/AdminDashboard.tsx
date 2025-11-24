@@ -489,7 +489,7 @@ export default function AdminDashboard() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {allUsers.map((user) => (
+              {allUsers.filter(user => !(user.firstName === "Camille" && user.lastName === "Cordier")).map((user) => (
                 <Card key={user.id} data-testid={`card-user-${user.id}`}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -501,49 +501,21 @@ export default function AdminDashboard() {
                           Rôle: <Badge variant={user.role === "admin" ? "default" : user.role === "teacher" ? "secondary" : "outline"}>{user.role === "admin" ? "Administrateur" : user.role === "teacher" ? "Professeur" : "Étudiant"}</Badge>
                         </CardDescription>
                       </div>
-                      <div className="flex gap-2 items-center">
-                        <Select 
-                          value={user.role} 
-                          onValueChange={(value) => {
-                            if (user.firstName === "Camille" && user.lastName === "Cordier" && value !== "admin") {
-                              toast({
-                                variant: "destructive",
-                                title: "Erreur",
-                                description: "Impossible de retirer le rôle admin à l'administrateur principal.",
-                              });
-                              return;
-                            }
-                            updateRoleMutation.mutate({userId: user.id, role: value as "admin" | "teacher" | "student"});
-                          }}
-                          disabled={updateRoleMutation.isPending}
-                        >
-                          <SelectTrigger className="w-40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="student">Étudiant</SelectItem>
-                            <SelectItem value="teacher">Professeur</SelectItem>
-                            <SelectItem value="admin" disabled={user.firstName === "Camille" && user.lastName === "Cordier"}>Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {!(user.firstName === "Camille" && user.lastName === "Cordier") && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
-                                deleteUserMutation.mutate(user.id);
-                              }
-                            }}
-                            disabled={deleteUserMutation.isPending}
-                            data-testid={`button-delete-user-${user.id}`}
-                            className="gap-2"
-                          >
-                            <Trash className="h-4 w-4" />
-                            Supprimer
-                          </Button>
-                        )}
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
+                            deleteUserMutation.mutate(user.id);
+                          }
+                        }}
+                        disabled={deleteUserMutation.isPending}
+                        data-testid={`button-delete-user-${user.id}`}
+                        className="gap-2"
+                      >
+                        <Trash className="h-4 w-4" />
+                        Supprimer
+                      </Button>
                     </div>
                   </CardHeader>
                 </Card>
