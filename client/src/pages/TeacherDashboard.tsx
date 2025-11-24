@@ -25,23 +25,6 @@ export default function TeacherDashboard() {
 
   const packsToDisplay = displayedPacks !== null ? displayedPacks : (packs || []);
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("DELETE", `/api/packs/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
-      toast({
-        title: "Pack supprimé",
-        description: "Le pack a été supprimé avec succès.",
-      });
-    },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer le pack. Veuillez réessayer.",
-      });
-    },
-  });
 
   const togglePublishMutation = useMutation({
     mutationFn: ({ id, published }: { id: string; published: boolean }) =>
@@ -180,21 +163,6 @@ export default function TeacherDashboard() {
                   >
                     <Edit className="h-4 w-4" />
                     Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (confirm(`Êtes-vous sûr de vouloir supprimer "${pack.title}"?`)) {
-                        deleteMutation.mutate(pack.id);
-                      }
-                    }}
-                    disabled={deleteMutation.isPending}
-                    data-testid={`button-delete-pack-${pack.id}`}
-                    className="gap-2"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Supprimer
                   </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4 border-t">
