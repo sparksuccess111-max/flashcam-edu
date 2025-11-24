@@ -2,6 +2,7 @@ import {
   users,
   packs,
   flashcards,
+  accountRequests,
   type User,
   type InsertUser,
   type Pack,
@@ -10,6 +11,8 @@ import {
   type Flashcard,
   type InsertFlashcard,
   type UpdateFlashcard,
+  type AccountRequest,
+  type InsertAccountRequest,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
@@ -19,6 +22,11 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<User>): Promise<User | undefined>;
+
+  getAllAccountRequests(): Promise<AccountRequest[]>;
+  createAccountRequest(request: InsertAccountRequest): Promise<AccountRequest>;
+  approveAccountRequest(id: string, firstName: string, lastName: string, password: string, role: string): Promise<{ user: User; deleted: boolean }>;
+  rejectAccountRequest(id: string): Promise<void>;
 
   getAllPacks(): Promise<Pack[]>;
   getPackById(id: string): Promise<Pack | undefined>;
@@ -115,6 +123,31 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFlashcard(id: string): Promise<void> {
     await db.delete(flashcards).where(eq(flashcards.id, id));
+  }
+
+  async getAllAccountRequests(): Promise<AccountRequest[]> {
+    return await db.select().from(accountRequests).where(eq(accountRequests.status, "pending"));
+  }
+
+  async createAccountRequest(request: InsertAccountRequest): Promise<AccountRequest> {
+    const [newRequest] = await db
+      .insert(accountRequests)
+      .values(request)
+      .returning();
+    return newRequest;
+  }
+
+  async approveAccountRequest(id: string, firstName: string, lastName: string, password: string, role: string): Promise<{ user: User; deleted: boolean }> {
+    const [user] = await db
+      .insert(users)
+      .values({ firstName, lastName, password, role })
+      .returning();
+    await db.delete(accountRequests).where(eq(accountRequests.id, id));
+    return { user, deleted: true };
+  }
+
+  async rejectAccountRequest(id: string): Promise<void> {
+    await db.delete(accountRequests).where(eq(accountRequests.id, id));
   }
 }
 

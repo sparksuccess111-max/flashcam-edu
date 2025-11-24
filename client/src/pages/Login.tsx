@@ -8,55 +8,56 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth-context";
 import { apiRequest } from "@/lib/queryClient";
-import { loginSchema, type LoginCredentials, type User } from "@shared/schema";
-import { GraduationCap, Eye, EyeOff } from "lucide-react";
+import { signupSchema, type SignupData } from "@shared/schema";
+import { GraduationCap, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
-export default function Login() {
+export default function Signup() {
   const [, setLocation] = useLocation();
-  const { setUser } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const form = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<SignupData>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginCredentials) => {
-      const response = await apiRequest<{ user: User; token: string }>(
+  const signupMutation = useMutation({
+    mutationFn: async (data: SignupData) => {
+      return await apiRequest<{ status: string }>(
         "POST",
-        "/api/login",
-        credentials
+        "/api/signup",
+        {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: data.password,
+        }
       );
-      return response;
     },
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
-      setUser(data.user);
+    onSuccess: () => {
       toast({
-        title: "Connexion réussie",
-        description: `Bienvenue, ${data.user.firstName}!`,
+        title: "Compte créé avec succès",
+        description: "Votre demande a été envoyée à l'administrateur. Veuillez attendre son approbation.",
       });
-      setLocation("/");
+      setLocation("/login");
     },
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message || "Identifiants invalides. Veuillez réessayer.",
+        title: "Erreur d'inscription",
+        description: error.message || "Impossible de créer le compte. Veuillez réessayer.",
       });
     },
   });
 
-  const onSubmit = (data: LoginCredentials) => {
-    loginMutation.mutate(data);
+  const onSubmit = (data: SignupData) => {
+    signupMutation.mutate(data);
   };
 
   return (
@@ -70,7 +71,7 @@ export default function Login() {
           </div>
           <CardTitle className="text-2xl">FlashCamEdu</CardTitle>
           <CardDescription>
-            Connectez-vous en tant qu'administrateur pour gérer les cartes.
+            Créez votre compte pour commencer à apprendre
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,7 +86,7 @@ export default function Login() {
                     <FormControl>
                       <Input
                         placeholder="Entrez votre prénom"
-                        data-testid="input-firstName"
+                        data-testid="input-signup-firstName"
                         {...field}
                       />
                     </FormControl>
@@ -102,7 +103,7 @@ export default function Login() {
                     <FormControl>
                       <Input
                         placeholder="Entrez votre nom"
-                        data-testid="input-lastName"
+                        data-testid="input-signup-lastName"
                         {...field}
                       />
                     </FormControl>
@@ -121,7 +122,7 @@ export default function Login() {
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="Entrez votre mot de passe"
-                          data-testid="input-password"
+                          data-testid="input-signup-password"
                           {...field}
                         />
                         <button
@@ -142,16 +143,59 @@ export default function Login() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmer le mot de passe</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showConfirm ? "text" : "password"}
+                          placeholder="Confirmer votre mot de passe"
+                          data-testid="input-signup-confirmPassword"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirm(!showConfirm)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          data-testid="button-toggle-confirmPassword"
+                        >
+                          {showConfirm ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button
                 type="submit"
                 className="gradient-violet-accent text-white border-0 w-full"
-                disabled={loginMutation.isPending}
-                data-testid="button-submit"
+                disabled={signupMutation.isPending}
+                data-testid="button-submit-signup"
               >
-                {loginMutation.isPending ? "Connexion..." : "Se connecter"}
+                {signupMutation.isPending ? "Création..." : "Créer un compte"}
               </Button>
             </form>
           </Form>
+          <div className="mt-6 pt-6 border-t">
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => setLocation("/login")}
+              data-testid="button-back-to-login"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour à la connexion
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

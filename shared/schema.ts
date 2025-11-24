@@ -11,6 +11,14 @@ export const users = pgTable("users", {
   role: text("role", { enum: ["admin", "student"] }).notNull().default("student"),
 });
 
+export const accountRequests = pgTable("account_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  password: text("password").notNull(),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+});
+
 export const packs = pgTable("packs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -44,6 +52,17 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+export const signupSchema = z.object({
+  firstName: z.string().min(1, "Prénom is required"),
+  lastName: z.string().min(1, "Nom is required"),
+  password: z.string().min(6, "Mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string().min(6, "Confirmation du mot de passe est requise"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
+});
+
+export const insertAccountRequestSchema = createInsertSchema(accountRequests).omit({ id: true, status: true });
 export const insertPackSchema = createInsertSchema(packs).omit({ id: true });
 export const updatePackSchema = insertPackSchema.partial();
 
@@ -53,6 +72,9 @@ export const updateFlashcardSchema = insertFlashcardSchema.partial().omit({ pack
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type LoginCredentials = z.infer<typeof loginSchema>;
+export type SignupData = z.infer<typeof signupSchema>;
+export type AccountRequest = typeof accountRequests.$inferSelect;
+export type InsertAccountRequest = z.infer<typeof insertAccountRequestSchema>;
 
 export type InsertPack = z.infer<typeof insertPackSchema>;
 export type UpdatePack = z.infer<typeof updatePackSchema>;

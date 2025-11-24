@@ -8,6 +8,7 @@ import { useWebSocket } from "@/lib/websocket";
 import { Header } from "@/components/Header";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
 import PackView from "@/pages/PackView";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -35,6 +36,7 @@ function Router() {
       <main className="flex-1">
         <Switch>
           <Route path="/login" component={Login} />
+          <Route path="/signup" component={Signup} />
           <Route path="/" component={Home} />
           <Route path="/pack/:id" component={PackView} />
           <Route path="/admin">
