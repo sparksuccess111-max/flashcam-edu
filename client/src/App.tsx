@@ -12,8 +12,9 @@ import Signup from "@/pages/Signup";
 import Home from "@/pages/Home";
 import PackView from "@/pages/PackView";
 import AdminDashboard from "@/pages/AdminDashboard";
+import TeacherDashboard from "@/pages/TeacherDashboard";
 
-function ProtectedRoute({ component: Component, adminOnly = false }: { component: () => JSX.Element; adminOnly?: boolean }) {
+function ProtectedRoute({ component: Component, adminOnly = false, teacherOrAdminOnly = false }: { component: () => JSX.Element; adminOnly?: boolean; teacherOrAdminOnly?: boolean }) {
   const { user, isAdmin } = useAuth();
 
   if (!user) {
@@ -21,6 +22,10 @@ function ProtectedRoute({ component: Component, adminOnly = false }: { component
   }
 
   if (adminOnly && !isAdmin) {
+    return <Redirect to="/" />;
+  }
+
+  if (teacherOrAdminOnly && user.role !== "teacher" && user.role !== "admin") {
     return <Redirect to="/" />;
   }
 
@@ -41,6 +46,9 @@ function Router() {
           <Route path="/pack/:id" component={PackView} />
           <Route path="/admin">
             {() => <ProtectedRoute component={AdminDashboard} adminOnly />}
+          </Route>
+          <Route path="/teacher">
+            {() => <ProtectedRoute component={TeacherDashboard} teacherOrAdminOnly />}
           </Route>
           <Route component={NotFound} />
         </Switch>

@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
+  const isTeacher = user?.role === "teacher";
 
   const handleLogout = () => {
     logout();
@@ -25,12 +26,12 @@ export function Header() {
           </button>
           
           <div className="flex items-center gap-2">
-            {user && isAdmin && (
+            {user && (isAdmin || isTeacher) && (
               <Button
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
                 variant="outline"
-                onClick={() => setLocation("/admin")}
-                data-testid="button-admin-dashboard"
+                onClick={() => setLocation(isAdmin ? "/admin" : "/teacher")}
+                data-testid="button-dashboard"
               >
                 <LayoutDashboard className="h-4 w-4 mr-2" />
                 Tableau de bord
