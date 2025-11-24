@@ -271,7 +271,7 @@ export default function AdminDashboard() {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="admins">Administrateurs</TabsTrigger>
+          <TabsTrigger value="admins">Gestion des comptes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="packs" className="space-y-4">
@@ -492,7 +492,7 @@ export default function AdminDashboard() {
 
         <TabsContent value="admins" className="space-y-4">
           <div className="mb-8">
-            <h2 className="text-xl font-semibold">Gestion des administrateurs</h2>
+            <h2 className="text-xl font-semibold">Membres</h2>
           </div>
 
           {usersLoading ? (
