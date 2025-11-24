@@ -377,9 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Teachers can only create packs in their subject
       if (req.user!.role === "teacher") {
         // Get current user from database to check latest subject assignment
-        const currentUser = await storage.db.query.users.findFirst({
-          where: (users, { eq }) => eq(users.id, req.user!.id),
-        });
+        const currentUser = await storage.getUser(req.user!.id);
         
         if (!currentUser || currentUser.subject !== packData.subject) {
           const userSubject = currentUser?.subject || "Non assigné";
@@ -410,9 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Teachers can only update packs in their subject
       if (req.user!.role === "teacher") {
         // Get current user from database to check latest subject assignment
-        const currentUser = await storage.db.query.users.findFirst({
-          where: (users, { eq }) => eq(users.id, req.user!.id),
-        });
+        const currentUser = await storage.getUser(req.user!.id);
         
         if (!currentUser || pack.subject !== currentUser.subject) {
           logger.warn(`Unauthorized pack update: teacher ${req.user!.id} tried to modify pack in subject ${pack.subject}`, "api");
