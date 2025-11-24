@@ -15,7 +15,7 @@ import { GraduationCap } from "lucide-react";
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { setUser } = useAuth();
 
   const form = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
@@ -35,7 +35,8 @@ export default function Login() {
       );
     },
     onSuccess: (data) => {
-      login(data.user, data.token);
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
       toast({
         title: "Connexion réussie",
         description: `Bienvenue, ${data.user.firstName}!`,
