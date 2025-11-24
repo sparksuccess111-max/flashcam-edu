@@ -23,6 +23,7 @@ export default function AdminDashboard() {
   const [animatingPackId, setAnimatingPackId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("packs");
   const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: "admin" | "student" }>({});
+  const [selectedSubjects, setSelectedSubjects] = useState<{ [key: string]: string }>({});
 
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
@@ -198,6 +199,25 @@ export default function AdminDashboard() {
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de mettre à jour le rôle de l'utilisateur.",
+      });
+    },
+  });
+
+  const updateSubjectMutation = useMutation({
+    mutationFn: ({ userId, subject }: { userId: string; subject: string }) =>
+      apiRequest("PATCH", `/api/admin/users/${userId}/subject`, { subject }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Matière mise à jour",
+        description: "La matière a été mise à jour avec succès.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour la matière.",
       });
     },
   });
@@ -499,9 +519,10 @@ export default function AdminDashboard() {
                         </CardTitle>
                         <CardDescription>
                           Rôle: <Badge variant={user.role === "admin" ? "default" : user.role === "teacher" ? "secondary" : "outline"}>{user.role === "admin" ? "Administrateur" : user.role === "teacher" ? "Professeur" : "Étudiant"}</Badge>
+                          {user.role === "teacher" && user.subject && <Badge className="ml-2">{user.subject}</Badge>}
                         </CardDescription>
                       </div>
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center flex-wrap">
                         <Select 
                           value={user.role} 
                           onValueChange={(value) => {
@@ -518,6 +539,29 @@ export default function AdminDashboard() {
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
+                        {user.role === "teacher" && (
+                          <Select 
+                            value={user.subject || ""} 
+                            onValueChange={(value) => {
+                              updateSubjectMutation.mutate({userId: user.id, subject: value});
+                            }}
+                            disabled={updateSubjectMutation.isPending}
+                          >
+                            <SelectTrigger className="w-48">
+                              <SelectValue placeholder="Choisir une matière..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Histoire-Géo">Histoire-Géo</SelectItem>
+                              <SelectItem value="Maths">Maths</SelectItem>
+                              <SelectItem value="Français">Français</SelectItem>
+                              <SelectItem value="SVT">SVT</SelectItem>
+                              <SelectItem value="Anglais">Anglais</SelectItem>
+                              <SelectItem value="Physique-Chimie">Physique-Chimie</SelectItem>
+                              <SelectItem value="Technologie">Technologie</SelectItem>
+                              <SelectItem value="Éducation Physique">Éducation Physique</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"

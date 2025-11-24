@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   password: text("password").notNull(),
   role: text("role", { enum: ["admin", "teacher", "student"] }).notNull().default("student"),
+  subject: text("subject", { enum: ["Histoire-Géo", "Maths", "Français", "SVT", "Anglais", "Physique-Chimie", "Technologie", "Éducation Physique"] }),
 });
 
 export const accountRequests = pgTable("account_requests", {

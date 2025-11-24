@@ -195,6 +195,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/users/:id/subject", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { subject } = req.body;
+      
+      const validSubjects = ["Histoire-Géo", "Maths", "Français", "SVT", "Anglais", "Physique-Chimie", "Technologie", "Éducation Physique"];
+      if (subject && !validSubjects.includes(subject)) {
+        return res.status(400).json({ error: "Invalid subject" });
+      }
+
+      const user = await storage.updateUser(id, { subject });
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      broadcastUpdate('user-updated', { id, subject });
+      logger.info(`User subject updated: ${user.firstName} ${user.lastName} to ${subject}`, "api");
+      res.json(user);
+    } catch (error: any) {
+      logger.error("Failed to update user subject", "api", error);
+      res.status(400).json({ error: error.message || "Failed to update user subject" });
+    }
+  });
+
   app.delete("/api/admin/users/:id", authenticate, requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
