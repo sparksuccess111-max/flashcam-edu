@@ -116,9 +116,14 @@ function PackCard({ pack }: { pack: Pack }) {
             <GraduationCap className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg mb-1 break-words" data-testid={`text-pack-title-${pack.id}`}>
-              {pack.title}
-            </CardTitle>
+            <div className="flex items-start gap-2 mb-1">
+              <CardTitle className="text-lg break-words" data-testid={`text-pack-title-${pack.id}`}>
+                {pack.title}
+              </CardTitle>
+              <Badge variant="outline" className="flex-shrink-0" data-testid={`badge-pack-subject-${pack.id}`}>
+                {pack.subject}
+              </Badge>
+            </div>
             <CardDescription className="line-clamp-2" data-testid={`text-pack-description-${pack.id}`}>
               {pack.description || "Pas de description"}
             </CardDescription>

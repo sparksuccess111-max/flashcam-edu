@@ -167,9 +167,14 @@ export default function TeacherDashboard() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <CardTitle className="text-xl" data-testid={`text-pack-title-${pack.id}`}>
-                      {pack.title}
-                    </CardTitle>
+                    <div className="flex items-center gap-2 mb-2">
+                      <CardTitle className="text-xl" data-testid={`text-pack-title-${pack.id}`}>
+                        {pack.title}
+                      </CardTitle>
+                      <Badge variant="outline" data-testid={`badge-pack-subject-${pack.id}`}>
+                        {pack.subject}
+                      </Badge>
+                    </div>
                     <CardDescription className="mt-2" data-testid={`text-pack-description-${pack.id}`}>
                       {pack.description}
                     </CardDescription>
