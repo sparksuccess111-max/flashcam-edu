@@ -74,6 +74,13 @@ export default function Messages() {
     sendMutation.mutate(data);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      form.handleSubmit(onSubmit)();
+    }
+  };
+
   const selectedUser = recipients.find(u => u.id === selectedUserId);
   
   const conversationMessages = allMessages
@@ -169,7 +176,7 @@ export default function Messages() {
 
               {/* Messages */}
               <Card className="flex-1 flex flex-col overflow-hidden">
-                <CardContent className="flex-1 overflow-y-auto p-4 space-y-3">
+                <CardContent className="flex-1 overflow-y-auto p-4 space-y-3 max-h-96">
                   {conversationMessages.length === 0 ? (
                     <div className="h-full flex items-center justify-center">
                       <div className="text-center">
@@ -224,6 +231,7 @@ export default function Messages() {
                                 placeholder="Écrivez votre message..."
                                 className="resize-none min-h-16"
                                 data-testid="input-message-content"
+                                onKeyDown={handleKeyDown}
                                 {...field}
                               />
                             </FormControl>
