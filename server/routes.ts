@@ -533,5 +533,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/packs/:packId/export", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
+    try {
+      const pack = await storage.getPackById(req.params.packId);
+      if (!pack) {
+        return res.status(404).json({ error: "Pack not found" });
+      }
+
+      // Teachers can only export their own packs
+      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
+        return res.status(403).json({ error: "You can only export packs from your subject" });
+      }
+
+      const flashcards = await storage.getFlashcardsByPackId(req.params.packId);
+      
+      // Format: ("question", "réponse"),
+      const lines = flashcards.map(fc => `("${fc.question.replace(/"/g, '\\"')}", "${fc.answer.replace(/"/g, '\\"')}")`).join(',\n');
+      
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${pack.title}-flashcards.txt"`);
+      res.send(lines);
+      
+      logger.info(`Pack exported: ${pack.id} - ${flashcards.length} flashcards`, "api");
+    } catch (error: any) {
+      logger.error("Failed to export pack", "api", error);
+      res.status(500).json({ error: error.message || "Failed to export pack" });
+    }
+  });
+
+  app.post("/api/packs/:packId/import", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
+    try {
+      const pack = await storage.getPackById(req.params.packId);
+      if (!pack) {
+        return res.status(404).json({ error: "Pack not found" });
+      }
+
+      // Teachers can only import to their own packs
+      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
+        return res.status(403).json({ error: "You can only import to packs in your subject" });
+      }
+
+      const { content } = req.body;
+      if (!content) {
+        return res.status(400).json({ error: "No content provided" });
+      }
+
+      const flashcards: Array<{ question: string; answer: string }> = [];
+      
+      // Parse format: ("question", "réponse"),
+      // Also support: ("question", "réponse")
+      const regex = /\("([^"]*(?:\\"[^"]*)*)"\s*,\s*"([^"]*(?:\\"[^"]*)*)"\)/g;
+      let match;
+      
+      while ((match = regex.exec(content)) !== null) {
+        const question = match[1].replace(/\\"/g, '"');
+        const answer = match[2].replace(/\\"/g, '"');
+        flashcards.push({ question, answer });
+      }
+
+      if (flashcards.length === 0) {
+        return res.status(400).json({ error: "No valid flashcards found in the file" });
+      }
+
+      // Create all flashcards
+      const created = [];
+      for (const fc of flashcards) {
+        const flashcard = await storage.createFlashcard({
+          packId: req.params.packId,
+          question: fc.question,
+          answer: fc.answer,
+        });
+        created.push(flashcard);
+      }
+
+      broadcastUpdate('flashcards-imported', { packId: req.params.packId, count: created.length });
+      logger.info(`Pack imported: ${pack.id} - ${created.length} flashcards added`, "api");
+      res.status(201).json({ count: created.length, flashcards: created });
+    } catch (error: any) {
+      logger.error("Failed to import pack", "api", error);
+      res.status(400).json({ error: error.message || "Failed to import pack" });
+    }
+  });
+
   return httpServer;
 }
