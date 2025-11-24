@@ -1,0 +1,147 @@
+Merci de lire tout le projet (backend, frontend, Drizzle) et d’appliquer proprement toutes les modifications ci-dessous.
+Je veux un système complet, stable et structuré.
+
+🔥 1. Gestion des packs par matière (déjà expliqué précédemment)
+Rappel obligatoire à respecter :
+
+Teachers ne voient et ne modifient que les packs de leur matière
+
+Teachers partageant la même matière peuvent modifier les mêmes packs
+
+Admin voit toutes les matières et tous les packs, triés par matière
+
+Students ne modifient rien, ils ne font que lire
+
+Drizzle :
+
+users.subject (null pour admin/student, défini pour teacher)
+
+card_packs.subject obligatoire
+
+Permissions API :
+
+Teachers : CRUD uniquement dans leur matière
+
+Admin : CRUD partout
+
+Students : lecture uniquement
+
+🧩 2. Boutons “activer/désactiver”, “supprimer”, “modifier pack” — Comportement CORRIGÉ
+
+Actuellement, cliquer sur ces boutons déclenche une navigation vers la page des cartes.
+C’est un bug. Je veux une correction propre, dans tous les composants concernés.
+
+Comportement attendu :
+✔ Bouton activer/désactiver pack
+
+Ce bouton ne doit pas naviguer vers la page des cartes
+
+Il doit :
+
+appeler l’API toggle (activation/désactivation)
+
+se mettre à jour instantanément
+
+empêcher la propagation du clic (e.stopPropagation())
+
+✔ Bouton supprimer pack
+
+Ne doit pas naviguer
+
+Confirmation → suppression → mise à jour de la liste
+
+Stop propagation obligatoire
+
+✔ Bouton modifier titre / description
+
+Petit bouton ✎ ou similaire
+
+Ouvre un modal OU inline edit
+
+Ne doit jamais naviguer vers la liste des cartes
+
+Stop propagation obligatoire
+
+🧩 3. Navigation correcte de la “bulle du pack”
+
+Chaque pack est affiché sous forme d’un bloc / carte cliquable (la “bulle du pack”).
+
+Comportement attendu :
+
+Cliquer sur la bulle → aller sur la liste des cartes du pack
+
+Cliquer sur un bouton interne de la bulle → ne doit PAS naviguer
+
+Donc :
+
+Le conteneur principal de la bulle doit avoir onClick → navigation
+
+Les boutons internes doivent avoir :
+
+onClick={handleAction}
+
+e.stopPropagation() à l’intérieur
+
+🧩 4. Correction globale front-end
+
+Je veux que tu :
+
+identifies tous les endroits où ces boutons sont rendus
+
+fixes les handlers pour empêcher la propagation
+
+ensures que rien n’ouvre la page des cartes sauf la bulle principale
+
+vérifies les conditions d’affichage selon le rôle (admin/teacher/student)
+
+🔧 5. Backend (API)
+Vérifier ou corriger :
+
+route activation/désactivation
+
+route modification titre/description
+
+route suppression pack
+
+permissions respectées selon le rôle utilisateur
+
+Aucune navigation ne doit être déclenchée par l’API.
+
+🎨 6. Admin UI — tri par matière
+
+Comme déjà demandé :
+
+un affichage par matière sous forme de groupes :
+
+Histoire-Géo  
+   pack 1  
+   pack 2  
+
+Maths  
+   pack 1  
+
+SVT  
+   pack 1  
+
+
+Les packs doivent respecter les comportements ci-dessus.
+
+⚙️ 7. À livrer
+
+Je veux :
+
+les modifications de Drizzle si nécessaires
+
+tous les diffs des fichiers modifiés
+
+une implémentation propre côté frontend
+
+gestion correcte de la propagation d’événements
+
+une navigation 100% cohérente
+
+aucun bug de redirection involontaire
+
+code clair, rangé, et commenté
+
+Merci de procéder étape par étape.
