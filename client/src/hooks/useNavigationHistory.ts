@@ -1,64 +1,67 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 export function useNavigationHistory() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const historyStack = useRef<string[]>([]);
   const currentIndex = useRef<number>(-1);
+  const isNavigatingViaButtons = useRef<boolean>(false);
 
+  // Tracker les changements de route via wouter
   useEffect(() => {
-    // Initialiser avec la page actuelle
+    // Initialiser l'historique
     if (historyStack.current.length === 0) {
-      historyStack.current.push(window.location.pathname);
+      historyStack.current.push(location);
       currentIndex.current = 0;
+      return;
     }
 
-    // Écouter les changements de route (wouter)
-    const handleLocationChange = () => {
-      const newPath = window.location.pathname;
-      const lastPath = historyStack.current[currentIndex.current];
+    // Si on navigue via les boutons retour/avant, ne pas ajouter à l'historique
+    if (isNavigatingViaButtons.current) {
+      isNavigatingViaButtons.current = false;
+      return;
+    }
 
-      // Si on n'est pas en train de naviguer via les boutons retour/avant
-      if (newPath !== lastPath) {
-        // Supprimer tout l'historique après l'index actuel (comme dans les vrais navigateurs)
-        historyStack.current.splice(currentIndex.current + 1);
+    // Nouvelle navigation normale
+    const lastPath = historyStack.current[currentIndex.current];
+    if (location !== lastPath) {
+      // Supprimer tout l'historique après l'index actuel
+      historyStack.current.splice(currentIndex.current + 1);
 
-        // Ajouter la nouvelle route
-        historyStack.current.push(newPath);
-        currentIndex.current = historyStack.current.length - 1;
-      }
-    };
+      // Ajouter la nouvelle route
+      historyStack.current.push(location);
+      currentIndex.current = historyStack.current.length - 1;
+    }
+  }, [location]);
 
-    // Observer tous les changements de route
-    window.addEventListener("popstate", handleLocationChange);
-
-    return () => {
-      window.removeEventListener("popstate", handleLocationChange);
-    };
-  }, []);
-
+  // Écouter les boutons retour/avant de la souris
   useEffect(() => {
-    // Écouter les boutons retour/avant de la souris
     const handleMouseButton = (e: MouseEvent) => {
-      // Bouton retour de la souris = 3
-      // Bouton avant de la souris = 4
-      if (e.button === 3) {
+      if (e.button === 3 || e.button === 4) {
         e.preventDefault();
         e.stopPropagation();
-        // Retour
-        if (currentIndex.current > 0) {
-          currentIndex.current--;
+
+        let canNavigate = false;
+
+        if (e.button === 3) {
+          // Bouton retour
+          if (currentIndex.current > 0) {
+            currentIndex.current--;
+            canNavigate = true;
+          }
+        } else if (e.button === 4) {
+          // Bouton avant
+          if (currentIndex.current < historyStack.current.length - 1) {
+            currentIndex.current++;
+            canNavigate = true;
+          }
+        }
+
+        if (canNavigate) {
+          isNavigatingViaButtons.current = true;
           navigate(historyStack.current[currentIndex.current]);
         }
-        return false;
-      } else if (e.button === 4) {
-        e.preventDefault();
-        e.stopPropagation();
-        // Avant
-        if (currentIndex.current < historyStack.current.length - 1) {
-          currentIndex.current++;
-          navigate(historyStack.current[currentIndex.current]);
-        }
+
         return false;
       }
     };
