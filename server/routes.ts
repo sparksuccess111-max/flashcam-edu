@@ -530,6 +530,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/packs/:packId/flashcards/:id/reorder", authenticate, requireTeacherOrAdmin, async (req, res) => {
+    try {
+      const { newOrder } = req.body;
+      if (typeof newOrder !== "number") {
+        return res.status(400).json({ error: "Invalid order value" });
+      }
+      const flashcard = await storage.updateFlashcard(req.params.id, { order: newOrder });
+      if (!flashcard) {
+        return res.status(404).json({ error: "Flashcard not found" });
+      }
+      broadcastUpdate('flashcard-reordered', flashcard);
+      logger.info(`Flashcard reordered in pack ${req.params.packId}: ${req.params.id} to position ${newOrder}`, "api");
+      res.json(flashcard);
+    } catch (error: any) {
+      logger.error("Failed to reorder flashcard", "api", error);
+      res.status(400).json({ error: error.message || "Failed to reorder flashcard" });
+    }
+  });
+
   app.delete("/api/packs/:packId/flashcards/:id", authenticate, requireTeacherOrAdmin, async (req, res) => {
     try {
       await storage.deleteFlashcard(req.params.id);

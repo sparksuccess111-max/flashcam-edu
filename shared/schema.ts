@@ -52,6 +52,7 @@ export const flashcards = pgTable("flashcards", {
   packId: varchar("pack_id").notNull().references(() => packs.id, { onDelete: "cascade" }),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
+  order: integer("order").notNull().default(0),
 });
 
 export const packsRelations = relations(packs, ({ many }) => ({

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, Edit, Trash2, Upload, Download } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, Upload, Download, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, Flashcard } from "@shared/schema";
@@ -29,6 +29,21 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
 
   const { data: flashcards, isLoading } = useQuery<Flashcard[]>({
     queryKey: ["/api/packs", packId, "flashcards"],
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: ({ id, newOrder }: { id: string; newOrder: number }) =>
+      apiRequest("PATCH", `/api/packs/${packId}/flashcards/${id}/reorder`, { newOrder }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/packs", packId, "flashcards"] });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to reorder flashcard.",
+      });
+    },
   });
 
   const deleteCardMutation = useMutation({
@@ -247,6 +262,32 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newOrder = cards[idx - 1]?.order ?? 0;
+                      reorderMutation.mutate({ id: card.id, newOrder: newOrder - 1 });
+                    }}
+                    disabled={idx === 0 || reorderMutation.isPending}
+                    data-testid={`button-move-up-${card.id}`}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newOrder = cards[idx + 1]?.order ?? 0;
+                      reorderMutation.mutate({ id: card.id, newOrder: newOrder + 1 });
+                    }}
+                    disabled={idx === cards.length - 1 || reorderMutation.isPending}
+                    data-testid={`button-move-down-${card.id}`}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
