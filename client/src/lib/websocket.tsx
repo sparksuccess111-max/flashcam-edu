@@ -56,6 +56,22 @@ export function useWebSocket() {
               queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
               queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
               break;
+
+            case "user-updated":
+              // Sync user updates to localStorage and emit event
+              const storedUser = localStorage.getItem("user");
+              if (storedUser) {
+                try {
+                  const user = JSON.parse(storedUser);
+                  const updatedUser = { ...user, ...message.data };
+                  localStorage.setItem("user", JSON.stringify(updatedUser));
+                  // Emit custom event so auth context can update
+                  window.dispatchEvent(new CustomEvent("user-updated", { detail: updatedUser }));
+                } catch (e) {
+                  console.error("Failed to update user from websocket:", e);
+                }
+              }
+              break;
           }
         } catch (error) {
           console.error("WebSocket message parse error:", error);

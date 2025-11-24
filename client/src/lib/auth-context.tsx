@@ -24,6 +24,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  // Listen for user updates from WebSocket
+  useEffect(() => {
+    const handleUserUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setUser(customEvent.detail);
+    };
+
+    window.addEventListener("user-updated", handleUserUpdate);
+    return () => {
+      window.removeEventListener("user-updated", handleUserUpdate);
+    };
+  }, []);
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");

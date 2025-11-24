@@ -65,12 +65,22 @@ export function PackDialog({ pack, open, onOpenChange }: PackDialogProps) {
       onOpenChange(false);
       form.reset();
     },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de créer le pack. Veuillez réessayer.",
-      });
+    onError: (error: any) => {
+      const errorMsg = error.message || "Impossible de créer le pack";
+      
+      if (errorMsg.includes("assigned subject") || errorMsg.includes("sujet assigné")) {
+        toast({
+          variant: "destructive",
+          title: "Erreur de sujet",
+          description: `Vous pouvez créer des packs seulement pour le sujet: ${user?.subject || "Non assigné"}`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: errorMsg,
+        });
+      }
     },
   });
 
