@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, BookOpen, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/lib/auth-context";
 import type { Pack } from "@shared/schema";
 import { PackDialog } from "@/components/PackDialog";
 import { FlashcardManager } from "@/components/FlashcardManager";
 
 export default function TeacherDashboard() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [editingPack, setEditingPack] = useState<Pack | null>(null);
   const [isPackDialogOpen, setIsPackDialogOpen] = useState(false);
@@ -115,7 +117,14 @@ export default function TeacherDashboard() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold">Tableau de bord Professeur</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Tableau de bord Professeur</h1>
+            {user?.subject && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Matière assignée: <Badge className="ml-2">{user.subject}</Badge>
+              </p>
+            )}
+          </div>
           <Button
             onClick={handleNewPack}
             className="gradient-violet-accent text-white border-0"
@@ -125,7 +134,7 @@ export default function TeacherDashboard() {
             Nouveau pack
           </Button>
         </div>
-        <p className="text-muted-foreground">Gérez vos packs et flashcards d'étude</p>
+        <p className="text-muted-foreground">Vous voyez uniquement les packs de votre matière</p>
       </div>
 
       {isLoading ? (
