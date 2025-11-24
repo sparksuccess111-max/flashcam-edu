@@ -1,0 +1,152 @@
+Je veux ajouter un système complet de messagerie en temps réel dans mon application. Merci de lire tout le projet et d’implémenter proprement la fonctionnalité. Voici les exigences exactes, incluant toutes les règles de permission.
+
+🔒 1. Rôles & règles de permission
+Rôles disponibles
+
+student
+
+teacher
+
+admin
+
+Qui peut lancer une conversation avec qui
+
+student → teacher : OUI
+
+student → admin : OUI
+
+teacher → student : NON
+
+teacher → admin : OUI
+
+admin → teacher : OUI
+
+admin → student : OUI
+
+Qui voit quels contacts
+
+student : voit tous les teachers et tous les admins
+
+teacher : voit uniquement les admins
+
+admin : voit les students ET les teachers
+
+Règle importante
+
+Les permissions ci-dessus doivent être appliquées :
+
+pour afficher la liste des contacts
+
+pour autoriser l’ouverture d’une conversation
+
+pour autoriser l’envoi d’un message
+
+🗃️ 2. Structure de données (Drizzle ORM)
+
+Créer une table conversations :
+
+id (PK)
+
+participantA (FK user)
+
+participantB (FK user)
+
+createdAt
+
+Créer une table messages :
+
+id (PK)
+
+conversationId (FK)
+
+senderId (FK user)
+
+content
+
+createdAt
+
+Une conversation doit être unique pour un pair (A,B).
+Si une conversation n’existe pas, la créer automatiquement seulement si la permission existe.
+
+🧠 3. Endpoints API
+POST /conversations/start
+
+Body : { targetUserId }
+
+Vérifier si l’utilisateur a le droit de lancer une conversation
+
+Créer la conversation si elle n’existe pas
+
+Retourner la conversation
+
+GET /conversations/list
+
+Retourner toutes les conversations de l’utilisateur connecté
+
+GET /conversations/:id/messages
+
+Retourner les messages d’une conversation
+
+POST /messages/send
+
+Body : { conversationId, content }
+
+Vérifier que l’utilisateur fait partie de la conversation
+
+Vérifier que l’envoi est autorisé selon les permissions
+
+Sauvegarder le message
+
+Émettre un événement temps réel
+
+⚡ 4. Temps réel (Socket.IO obligatoire)
+
+Une connexion socket doit être authentifiée via le JWT déjà utilisé dans le projet
+
+Lors de l’envoi d’un message :
+
+l’expéditeur reçoit le message immédiatement
+
+le destinataire reçoit l’événement instantanément
+
+Mettre à jour automatiquement l’UI sans rechargement
+
+🎨 5. Interface front-end
+
+Créer une interface moderne simple :
+
+Liste des contacts autorisés (selon les règles)
+
+Liste des conversations existantes
+
+Fenêtre de chat
+
+Messages alignés à droite pour l’expéditeur, gauche pour le destinataire
+
+Actualisation instantanée via WebSockets
+
+🔐 6. Sécurité et validation
+
+Tous les contrôles de permission doivent être centralisés dans une fonction canUserStartConversation(user, targetUser)
+
+Vérifier également lors de l’envoi de message qu’il n’y a pas de contournement (ex : teacher → student).
+
+Vérifier que la conversation appartient bien aux deux participants.
+
+🧩 7. Ce que j’attends de Replit AI
+
+Lire totalement le projet
+
+Créer toutes les tables Drizzle
+
+Mettre à jour le backend (routes + sockets)
+
+Mettre à jour le frontend (UI + sockets)
+
+Faire le code complet, propre et testé
+
+Ne rien casser dans les autres fonctionnalités
+
+Montrer les diffs, puis insérer directement dans les fichiers
+
+Merci de procéder proprement, étape par étape.
