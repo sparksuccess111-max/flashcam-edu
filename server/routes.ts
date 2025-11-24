@@ -94,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/signup", async (req, res) => {
     try {
-      const signupData = signupSchema.omit({ confirmPassword: true }).parse(req.body);
+      const signupData = signupSchema.parse(req.body);
       const hashedPassword = await bcrypt.hash(signupData.password, SALT_ROUNDS);
       const request = await storage.createAccountRequest({
         firstName: signupData.firstName,
