@@ -504,7 +504,7 @@ export default function AdminDashboard() {
           ) : !allUsers || allUsers.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
-                <p className="text-muted-foreground">Aucun utilisateur</p>
+                <p className="text-muted-foreground">Aucun membre pour l'instant</p>
               </CardContent>
             </Card>
           ) : (
