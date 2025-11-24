@@ -1,0 +1,123 @@
+Je veux ajouter un système complet de messagerie en temps réel dans mon application. Merci de lire tout le projet et d’implémenter proprement la fonctionnalité. Voici les exigences précises :
+
+1. Rôles & permissions
+
+Il existe trois rôles : student, teacher, admin.
+
+Un utilisateur student peut discuter uniquement avec :
+
+des teachers
+
+des admins
+
+Un utilisateur teacher peut discuter avec :
+
+des students
+
+des admins
+
+Un utilisateur admin peut discuter avec :
+
+des teachers
+
+des students
+
+Les utilisateurs ne peuvent pas discuter entre eux si la permission n’est pas prévue ci-dessus.
+
+2. Structure de données à créer
+
+Créer une table messages avec :
+
+id
+
+senderId (FK user)
+
+receiverId (FK user)
+
+content (string)
+
+createdAt (timestamp)
+
+Créer une table conversations ou utiliser un système qui regroupe automatiquement les messages par pair (senderId, receiverId).
+Utiliser Drizzle ORM si possible (sinon adapter au projet).
+
+3. Endpoints API
+
+Créer les endpoints suivants :
+
+POST /messages/send
+
+body : { receiverId, content }
+
+Vérifier que l’expéditeur a le droit d’envoyer au destinataire (en fonction du rôle).
+
+Sauvegarder le message.
+
+Émettre un événement temps réel.
+
+GET /messages/:userId
+
+Récupérer toutes les conversations avec ce userId.
+
+GET /messages/conversation/:otherUserId
+
+Récupérer l’historique complet de discussion entre l’utilisateur connecté et l’autre utilisateur.
+
+4. Temps réel (obligatoire)
+
+Mettre en place un système en temps réel :
+
+utiliser Socket.IO ou WebSockets natifs
+
+Quand un user envoie un message, tous les clients concernés doivent le recevoir instantanément
+
+Mettre à jour automatiquement l’UI sans rechargement
+
+5. Intégration front-end
+
+Ajouter une interface de messagerie simple :
+
+liste des conversations
+
+fenêtre de chat
+
+messages alignés à droite pour l’expéditeur
+
+messages alignés à gauche pour le destinataire
+
+Intégrer WebSockets pour mise à jour en direct
+
+Quand un message est envoyé :
+
+affichage instantané côté expéditeur
+
+réception instantanée côté destinataire
+
+6. Sécurité
+
+Vérifier les rôles avant d’envoyer un message.
+
+Empêcher l’envoi de message si l’utilisateur ne fait pas partie des permissions.
+
+Utiliser le JWT déjà présent dans le projet pour authentifier chaque socket connection.
+
+7. Ce que j’attends de toi
+
+Lis tous les fichiers du projet
+
+Modifie uniquement ce qui est nécessaire
+
+Ajoute les tables Drizzle
+
+Ajoute les routes
+
+Ajoute le système Socket.IO
+
+Ajoute le front-end de messagerie
+
+Propose une structure de fichiers propre et réutilisable
+
+Fais le code complet, propre, testé
+
+Merci de procéder étape par étape, montrer les diffs et intégrer directement dans le projet.
+»**

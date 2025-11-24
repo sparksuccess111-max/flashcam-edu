@@ -13,6 +13,7 @@ import Home from "@/pages/Home";
 import PackView from "@/pages/PackView";
 import AdminDashboard from "@/pages/AdminDashboard";
 import TeacherDashboard from "@/pages/TeacherDashboard";
+import Messages from "@/pages/Messages";
 
 function ProtectedRoute({ component: Component, adminOnly = false, teacherOrAdminOnly = false }: { component: () => JSX.Element; adminOnly?: boolean; teacherOrAdminOnly?: boolean }) {
   const { user, isAdmin } = useAuth();
@@ -49,6 +50,9 @@ function Router() {
           </Route>
           <Route path="/teacher">
             {() => <ProtectedRoute component={TeacherDashboard} teacherOrAdminOnly />}
+          </Route>
+          <Route path="/messages">
+            {() => <ProtectedRoute component={Messages} />}
           </Route>
           <Route component={NotFound} />
         </Switch>
