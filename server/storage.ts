@@ -175,7 +175,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessages(userId: string): Promise<Message[]> {
-    return await db.select().from(messages).where(eq(messages.toUserId, userId)).orderBy(desc(messages.createdAt));
+    return await db.select().from(messages).where(eq(messages.toUserId, userId) || eq(messages.fromUserId, userId)).orderBy(desc(messages.createdAt));
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
