@@ -25,7 +25,9 @@ export default function TeacherDashboard() {
     queryKey: ["/api/packs"],
   });
 
-  const packsToDisplay = displayedPacks !== null ? displayedPacks : (packs || []);
+  // Filter packs to show only those matching the teacher's assigned subject
+  const filteredPacks = packs?.filter(pack => pack.subject === user?.subject) || [];
+  const packsToDisplay = displayedPacks !== null ? displayedPacks : filteredPacks;
 
 
   const togglePublishMutation = useMutation({
