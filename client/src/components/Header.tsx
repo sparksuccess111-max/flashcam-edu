@@ -1,7 +1,5 @@
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { GraduationCap, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -9,14 +7,6 @@ export function Header() {
   const { user, logout, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
   const isTeacher = user?.role === "teacher";
-
-  const { data: unreadData } = useQuery<{ count: number }>({
-    queryKey: ["/api/messages/unread-count"],
-    refetchInterval: 2000,
-    enabled: !!user,
-  });
-
-  const unreadCount = unreadData?.count || 0;
 
   const handleLogout = () => {
     logout();
@@ -49,21 +39,13 @@ export function Header() {
             )}
             {user && (
               <Button
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm relative"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
                 variant="outline"
                 onClick={() => setLocation("/messages")}
                 data-testid="button-messages"
               >
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Messages
-                {unreadCount > 0 && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500 text-white border-0 text-xs"
-                    data-testid="badge-unread-messages"
-                  >
-                    {unreadCount}
-                  </Badge>
-                )}
               </Button>
             )}
             {user ? (

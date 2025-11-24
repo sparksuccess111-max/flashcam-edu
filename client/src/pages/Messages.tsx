@@ -11,7 +11,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/lib/auth-context";
-import { useCallback } from "react";
 import { insertMessageSchema } from "@shared/schema";
 import type { User, Message } from "@shared/schema";
 import { Send, MessageSquare, Search } from "lucide-react";
@@ -97,24 +96,6 @@ export default function Messages() {
     return role === "admin" ? "Administrateur" : role === "teacher" ? "Professeur" : "Étudiant";
   };
 
-  const getUnreadCountForContact = (contactId: string) => {
-    return allMessages.filter(m => m.fromUserId === contactId && m.toUserId === currentUser?.id && !m.read).length;
-  };
-
-  const handleSelectContact = useCallback(async (contactId: string, unreadCount: number) => {
-    setSelectedUserId(contactId);
-    form.setValue("toUserId", contactId);
-    if (unreadCount > 0) {
-      try {
-        await apiRequest("POST", `/api/messages/mark-read/${contactId}`, {});
-        queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-      } catch (error) {
-        console.error("Failed to mark messages as read", error);
-      }
-    }
-  }, [form]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversationMessages]);
@@ -152,33 +133,24 @@ export default function Messages() {
                     {recipients.length === 0 ? "Aucun contact" : "Pas de résultats"}
                   </p>
                 ) : (
-                  filteredRecipients.map(contact => {
-                    const unreadCount = getUnreadCountForContact(contact.id);
-                    return (
-                      <button
-                        key={contact.id}
-                        onClick={() => handleSelectContact(contact.id, unreadCount)}
-                        className={`w-full text-left p-2 rounded-md transition-colors border text-sm relative ${
-                          selectedUserId === contact.id
-                            ? "bg-violet-100 dark:bg-violet-900 border-violet-300 dark:border-violet-700"
-                            : "border-transparent hover:bg-muted"
-                        }`}
-                        data-testid={`button-select-user-${contact.id}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="font-medium truncate">{contact.firstName} {contact.lastName}</div>
-                            <div className="text-xs text-muted-foreground">{getRoleLabel(contact.role)}</div>
-                          </div>
-                          {unreadCount > 0 && (
-                            <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500 text-white border-0 text-xs flex-shrink-0">
-                              {unreadCount}
-                            </Badge>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })
+                  filteredRecipients.map(contact => (
+                    <button
+                      key={contact.id}
+                      onClick={() => {
+                        setSelectedUserId(contact.id);
+                        form.setValue("toUserId", contact.id);
+                      }}
+                      className={`w-full text-left p-2 rounded-md transition-colors border text-sm ${
+                        selectedUserId === contact.id
+                          ? "bg-violet-100 dark:bg-violet-900 border-violet-300 dark:border-violet-700"
+                          : "border-transparent hover:bg-muted"
+                      }`}
+                      data-testid={`button-select-user-${contact.id}`}
+                    >
+                      <div className="font-medium truncate">{contact.firstName} {contact.lastName}</div>
+                      <div className="text-xs text-muted-foreground">{getRoleLabel(contact.role)}</div>
+                    </button>
+                  ))
                 )}
               </div>
             </CardContent>
