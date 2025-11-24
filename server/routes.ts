@@ -215,8 +215,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/packs", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const allPacks = await storage.getAllPacks();
-      const isAdmin = req.user?.role === "admin";
-      const filteredPacks = isAdmin ? allPacks : allPacks.filter(pack => pack.published);
+      const isAdminOrTeacher = req.user?.role === "admin" || req.user?.role === "teacher";
+      const filteredPacks = isAdminOrTeacher ? allPacks : allPacks.filter(pack => pack.published);
       res.json(filteredPacks);
     } catch (error: any) {
       logger.error("Failed to fetch packs", "api", error);
