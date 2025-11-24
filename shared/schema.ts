@@ -62,6 +62,12 @@ export const signupSchema = z.object({
   path: ["confirmPassword"],
 });
 
+export const signupBackendSchema = z.object({
+  firstName: z.string().min(1, "Prénom is required"),
+  lastName: z.string().min(1, "Nom is required"),
+  password: z.string().min(6, "Mot de passe doit contenir au moins 6 caractères"),
+});
+
 export const insertAccountRequestSchema = createInsertSchema(accountRequests).omit({ id: true, status: true });
 export const insertPackSchema = createInsertSchema(packs).omit({ id: true });
 export const updatePackSchema = insertPackSchema.partial();

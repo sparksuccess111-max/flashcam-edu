@@ -7,7 +7,7 @@ import { authenticate, requireAdmin, optionalAuth, generateToken, type AuthReque
 import { logger } from "./logger";
 import {
   loginSchema,
-  signupSchema,
+  signupBackendSchema,
   insertPackSchema,
   updatePackSchema,
   insertFlashcardSchema,
@@ -94,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/signup", async (req, res) => {
     try {
-      const signupData = signupSchema.parse(req.body);
+      const signupData = signupBackendSchema.parse(req.body);
       const hashedPassword = await bcrypt.hash(signupData.password, SALT_ROUNDS);
       const request = await storage.createAccountRequest({
         firstName: signupData.firstName,
