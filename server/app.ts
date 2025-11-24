@@ -60,40 +60,41 @@ app.use((req, res, next) => {
 
 // Internal keep-alive ping function
 function startAutoPing(port: number) {
-  const pingInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const pingInterval = 3 * 60 * 1000; // 3 minutes in milliseconds (for Replit keep-alive)
   const pingUrl = `http://localhost:${port}/ping`;
   let pingCount = 0;
 
-  const pingTask = setInterval(async () => {
+  const doPing = async () => {
     pingCount++;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
       const response = await fetch(pingUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
       
       if (response.ok) {
-        logger.debug(`[Ping #${pingCount}] Auto-ping successful (${response.status})`, "server");
+        logger.info(`✓ Auto-ping #${pingCount} successful (${response.status})`, "server");
       } else {
-        logger.warn(`[Ping #${pingCount}] Auto-ping failed (${response.status})`, "server");
+        logger.warn(`✗ Auto-ping #${pingCount} failed (${response.status})`, "server");
       }
     } catch (error: any) {
-      logger.error(`[Ping #${pingCount}] Auto-ping error: ${error.message}`, "server", error);
+      logger.error(`✗ Auto-ping #${pingCount} error: ${error.message}`, "server", error);
     }
-  }, pingInterval);
+  };
+
+  // Immediate ping on startup
+  doPing();
+  
+  // Then ping every 3 minutes
+  const pingTask = setInterval(doPing, pingInterval);
 
   // Prevent process from keeping the interval alive if all other connections close
   if (pingTask.unref) {
     pingTask.unref();
   }
   
-  logger.info(`Auto-ping started (every ${pingInterval / 1000}s)`, "server");
-  
-  // Also do an immediate ping on startup
-  fetch(pingUrl).catch((error) => {
-    logger.debug(`Initial startup ping failed: ${error.message}`, "server");
-  });
+  logger.info(`✓ Auto-ping system STARTED (keeps app alive every ${pingInterval / 1000}s)`, "server");
 }
 
 export default async function runApp(
