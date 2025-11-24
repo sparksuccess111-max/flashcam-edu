@@ -119,10 +119,11 @@ export default function TeacherDashboard() {
           {allPacks.map((pack) => (
             <Card
               key={pack.id}
-              className={`overflow-hidden transition-all duration-300 ${
+              className={`overflow-hidden transition-all duration-300 cursor-pointer hover-elevate ${
                 animatingPackId === pack.id ? "scale-95 opacity-50" : ""
               }`}
               data-testid={`card-pack-${pack.id}`}
+              onClick={() => handleEdit(pack)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-4">
@@ -147,29 +148,25 @@ export default function TeacherDashboard() {
                   <Button
                     size="sm"
                     variant="default"
-                    onClick={() => handleManage(pack.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleManage(pack.id);
+                    }}
                     data-testid={`button-manage-pack-${pack.id}`}
                     className="gap-2"
                   >
                     <BookOpen className="h-4 w-4" />
                     Gérer les cartes
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(pack)}
-                    data-testid={`button-edit-pack-${pack.id}`}
-                    className="gap-2"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Modifier
-                  </Button>
                 </div>
                 <div className="flex items-center gap-4 pt-4 border-t">
                   <span className="text-sm font-medium">Publier ce pack</span>
                   <Switch
                     checked={pack.published}
-                    onCheckedChange={() => togglePublishMutation.mutate({ id: pack.id, published: !pack.published })}
+                    onCheckedChange={(e) => {
+                      e.stopPropagation?.();
+                      togglePublishMutation.mutate({ id: pack.id, published: !pack.published });
+                    }}
                     disabled={togglePublishMutation.isPending}
                     data-testid={`switch-publish-pack-${pack.id}`}
                   />
