@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, LogOut, LayoutDashboard } from "lucide-react";
+import { GraduationCap, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 export function Header() {
@@ -27,15 +27,26 @@ export function Header() {
           
           <div className="flex items-center gap-2">
             {user && (isAdmin || isTeacher) && (
-              <Button
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
-                variant="outline"
-                onClick={() => setLocation(isAdmin ? "/admin" : "/teacher")}
-                data-testid="button-dashboard"
-              >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                Tableau de bord
-              </Button>
+              <>
+                <Button
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                  variant="outline"
+                  onClick={() => setLocation(isAdmin ? "/admin" : "/teacher")}
+                  data-testid="button-dashboard"
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Tableau de bord
+                </Button>
+                <Button
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                  variant="outline"
+                  onClick={() => setLocation("/messages")}
+                  data-testid="button-messages"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                </Button>
+              </>
             )}
             {user ? (
               <Button
