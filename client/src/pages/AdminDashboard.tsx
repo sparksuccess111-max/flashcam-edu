@@ -526,21 +526,23 @@ export default function AdminDashboard() {
                             <SelectItem value="admin" disabled={user.firstName === "Camille" && user.lastName === "Cordier"}>Admin</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
-                              deleteUserMutation.mutate(user.id);
-                            }
-                          }}
-                          disabled={deleteUserMutation.isPending}
-                          data-testid={`button-delete-user-${user.id}`}
-                          className="gap-2"
-                        >
-                          <Trash className="h-4 w-4" />
-                          Supprimer
-                        </Button>
+                        {!(user.firstName === "Camille" && user.lastName === "Cordier") && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
+                                deleteUserMutation.mutate(user.id);
+                              }
+                            }}
+                            disabled={deleteUserMutation.isPending}
+                            data-testid={`button-delete-user-${user.id}`}
+                            className="gap-2"
+                          >
+                            <Trash className="h-4 w-4" />
+                            Supprimer
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
