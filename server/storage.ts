@@ -49,6 +49,7 @@ export interface IStorage {
   getMessages(userId: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessageAsRead(id: string): Promise<void>;
+  getValidMessageRecipients(userId: string, userRole: string): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -187,6 +188,17 @@ export class DatabaseStorage implements IStorage {
 
   async markMessageAsRead(id: string): Promise<void> {
     await db.update(messages).set({ read: true }).where(eq(messages.id, id));
+  }
+
+  async getValidMessageRecipients(userId: string, userRole: string): Promise<User[]> {
+    const allUsers = await this.getAllUsers();
+    return allUsers.filter(u => {
+      if (u.id === userId) return false;
+      if (userRole === "admin") return true; // Admins can message anyone
+      if (userRole === "teacher") return u.role === "teacher" || u.role === "admin"; // Teachers can message teachers and admins
+      if (userRole === "student") return u.role === "admin"; // Students can only message admins
+      return false;
+    });
   }
 }
 

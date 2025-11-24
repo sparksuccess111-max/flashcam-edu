@@ -272,9 +272,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/messages/recipients", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const recipients = await storage.getValidMessageRecipients(req.user!.id, req.user!.role);
+      res.json(recipients);
+    } catch (error: any) {
+      logger.error("Failed to fetch recipients", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch recipients" });
+    }
+  });
+
   app.post("/api/messages", authenticate, async (req: AuthRequest, res) => {
     try {
       const messageData = insertMessageSchema.parse({...req.body, fromUserId: req.user!.id});
+      const recipients = await storage.getValidMessageRecipients(req.user!.id, req.user!.role);
+      
+      if (!recipients.find(r => r.id === messageData.toUserId)) {
+        logger.warn(`Unauthorized message attempt from ${req.user!.id} to ${messageData.toUserId}`, "api");
+        return res.status(403).json({ error: "You don't have permission to message this user" });
+      }
+
       const message = await storage.createMessage(messageData);
       broadcastUpdate('message-received', message);
       logger.info(`Message sent from ${req.user!.firstName} to ${req.body.toUserId}`, "api");
