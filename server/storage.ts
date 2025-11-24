@@ -124,7 +124,17 @@ export class DatabaseStorage implements IStorage {
 
   async getFlashcardsByPackId(packId: string): Promise<Flashcard[]> {
     const cards = await db.select().from(flashcards).where(eq(flashcards.packId, packId));
-    return cards.sort((a, b) => a.order - b.order);
+    const sorted = cards.sort((a, b) => a.order - b.order);
+    
+    // Reassign orders sequentially to fix any disorder
+    for (let i = 0; i < sorted.length; i++) {
+      if (sorted[i].order !== i) {
+        await db.update(flashcards).set({ order: i }).where(eq(flashcards.id, sorted[i].id));
+        sorted[i].order = i;
+      }
+    }
+    
+    return sorted;
   }
 
   async getFlashcardById(id: string): Promise<Flashcard | undefined> {
