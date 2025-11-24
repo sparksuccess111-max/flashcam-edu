@@ -101,6 +101,20 @@ export default function Messages() {
     return allMessages.filter(m => m.fromUserId === contactId && m.toUserId === currentUser?.id && !m.read).length;
   };
 
+  const handleSelectContact = useCallback(async (contactId: string, unreadCount: number) => {
+    setSelectedUserId(contactId);
+    form.setValue("toUserId", contactId);
+    if (unreadCount > 0) {
+      try {
+        await apiRequest("POST", `/api/messages/mark-read/${contactId}`, {});
+        queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
+      } catch (error) {
+        console.error("Failed to mark messages as read", error);
+      }
+    }
+  }, [form]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversationMessages]);
@@ -140,23 +154,10 @@ export default function Messages() {
                 ) : (
                   filteredRecipients.map(contact => {
                     const unreadCount = getUnreadCountForContact(contact.id);
-                    const handleSelectContact = useCallback(async () => {
-                      setSelectedUserId(contact.id);
-                      form.setValue("toUserId", contact.id);
-                      if (unreadCount > 0) {
-                        try {
-                          await apiRequest("POST", `/api/messages/mark-read/${contact.id}`, {});
-                          queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
-                          queryClient.invalidateQueries({ queryKey: ["/api/messages/unread-count"] });
-                        } catch (error) {
-                          console.error("Failed to mark messages as read", error);
-                        }
-                      }
-                    }, [contact.id, unreadCount]);
                     return (
                       <button
                         key={contact.id}
-                        onClick={handleSelectContact}
+                        onClick={() => handleSelectContact(contact.id, unreadCount)}
                         className={`w-full text-left p-2 rounded-md transition-colors border text-sm relative ${
                           selectedUserId === contact.id
                             ? "bg-violet-100 dark:bg-violet-900 border-violet-300 dark:border-violet-700"
