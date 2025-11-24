@@ -59,32 +59,41 @@ app.use((req, res, next) => {
 });
 
 // Internal keep-alive ping function
-function startAutoPing(port: number, env: string) {
-  if (env === "development") {
-    logger.debug("Auto-ping disabled in development mode", "server");
-    return;
-  }
-
+function startAutoPing(port: number) {
   const pingInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
   const pingUrl = `http://localhost:${port}/ping`;
+  let pingCount = 0;
 
   const pingTask = setInterval(async () => {
+    pingCount++;
     try {
-      const response = await fetch(pingUrl);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch(pingUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
-        logger.debug(`Auto-ping successful (${response.status})`, "server");
+        logger.debug(`[Ping #${pingCount}] Auto-ping successful (${response.status})`, "server");
       } else {
-        logger.warn(`Auto-ping failed (${response.status})`, "server");
+        logger.warn(`[Ping #${pingCount}] Auto-ping failed (${response.status})`, "server");
       }
     } catch (error: any) {
-      logger.error("Auto-ping error", "server", error);
+      logger.error(`[Ping #${pingCount}] Auto-ping error: ${error.message}`, "server", error);
     }
   }, pingInterval);
 
   // Prevent process from keeping the interval alive if all other connections close
-  pingTask.unref?.();
+  if (pingTask.unref) {
+    pingTask.unref();
+  }
   
   logger.info(`Auto-ping started (every ${pingInterval / 1000}s)`, "server");
+  
+  // Also do an immediate ping on startup
+  fetch(pingUrl).catch((error) => {
+    logger.debug(`Initial startup ping failed: ${error.message}`, "server");
+  });
 }
 
 export default async function runApp(
@@ -121,7 +130,8 @@ export default async function runApp(
     log("WebSocket server ready at /ws", "ws");
     
     // Start internal auto-ping to keep app alive on free tier
-    startAutoPing(port, env);
+    // This helps prevent Replit free tier (15 min inactivity timeout)
+    startAutoPing(port);
   });
 
   // Keep-alive: Prevent server timeout on free tier hosting
