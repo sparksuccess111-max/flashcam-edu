@@ -501,21 +501,39 @@ export default function AdminDashboard() {
                           Rôle: <Badge variant={user.role === "admin" ? "default" : user.role === "teacher" ? "secondary" : "outline"}>{user.role === "admin" ? "Administrateur" : user.role === "teacher" ? "Professeur" : "Étudiant"}</Badge>
                         </CardDescription>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
-                            deleteUserMutation.mutate(user.id);
-                          }
-                        }}
-                        disabled={deleteUserMutation.isPending}
-                        data-testid={`button-delete-user-${user.id}`}
-                        className="gap-2"
-                      >
-                        <Trash className="h-4 w-4" />
-                        Supprimer
-                      </Button>
+                      <div className="flex gap-2 items-center">
+                        <Select 
+                          value={user.role} 
+                          onValueChange={(value) => {
+                            updateRoleMutation.mutate({userId: user.id, role: value as "admin" | "teacher" | "student"});
+                          }}
+                          disabled={updateRoleMutation.isPending}
+                        >
+                          <SelectTrigger className="w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="student">Étudiant</SelectItem>
+                            <SelectItem value="teacher">Professeur</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.firstName} ${user.lastName}?`)) {
+                              deleteUserMutation.mutate(user.id);
+                            }
+                          }}
+                          disabled={deleteUserMutation.isPending}
+                          data-testid={`button-delete-user-${user.id}`}
+                          className="gap-2"
+                        >
+                          <Trash className="h-4 w-4" />
+                          Supprimer
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                 </Card>
