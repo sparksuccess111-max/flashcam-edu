@@ -196,7 +196,7 @@ export class DatabaseStorage implements IStorage {
       if (u.id === userId) return false;
       if (userRole === "admin") return true; // Admins can message anyone
       if (userRole === "teacher") return u.role === "teacher" || u.role === "admin"; // Teachers can message teachers and admins
-      if (userRole === "student") return u.role === "admin"; // Students can only message admins
+      if (userRole === "student") return u.role === "admin" || u.role === "teacher"; // Students can message admins and teachers
       return false;
     });
   }
