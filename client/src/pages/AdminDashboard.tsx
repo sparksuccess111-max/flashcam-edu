@@ -305,7 +305,7 @@ export default function AdminDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="packs">Packs</TabsTrigger>
-          <TabsTrigger value="deleted">Supprimés {deletedPacks && deletedPacks.length > 0 && <Badge variant="destructive" className="ml-2 text-xs">{deletedPacks.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="deleted">Supprimés</TabsTrigger>
           <TabsTrigger value="requests">
             Demandes
             {accountRequests && accountRequests.length > 0 && (

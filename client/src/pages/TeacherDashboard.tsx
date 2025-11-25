@@ -198,7 +198,7 @@ export default function TeacherDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="active">Packs actifs</TabsTrigger>
-          <TabsTrigger value="deleted">Packs supprimés {deletedPacks && deletedPacks.length > 0 && <Badge variant="destructive" className="ml-2">{deletedPacks.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="deleted">Packs supprimés</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
