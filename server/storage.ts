@@ -38,14 +38,10 @@ export interface IStorage {
   getUsersByRole(role: "admin" | "student"): Promise<User[]>;
 
   getAllPacks(): Promise<Pack[]>;
-  getDeletedPacks(): Promise<Pack[]>;
-  getDeletedPacksByTeacher(subject: string): Promise<Pack[]>;
   getPackById(id: string): Promise<Pack | undefined>;
   createPack(pack: InsertPack): Promise<Pack>;
   updatePack(id: string, pack: UpdatePack): Promise<Pack | undefined>;
-  softDeletePack(id: string): Promise<void>;
-  restorePack(id: string): Promise<void>;
-  permanentlyDeletePack(id: string): Promise<void>;
+  deletePack(id: string): Promise<void>;
   incrementPackViews(id: string): Promise<void>;
 
   getFlashcardsByPackId(packId: string): Promise<Flashcard[]>;
@@ -93,23 +89,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllPacks(): Promise<Pack[]> {
-    return await db.select().from(packs).where(eq(packs.deletedAt, null)).orderBy(asc(packs.order));
+    return await db.select().from(packs).orderBy(asc(packs.order));
   }
 
   async getPacksBySubject(subject: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(and(eq(packs.subject, subject), eq(packs.deletedAt, null))).orderBy(asc(packs.order));
+    return await db.select().from(packs).where(eq(packs.subject, subject)).orderBy(asc(packs.order));
   }
 
   async getPacksByTeacher(subject: string, teacherId: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(and(eq(packs.subject, subject), eq(packs.createdByUserId, teacherId), eq(packs.deletedAt, null))).orderBy(asc(packs.order));
-  }
-
-  async getDeletedPacks(): Promise<Pack[]> {
-    return await db.select().from(packs).where(sql`${packs.deletedAt} IS NOT NULL`).orderBy(desc(packs.deletedAt));
-  }
-
-  async getDeletedPacksByTeacher(subject: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(and(eq(packs.subject, subject), sql`${packs.deletedAt} IS NOT NULL`)).orderBy(desc(packs.deletedAt));
+    return await db.select().from(packs).where(and(eq(packs.subject, subject), eq(packs.createdByUserId, teacherId))).orderBy(asc(packs.order));
   }
 
   async getPackById(id: string): Promise<Pack | undefined> {
@@ -131,15 +119,7 @@ export class DatabaseStorage implements IStorage {
     return pack || undefined;
   }
 
-  async softDeletePack(id: string): Promise<void> {
-    await db.update(packs).set({ deletedAt: sql`now()` }).where(eq(packs.id, id));
-  }
-
-  async restorePack(id: string): Promise<void> {
-    await db.update(packs).set({ deletedAt: null }).where(eq(packs.id, id));
-  }
-
-  async permanentlyDeletePack(id: string): Promise<void> {
+  async deletePack(id: string): Promise<void> {
     await db.delete(packs).where(eq(packs.id, id));
   }
 
