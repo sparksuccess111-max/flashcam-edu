@@ -6,13 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, GraduationCap, Layers, Users, Eye } from "lucide-react";
 import type { Pack, Flashcard } from "@shared/schema";
 import { useAuth } from "@/lib/auth-context";
-import { useWebSocket } from "@/lib/websocket";
 import { SUBJECTS } from "@shared/schema";
 import { useState, useEffect } from "react";
 
 export default function Home() {
   const { user } = useAuth();
-  const { onlineCount } = useWebSocket();
   const [wsOnlineCount, setWsOnlineCount] = useState(0);
   
   const { data: packs, isLoading } = useQuery<Pack[]>({
@@ -71,7 +69,7 @@ export default function Home() {
           <div className="flex gap-3">
             <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-900/20 px-4 py-2 rounded-full border border-violet-200 dark:border-violet-800">
               <Users className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-              <span className="text-sm font-medium text-violet-600 dark:text-violet-400">{wsOnlineCount || onlineCount || 0}</span>
+              <span className="text-sm font-medium text-violet-600 dark:text-violet-400">{wsOnlineCount || 0}</span>
             </div>
           </div>
         </div>
