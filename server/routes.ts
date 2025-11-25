@@ -480,7 +480,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       let deletedPacks;
       if (req.user!.role === "teacher") {
-        deletedPacks = await storage.getDeletedPacksByTeacher(req.user!.subject!);
+        // Get current user from database to ensure subject is available
+        const currentUser = await storage.getUser(req.user!.id);
+        if (!currentUser) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        deletedPacks = await storage.getDeletedPacksByTeacher(currentUser.subject!);
       } else if (req.user!.role === "admin") {
         deletedPacks = await storage.getDeletedPacks();
       } else {
