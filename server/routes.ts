@@ -461,13 +461,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
       }
 
-      await storage.deletePack(req.params.id);
+      await storage.softDeletePack(req.params.id);
       broadcastUpdate('pack-deleted', { id: req.params.id });
-      logger.info(`Pack deleted: ${req.params.id}`, "api");
+      logger.info(`Pack soft-deleted: ${req.params.id}`, "api");
       res.status(204).send();
     } catch (error: any) {
       logger.error("Failed to delete pack", "api", error);
       res.status(500).json({ error: error.message || "Failed to delete pack" });
+    }
+  });
+
+  app.get("/api/packs/deleted/all", authenticate, async (req: AuthRequest, res) => {
+    try {
+      let deletedPacks;
+      if (req.user!.role === "teacher") {
+        deletedPacks = await storage.getDeletedPacksByTeacher(req.user!.subject!);
+      } else if (req.user!.role === "admin") {
+        deletedPacks = await storage.getDeletedPacks();
+      } else {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      res.json(deletedPacks);
+    } catch (error: any) {
+      logger.error("Failed to fetch deleted packs", "api", error);
+      res.status(500).json({ error: error.message || "Failed to fetch deleted packs" });
+    }
+  });
+
+  app.post("/api/packs/:id/restore", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
+    try {
+      const pack = await storage.getPackById(req.params.id);
+      if (!pack) {
+        return res.status(404).json({ error: "Pack not found" });
+      }
+
+      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
+        logger.warn(`Unauthorized pack restore: teacher ${req.user!.id} tried to restore pack in subject ${pack.subject}`, "api");
+        return res.status(403).json({ error: "You can only restore packs in your assigned subject" });
+      }
+
+      await storage.restorePack(req.params.id);
+      broadcastUpdate('pack-restored', pack);
+      logger.info(`Pack restored: ${req.params.id}`, "api");
+      res.json(pack);
+    } catch (error: any) {
+      logger.error("Failed to restore pack", "api", error);
+      res.status(500).json({ error: error.message || "Failed to restore pack" });
+    }
+  });
+
+  app.delete("/api/packs/:id/permanent", authenticate, requireTeacherOrAdmin, async (req: AuthRequest, res) => {
+    try {
+      const pack = await storage.getPackById(req.params.id);
+      if (!pack) {
+        return res.status(404).json({ error: "Pack not found" });
+      }
+
+      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
+        logger.warn(`Unauthorized pack deletion: teacher ${req.user!.id} tried to permanently delete pack in subject ${pack.subject}`, "api");
+        return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
+      }
+
+      await storage.permanentlyDeletePack(req.params.id);
+      broadcastUpdate('pack-permanently-deleted', { id: req.params.id });
+      logger.info(`Pack permanently deleted: ${req.params.id}`, "api");
+      res.status(204).send();
+    } catch (error: any) {
+      logger.error("Failed to permanently delete pack", "api", error);
+      res.status(500).json({ error: error.message || "Failed to permanently delete pack" });
     }
   });
 
