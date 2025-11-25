@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit, Trash2, Upload, Download, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Edit, Trash2, Upload, Download, ChevronUp, ChevronDown, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, Flashcard } from "@shared/schema";
@@ -164,13 +164,23 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
     <div className="container mx-auto px-4 py-8">
 
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent" data-testid="text-pack-title">
-            {pack?.title || "Gérer les cartes"}
-          </h1>
-          <p className="text-muted-foreground">
-            Ajouter, modifier ou supprimer des cartes
-          </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            data-testid="button-back-to-dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent" data-testid="text-pack-title">
+              {pack?.title || "Gérer les cartes"}
+            </h1>
+            <p className="text-muted-foreground">
+              Ajouter, modifier ou supprimer des cartes
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           {onEditPack && (
