@@ -98,6 +98,7 @@ export default function TeacherDashboard() {
             setTimeout(() => {
               setManagingPackId(null);
               setDisplayedPacks(null);
+              setAnimatingPackId(null);
             }, 300);
           }}
           data-testid="button-back-to-packs"
@@ -109,6 +110,7 @@ export default function TeacherDashboard() {
             setTimeout(() => {
               setManagingPackId(null);
               setDisplayedPacks(null);
+              setAnimatingPackId(null);
             }, 300);
           }} />
       </div>
