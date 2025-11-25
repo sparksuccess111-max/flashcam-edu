@@ -45,6 +45,7 @@ export const packs = pgTable("packs", {
   published: boolean("published").notNull().default(false),
   subject: text("subject", { enum: ["Histoire-Géo", "Maths", "Français", "SVT", "Anglais", "Physique-Chimie", "Technologie", "Éducation Physique"] }).notNull(),
   createdByUserId: varchar("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  views: integer("views").notNull().default(0),
 });
 
 export const flashcards = pgTable("flashcards", {

@@ -51,6 +51,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Get online users count (WebSocket clients)
+  app.get("/api/online-users", (_req, res) => {
+    res.json({ onlineCount: wss.clients.size });
+  });
+
   // Ping endpoint for internal keep-alive script
   // Performs a micro-action (timestamp update in memory) to signal server is active
   app.get("/ping", (_req, res) => {
@@ -291,6 +296,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       logger.error("Failed to fetch pack", "api", error);
       res.status(500).json({ error: error.message || "Failed to fetch pack" });
+    }
+  });
+
+  app.patch("/api/packs/:id/view", optionalAuth, async (req: AuthRequest, res) => {
+    try {
+      await storage.incrementPackViews(req.params.id);
+      const pack = await storage.getPackById(req.params.id);
+      res.json(pack);
+    } catch (error: any) {
+      logger.error("Failed to increment pack views", "api", error);
+      res.status(500).json({ error: error.message || "Failed to increment views" });
     }
   });
 

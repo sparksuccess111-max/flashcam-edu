@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, GraduationCap, Layers } from "lucide-react";
+import { BookOpen, GraduationCap, Layers, Users, Eye } from "lucide-react";
 import type { Pack, Flashcard } from "@shared/schema";
 import { useAuth } from "@/lib/auth-context";
 import { SUBJECTS } from "@shared/schema";
@@ -13,6 +13,11 @@ export default function Home() {
   
   const { data: packs, isLoading } = useQuery<Pack[]>({
     queryKey: ["/api/packs"],
+  });
+
+  const { data: onlineData } = useQuery({
+    queryKey: ["/api/online-users"],
+    refetchInterval: 5000,
   });
 
   if (isLoading) {
@@ -42,14 +47,24 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
-          Packs de Flashcard
-        </h1>
-        {user && (
-          <p className="text-muted-foreground">
-            Bienvenue, {user.firstName}!
-          </p>
-        )}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Packs de Flashcard
+            </h1>
+            {user && (
+              <p className="text-muted-foreground">
+                Bienvenue, {user.firstName}!
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-900/20 px-4 py-2 rounded-full border border-violet-200 dark:border-violet-800">
+              <Users className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <span className="text-sm font-medium text-violet-600 dark:text-violet-400">{onlineData?.onlineCount || 0}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {publishedPacks.length === 0 ? (
@@ -132,11 +147,17 @@ function PackCard({ pack }: { pack: Pack }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {isLoading ? "..." : `${cardCount} carte${cardCount !== 1 ? "s" : ""}`}
-          </span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Layers className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {isLoading ? "..." : `${cardCount} carte${cardCount !== 1 ? "s" : ""}`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+            <Eye className="h-4 w-4" />
+            <span className="text-sm font-medium">{pack.views || 0}</span>
+          </div>
         </div>
         <Button variant="outline" className="w-full pointer-events-none" data-testid={`button-study-${pack.id}`}>
           Commencer à étudier

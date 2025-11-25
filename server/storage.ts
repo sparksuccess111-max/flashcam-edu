@@ -42,6 +42,7 @@ export interface IStorage {
   createPack(pack: InsertPack): Promise<Pack>;
   updatePack(id: string, pack: UpdatePack): Promise<Pack | undefined>;
   deletePack(id: string): Promise<void>;
+  incrementPackViews(id: string): Promise<void>;
 
   getFlashcardsByPackId(packId: string): Promise<Flashcard[]>;
   getFlashcardById(id: string): Promise<Flashcard | undefined>;
@@ -120,6 +121,10 @@ export class DatabaseStorage implements IStorage {
 
   async deletePack(id: string): Promise<void> {
     await db.delete(packs).where(eq(packs.id, id));
+  }
+
+  async incrementPackViews(id: string): Promise<void> {
+    await db.update(packs).set({ views: sql`${packs.views} + 1` }).where(eq(packs.id, id));
   }
 
   async getFlashcardsByPackId(packId: string): Promise<Flashcard[]> {
