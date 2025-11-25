@@ -21,7 +21,7 @@ import {
   type InsertMessageRead,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, asc, desc, or, and, sql } from "drizzle-orm";
+import { eq, asc, desc, or, and, sql, isNull, isNotNull } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -93,23 +93,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllPacks(): Promise<Pack[]> {
-    return await db.select().from(packs).where(sql`${packs.deletedAt} IS NULL`).orderBy(asc(packs.order));
+    return await db.select().from(packs).where(isNull(packs.deletedAt)).orderBy(asc(packs.order));
   }
 
   async getPacksBySubject(subject: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(and(eq(packs.subject, subject), sql`${packs.deletedAt} IS NULL`)).orderBy(asc(packs.order));
+    return await db.select().from(packs).where(and(eq(packs.subject, subject), isNull(packs.deletedAt))).orderBy(asc(packs.order));
   }
 
   async getPacksByTeacher(subject: string, teacherId: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(and(eq(packs.subject, subject), eq(packs.createdByUserId, teacherId), sql`${packs.deletedAt} IS NULL`)).orderBy(asc(packs.order));
+    return await db.select().from(packs).where(and(eq(packs.subject, subject), eq(packs.createdByUserId, teacherId), isNull(packs.deletedAt))).orderBy(asc(packs.order));
   }
 
   async getDeletedPacks(): Promise<Pack[]> {
-    return await db.select().from(packs).where(sql`${packs.deletedAt} IS NOT NULL`).orderBy(desc(packs.deletedAt));
+    return await db.select().from(packs).where(isNotNull(packs.deletedAt)).orderBy(desc(packs.deletedAt));
   }
 
   async getDeletedPacksByTeacher(subject: string): Promise<Pack[]> {
-    return await db.select().from(packs).where(and(eq(packs.subject, subject), sql`${packs.deletedAt} IS NOT NULL`)).orderBy(desc(packs.deletedAt));
+    return await db.select().from(packs).where(and(eq(packs.subject, subject), isNotNull(packs.deletedAt))).orderBy(desc(packs.deletedAt));
   }
 
   async getPackById(id: string): Promise<Pack | undefined> {
