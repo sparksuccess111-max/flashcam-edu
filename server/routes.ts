@@ -507,9 +507,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.restorePack(req.params.id);
-      broadcastUpdate('pack-restored', pack);
+      const restoredPack = await storage.getPackById(req.params.id);
+      broadcastUpdate('pack-restored', restoredPack);
       logger.info(`Pack restored: ${req.params.id}`, "api");
-      res.json(pack);
+      res.json(restoredPack);
     } catch (error: any) {
       logger.error("Failed to restore pack", "api", error);
       res.status(500).json({ error: error.message || "Failed to restore pack" });
