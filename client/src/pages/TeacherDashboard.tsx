@@ -204,7 +204,18 @@ export default function TeacherDashboard() {
                     className="gap-2"
                   >
                     <BookOpen className="h-4 w-4" />
-                    Gérer les cartes
+                    Gestion des cartes
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(pack);
+                    }}
+                    data-testid={`button-edit-pack-${pack.id}`}
+                  >
+                    <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     size="sm"
