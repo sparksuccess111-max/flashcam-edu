@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Plus, Edit, Trash2, Upload, Download, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Edit, Trash2, Upload, Download, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, Flashcard } from "@shared/schema";
@@ -162,15 +162,6 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Button
-        variant="ghost"
-        onClick={onClose}
-        className="mb-6"
-        data-testid="button-back-to-dashboard"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour au tableau de bord
-      </Button>
 
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <div>
