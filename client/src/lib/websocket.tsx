@@ -1,8 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { queryClient } from "@/lib/queryClient";
 
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
+  const [onlineCount, setOnlineCount] = useState(0);
+
+  // Store listener functions to avoid re-registering
+  const handleOnlineCount = useCallback((count: number) => {
+    setOnlineCount(count);
+  }, []);
 
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -35,6 +41,13 @@ export function useWebSocket() {
           console.log("WebSocket message received:", message);
 
           switch (message.type) {
+            case "online-users-count":
+              if (message.data?.count !== undefined) {
+                handleOnlineCount(message.data.count);
+                window.dispatchEvent(new CustomEvent("online-count-updated", { detail: message.data.count }));
+              }
+              break;
+
             case "pack-created":
             case "pack-updated":
             case "pack-deleted":
@@ -95,5 +108,7 @@ export function useWebSocket() {
         wsRef.current.close();
       }
     };
-  }, []);
+  }, [handleOnlineCount]);
+
+  return { onlineCount };
 }

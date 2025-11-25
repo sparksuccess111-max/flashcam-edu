@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,16 +8,27 @@ import { ChevronLeft, ChevronRight, RotateCw, ArrowLeft, Download } from "lucide
 import { Progress } from "@/components/ui/progress";
 import jsPDF from "jspdf";
 import type { Flashcard, Pack } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function PackView() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [viewRecorded, setViewRecorded] = useState(false);
 
   const { data: pack, isLoading: packLoading } = useQuery<Pack>({
     queryKey: ["/api/packs", id],
   });
+
+  // Increment view count when pack is loaded
+  useEffect(() => {
+    if (pack && !viewRecorded && id) {
+      setViewRecorded(true);
+      apiRequest("PATCH", `/api/packs/${id}/view`)
+        .catch(err => console.error("Failed to record pack view:", err));
+    }
+  }, [pack, id, viewRecorded]);
 
   const { data: flashcards, isLoading: cardsLoading } = useQuery<Flashcard[]>({
     queryKey: ["/api/packs", id, "flashcards"],

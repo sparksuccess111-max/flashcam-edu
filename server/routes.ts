@@ -37,12 +37,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const clientId = Math.random().toString(36).slice(2, 9);
     logger.ws(`Client ${clientId} connected (total: ${wss.clients.size})`);
     
+    // Broadcast online count to all clients
+    broadcastUpdate('online-users-count', { count: wss.clients.size });
+    
     ws.on('error', (error) => {
       logger.error(`Client ${clientId} error: ${error.message}`, "websocket", error);
     });
 
     ws.on('close', () => {
       logger.ws(`Client ${clientId} disconnected (total: ${wss.clients.size - 1})`);
+      // Broadcast updated online count
+      broadcastUpdate('online-users-count', { count: wss.clients.size - 1 });
     });
   });
 
