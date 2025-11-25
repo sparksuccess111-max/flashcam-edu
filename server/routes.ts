@@ -456,9 +456,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Teachers can only delete packs in their subject
-      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
-        logger.warn(`Unauthorized pack deletion: teacher ${req.user!.id} tried to delete pack in subject ${pack.subject}`, "api");
-        return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
+      if (req.user!.role === "teacher") {
+        // Get current user from database to check latest subject assignment
+        const currentUser = await storage.getUser(req.user!.id);
+        
+        if (!currentUser || pack.subject !== currentUser.subject) {
+          logger.warn(`Unauthorized pack deletion: teacher ${req.user!.id} tried to delete pack in subject ${pack.subject}`, "api");
+          return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
+        }
       }
 
       await storage.softDeletePack(req.params.id);
