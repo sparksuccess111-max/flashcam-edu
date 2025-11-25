@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, BookOpen, ChevronUp, ChevronDown, Check, X, Trash } from "lucide-react";
+import { Plus, Edit, Trash2, BookOpen, ChevronUp, ChevronDown, Check, X, Trash, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Pack, AccountRequest, User } from "@shared/schema";
@@ -37,6 +37,10 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/users"],
   });
 
+  const { data: deletedPacks, isLoading: deletedLoading } = useQuery<Pack[]>({
+    queryKey: ["/api/packs/deleted/all"],
+  });
+
   // Sync displayed packs with server data
   const packsToDisplay = displayedPacks !== null ? displayedPacks : (packs || []);
 
@@ -44,6 +48,7 @@ export default function AdminDashboard() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/packs/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/packs/deleted/all"] });
       toast({
         title: "Pack supprimé",
         description: "Le pack a été supprimé avec succès.",
@@ -54,6 +59,43 @@ export default function AdminDashboard() {
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de supprimer le pack. Veuillez réessayer.",
+      });
+    },
+  });
+
+  const restorePackMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/packs/${id}/restore`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/packs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/packs/deleted/all"] });
+      toast({
+        title: "Pack restauré",
+        description: "Le pack a été restauré avec succès.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de restaurer le pack.",
+      });
+    },
+  });
+
+  const permanentlyDeleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/packs/${id}/permanent`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/packs/deleted/all"] });
+      toast({
+        title: "Pack supprimé définitivement",
+        description: "Le pack a été supprimé de manière définitive.",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer le pack.",
       });
     },
   });
@@ -261,8 +303,9 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="packs">Packs</TabsTrigger>
+          <TabsTrigger value="deleted">Supprimés {deletedPacks && deletedPacks.length > 0 && <Badge variant="destructive" className="ml-2 text-xs">{deletedPacks.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="requests">
             Demandes
             {accountRequests && accountRequests.length > 0 && (
@@ -407,6 +450,86 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="deleted" className="space-y-4">
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold">Packs supprimés</h2>
+          </div>
+
+          {deletedLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-32" />
+              ))}
+            </div>
+          ) : !deletedPacks || deletedPacks.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent className="space-y-4">
+                <div className="flex justify-center">
+                  <div className="bg-muted p-4 rounded-full">
+                    <Trash2 className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2">Aucun pack supprimé</h3>
+                  <p className="text-muted-foreground">
+                    Les packs supprimés apparaîtront ici
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {deletedPacks.map((pack) => (
+                <Card key={pack.id} data-testid={`card-deleted-pack-${pack.id}`} className="border-destructive/30">
+                  <CardHeader className="pb-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="break-words">{pack.title}</CardTitle>
+                        <Badge variant="destructive">Supprimé</Badge>
+                      </div>
+                      <CardDescription className="break-words">
+                        {pack.description || "Pas de description"}
+                      </CardDescription>
+                      <div className="flex items-center gap-2 pt-2">
+                        <Badge variant="outline">{pack.subject}</Badge>
+                        {pack.createdByUserId && <span className="text-xs text-muted-foreground">Creator ID: {pack.createdByUserId.slice(0, 8)}...</span>}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => restorePackMutation.mutate(pack.id)}
+                        disabled={restorePackMutation.isPending}
+                        data-testid={`button-restore-pack-${pack.id}`}
+                      >
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Restaurer
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm("Êtes-vous sûr de vouloir supprimer ce pack définitivement? Cette action est irréversible.")) {
+                            permanentlyDeleteMutation.mutate(pack.id);
+                          }
+                        }}
+                        disabled={permanentlyDeleteMutation.isPending}
+                        data-testid={`button-permanent-delete-pack-${pack.id}`}
+                      >
+                        <Trash className="h-4 w-4 mr-2" />
+                        Supprimer définitivement
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
