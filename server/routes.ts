@@ -495,9 +495,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Pack not found" });
       }
 
-      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
-        logger.warn(`Unauthorized pack restore: teacher ${req.user!.id} tried to restore pack in subject ${pack.subject}`, "api");
-        return res.status(403).json({ error: "You can only restore packs in your assigned subject" });
+      // Teachers can only restore packs in their subject
+      if (req.user!.role === "teacher") {
+        // Get current user from database to check latest subject assignment
+        const currentUser = await storage.getUser(req.user!.id);
+        
+        if (!currentUser || pack.subject !== currentUser.subject) {
+          logger.warn(`Unauthorized pack restore: teacher ${req.user!.id} tried to restore pack in subject ${pack.subject}`, "api");
+          return res.status(403).json({ error: "You can only restore packs in your assigned subject" });
+        }
       }
 
       await storage.restorePack(req.params.id);
@@ -517,9 +523,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Pack not found" });
       }
 
-      if (req.user!.role === "teacher" && pack.subject !== req.user!.subject) {
-        logger.warn(`Unauthorized pack deletion: teacher ${req.user!.id} tried to permanently delete pack in subject ${pack.subject}`, "api");
-        return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
+      // Teachers can only delete packs in their subject
+      if (req.user!.role === "teacher") {
+        // Get current user from database to check latest subject assignment
+        const currentUser = await storage.getUser(req.user!.id);
+        
+        if (!currentUser || pack.subject !== currentUser.subject) {
+          logger.warn(`Unauthorized pack deletion: teacher ${req.user!.id} tried to permanently delete pack in subject ${pack.subject}`, "api");
+          return res.status(403).json({ error: "You can only delete packs in your assigned subject" });
+        }
       }
 
       await storage.permanentlyDeletePack(req.params.id);
