@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
@@ -28,6 +29,7 @@ export function Header() {
           </button>
           
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {user && (isAdmin || isTeacher) && (
               <Button
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
