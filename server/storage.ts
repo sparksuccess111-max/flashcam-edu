@@ -63,6 +63,7 @@ export interface IStorage {
   getTotalUnreadCount(userId: string): Promise<number>;
   markConversationAsRead(userId: string, otherUserId: string): Promise<void>;
   recordMessageRead(messageId: string, userId: string): Promise<void>;
+  deleteOldMessages(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -309,6 +310,20 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       // Ignore duplicate key errors
     }
+  }
+
+  async deleteOldMessages(): Promise<number> {
+    // Delete messages older than 7 days
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const oneWeekAgoISO = oneWeekAgo.toISOString();
+
+    const result = await db
+      .delete(messages)
+      .where(sql`${messages.createdAt} < ${oneWeekAgoISO}`)
+      .returning();
+
+    return result.length;
   }
 }
 
