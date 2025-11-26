@@ -56,8 +56,6 @@ export const queryClient = new QueryClient({
       },
       staleTime: 1000 * 60,
       retry: false,
-      refetchInterval: 8000, // Poll every 8 seconds
-      refetchIntervalInBackground: true, // Keep polling even when tab is not focused
     },
     mutations: {
       retry: false,
