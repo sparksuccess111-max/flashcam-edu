@@ -7,10 +7,9 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Load theme from localStorage on mount
+    // Load theme from localStorage on mount, default to light mode
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+    const initialTheme = savedTheme || "light";
     
     setTheme(initialTheme);
     applyTheme(initialTheme);
