@@ -32,27 +32,27 @@ export function Header() {
             <ThemeToggle />
             {user && (isAdmin || isTeacher) && (
               <Button
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm hidden md:flex"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
                 variant="outline"
                 size="sm"
                 onClick={() => setLocation(isAdmin ? "/admin" : "/teacher")}
                 data-testid="button-dashboard"
               >
-                <LayoutDashboard className="h-4 w-4 mr-1" />
-                <span className="hidden lg:inline">Tableau de bord</span>
+                <LayoutDashboard className="h-4 w-4 md:mr-1" />
+                <span className="hidden md:inline">Tableau</span>
               </Button>
             )}
             {user && (
               <div className="relative">
                 <Button
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm hidden md:flex"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
                   variant="outline"
                   size="sm"
                   onClick={() => setLocation("/messages")}
                   data-testid="button-messages"
                 >
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  <span className="hidden lg:inline">Messages</span>
+                  <MessageSquare className="h-4 w-4 md:mr-1" />
+                  <span className="hidden md:inline">Messages</span>
                 </Button>
                 {unreadCount > 0 && (
                   <div
