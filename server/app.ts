@@ -11,6 +11,7 @@ import express, {
 
 import { registerRoutes } from "./routes";
 import { logger } from "./logger";
+import { storage } from "./storage";
 
 export function log(message: string, source = "express") {
   logger.info(message, source);
@@ -59,6 +60,30 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Start automatic cleanup of old messages
+function startMessageCleanup() {
+  // Run cleanup immediately on startup
+  storage.deleteOldMessages().then(count => {
+    if (count > 0) {
+      logger.info(`Cleaned up ${count} old messages on startup`, "cleanup");
+    }
+  }).catch(error => {
+    logger.error("Failed to cleanup old messages on startup", "cleanup", error);
+  });
+
+  // Schedule cleanup daily at 2 AM
+  setInterval(async () => {
+    try {
+      const count = await storage.deleteOldMessages();
+      if (count > 0) {
+        logger.info(`Daily cleanup: removed ${count} old messages`, "cleanup");
+      }
+    } catch (error) {
+      logger.error("Failed to cleanup old messages", "cleanup", error);
+    }
+  }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+}
 
 // Launch standalone ping.js process with auto-restart
 function startPingProcess(port: number) {
@@ -127,6 +152,9 @@ export default async function runApp(
     log(`serving on port ${port} (${env})`);
     log("Database connected", "db");
     log("WebSocket server ready at /ws", "ws");
+    
+    // Start automatic message cleanup (remove messages older than 7 days)
+    startMessageCleanup();
     
     // Start standalone ping.js process to keep app alive on free tier
     // This helps prevent Replit free tier (15 min inactivity timeout)
