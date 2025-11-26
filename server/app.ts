@@ -1,7 +1,6 @@
 import { type Server } from "node:http";
 import { spawn } from "child_process";
 import { join } from "path";
-import { createRequire } from "module";
 
 import express, {
   type Express,
@@ -12,25 +11,7 @@ import express, {
 
 import { registerRoutes } from "./routes";
 import { logger } from "./logger";
-
-// Use Firebase storage if FIREBASE_PROJECT_ID is set, otherwise PostgreSQL
-const require = createRequire(import.meta.url);
-let storage: any;
-
-if (process.env.FIREBASE_PROJECT_ID) {
-  try {
-    const { storage: firebaseStorage } = require("./storage-firebase.js");
-    storage = firebaseStorage;
-    console.log("✅ Firebase Firestore storage loaded");
-  } catch (err: any) {
-    console.error("❌ Firebase loading failed:", err.message);
-    const { storage: pgStorage } = require("./storage.js");
-    storage = pgStorage;
-  }
-} else {
-  const { storage: pgStorage } = require("./storage.js");
-  storage = pgStorage;
-}
+import { storage } from "./storage-selector";
 
 export function log(message: string, source = "express") {
   logger.info(message, source);
