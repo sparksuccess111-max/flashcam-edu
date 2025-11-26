@@ -18,39 +18,41 @@ export function Header() {
 
   return (
     <header className="gradient-header border-b shadow-lg">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between gap-2 md:gap-4 flex-wrap">
           <button
             onClick={() => setLocation("/")}
-            className="flex items-center gap-2 hover-elevate active-elevate-2 px-3 py-2 rounded-md bg-white/10 backdrop-blur-sm border-0 cursor-pointer text-white"
+            className="flex items-center gap-1 md:gap-2 hover-elevate active-elevate-2 px-2 md:px-3 py-2 rounded-md bg-white/10 backdrop-blur-sm border-0 cursor-pointer text-white"
           >
-            <GraduationCap className="h-6 w-6" />
-            <h1 className="text-xl font-semibold">FlashCamEdu</h1>
+            <GraduationCap className="h-5 md:h-6 w-5 md:w-6" />
+            <h1 className="text-lg md:text-xl font-semibold hidden sm:inline">FlashCamEdu</h1>
           </button>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2 flex-wrap justify-end">
             <ThemeToggle />
             {user && (isAdmin || isTeacher) && (
               <Button
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm hidden md:flex"
                 variant="outline"
+                size="sm"
                 onClick={() => setLocation(isAdmin ? "/admin" : "/teacher")}
                 data-testid="button-dashboard"
               >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                Tableau de bord
+                <LayoutDashboard className="h-4 w-4 mr-1" />
+                <span className="hidden lg:inline">Tableau de bord</span>
               </Button>
             )}
             {user && (
               <div className="relative">
                 <Button
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm hidden md:flex"
                   variant="outline"
+                  size="sm"
                   onClick={() => setLocation("/messages")}
                   data-testid="button-messages"
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Messages
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  <span className="hidden lg:inline">Messages</span>
                 </Button>
                 {unreadCount > 0 && (
                   <div
@@ -64,16 +66,18 @@ export function Header() {
               <Button
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
                 variant="outline"
+                size="sm"
                 onClick={handleLogout}
                 data-testid="button-logout"
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
+                <LogOut className="h-4 w-4 md:mr-1" />
+                <span className="hidden md:inline">Déconnexion</span>
               </Button>
             ) : (
               <Button
                 className="bg-white text-violet-600 hover:bg-white/90"
                 variant="default"
+                size="sm"
                 onClick={() => setLocation("/login")}
                 data-testid="button-login"
               >

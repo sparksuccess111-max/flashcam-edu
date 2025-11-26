@@ -163,54 +163,67 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
   return (
     <div className="container mx-auto px-4 py-8">
 
-      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-8 gap-2 md:gap-4 flex-wrap">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
           <Button
             variant="outline"
             onClick={onClose}
             data-testid="button-back-to-dashboard"
-            className="gap-2"
+            className="gap-1 md:gap-2 flex-shrink-0"
+            size="sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Retour au tableau de bord
+            <span className="hidden sm:inline">Retour</span>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent" data-testid="text-pack-title">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400 bg-clip-text text-transparent truncate" data-testid="text-pack-title">
               {pack?.title || "Gérer les cartes"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
               Ajouter, modifier ou supprimer des cartes
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1 md:gap-2 flex-wrap justify-end">
           {onEditPack && (
             <Button
               variant="outline"
               onClick={() => pack && onEditPack(pack)}
-              className="gap-2"
+              className="gap-1 md:gap-2"
+              size="sm"
               data-testid="button-edit-pack-info"
             >
               <Edit className="h-4 w-4" />
-              Modifier
+              <span className="hidden sm:inline">Modifier</span>
             </Button>
           )}
           <Button
             variant="outline"
             onClick={handleExport}
             disabled={cards.length === 0}
+            size="sm"
             data-testid="button-export-flashcards"
           >
-            <Download className="h-4 w-4 mr-2" />
-            Exporter
+            <Download className="h-4 w-4 md:mr-1" />
+            <span className="hidden sm:inline">Exporter</span>
           </Button>
-          <Button variant="outline" onClick={() => setIsBulkImportOpen(true)} data-testid="button-bulk-import">
-            <Upload className="h-4 w-4 mr-2" />
-            Importer
+          <Button 
+            variant="outline" 
+            onClick={() => setIsBulkImportOpen(true)} 
+            size="sm"
+            data-testid="button-bulk-import"
+          >
+            <Upload className="h-4 w-4 md:mr-1" />
+            <span className="hidden sm:inline">Importer</span>
           </Button>
-          <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-flashcard">
-            <Plus className="h-4 w-4 mr-2" />
-            Ajouter
+          <Button 
+            className="gradient-violet-accent text-white border-0" 
+            onClick={handleCreate} 
+            size="sm"
+            data-testid="button-create-flashcard"
+          >
+            <Plus className="h-4 w-4 md:mr-1" />
+            <span className="hidden sm:inline">Ajouter</span>
           </Button>
           <Button
             variant="outline"
