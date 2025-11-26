@@ -2,6 +2,20 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+// Initialize theme to light mode by default before React renders
+function initializeTheme() {
+  const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+  const theme = savedTheme || "light";
+  
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}
+
+initializeTheme();
+
 // AGGRESSIVE: Override WebSocket constructor to prevent Vite HMR localhost:undefined errors
 const OriginalWebSocket = window.WebSocket;
 (window as any).WebSocket = function(url: string, ...args: any[]) {
