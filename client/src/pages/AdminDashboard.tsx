@@ -282,6 +282,9 @@ export default function AdminDashboard() {
     },
   });
 
+  // Define allPacks first
+  const allPacks = packsToDisplay;
+
   // Group packs by subject
   const packsGroupedBySubject = allPacks.reduce((acc, pack) => {
     if (!acc[pack.subject]) {
@@ -290,8 +293,6 @@ export default function AdminDashboard() {
     acc[pack.subject].push(pack);
     return acc;
   }, {} as Record<string, typeof allPacks>);
-
-  const allPacks = packsToDisplay;
 
   if (managingPackId) {
     return (
