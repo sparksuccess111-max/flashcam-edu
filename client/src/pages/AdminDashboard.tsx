@@ -282,6 +282,15 @@ export default function AdminDashboard() {
     },
   });
 
+  // Group packs by subject
+  const packsGroupedBySubject = allPacks.reduce((acc, pack) => {
+    if (!acc[pack.subject]) {
+      acc[pack.subject] = [];
+    }
+    acc[pack.subject].push(pack);
+    return acc;
+  }, {} as Record<string, typeof allPacks>);
+
   const allPacks = packsToDisplay;
 
   if (managingPackId) {
@@ -320,7 +329,7 @@ export default function AdminDashboard() {
         <TabsContent value="packs" className="space-y-4">
           <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
             <div>
-              <h2 className="text-xl font-semibold">Vos packs</h2>
+              <h2 className="text-xl font-semibold">Tous les packs (par matière)</h2>
             </div>
             <Button className="gradient-violet-accent text-white border-0" onClick={handleCreate} data-testid="button-create-pack">
               <Plus className="h-4 w-4 mr-2" />
@@ -355,17 +364,24 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {allPacks.map((pack, idx) => (
-                <div
-                  key={pack.id}
-                  className={`transition-all duration-300 ease-out ${animatingPackId === pack.id ? "scale-95 opacity-75" : "scale-100 opacity-100"}`}
-                >
-                  <Card 
-                    data-testid={`card-pack-${pack.id}`} 
-                    className="hover:shadow-md transition-all duration-300 cursor-pointer"
-                    onClick={() => setManagingPackId(pack.id)}
-                  >
+            <div className="space-y-6">
+              {Object.entries(packsGroupedBySubject).map(([subject, subjectPacks]) => (
+                <div key={subject} className="space-y-3">
+                  <div className="flex items-center gap-2 px-2">
+                    <h3 className="font-semibold text-lg">{subject}</h3>
+                    <Badge variant="outline">{subjectPacks.length}</Badge>
+                  </div>
+                  <div className="space-y-3 pl-2 border-l-2 border-muted">
+                    {subjectPacks.map((pack, subIdx) => (
+                      <div
+                        key={pack.id}
+                        className={`transition-all duration-300 ease-out ${animatingPackId === pack.id ? "scale-95 opacity-75" : "scale-100 opacity-100"}`}
+                      >
+                        <Card 
+                          data-testid={`card-pack-${pack.id}`} 
+                          className="hover:shadow-md transition-all duration-300 cursor-pointer"
+                          onClick={() => setManagingPackId(pack.id)}
+                        >
                     <CardHeader className="pb-3">
                       <div className="space-y-2">
                         <CardTitle className="break-words" data-testid={`text-pack-title-${pack.id}`}>
@@ -399,7 +415,7 @@ export default function AdminDashboard() {
                               e.stopPropagation();
                               handleMoveUp(pack.id);
                             }}
-                            disabled={idx === 0}
+                            disabled={subIdx === 0}
                             data-testid={`button-move-up-${pack.id}`}
                           >
                             <ChevronUp className="h-4 w-4" />
@@ -412,7 +428,7 @@ export default function AdminDashboard() {
                               e.stopPropagation();
                               handleMoveDown(pack.id);
                             }}
-                            disabled={idx === allPacks.length - 1}
+                            disabled={subIdx === subjectPacks.length - 1}
                             data-testid={`button-move-down-${pack.id}`}
                           >
                             <ChevronDown className="h-4 w-4" />
@@ -448,7 +464,10 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
+                        </Card>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
