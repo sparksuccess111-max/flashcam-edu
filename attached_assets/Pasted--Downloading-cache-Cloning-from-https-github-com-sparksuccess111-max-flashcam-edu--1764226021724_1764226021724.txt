@@ -1,0 +1,62 @@
+==> Downloading cache...
+==> Cloning from https://github.com/sparksuccess111-max/flashcam-edu
+==> Checking out commit 61ecf0ce16dd47987fe38da86211e4b0b54beb61 in branch main
+==> Downloaded 265MB in 9s. Extraction took 6s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install && npm run build'...
+up to date, audited 693 packages in 1s
+77 packages are looking for funding
+  run `npm fund` for details
+9 vulnerabilities (3 low, 5 moderate, 1 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 2231 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                            3.53 kB │ gzip:   1.35 kB
+../dist/public/assets/index-nk9UPeu9.css            82.14 kB │ gzip:  13.06 kB
+../dist/public/assets/purify.es-sOfw8HaZ.js         22.67 kB │ gzip:   8.79 kB
+../dist/public/assets/index.es-DhsKP7ji.js         150.55 kB │ gzip:  51.51 kB
+../dist/public/assets/html2canvas.esm-CBrSDip1.js  201.42 kB │ gzip:  48.03 kB
+../dist/public/assets/index-Dm-eTG52.js            964.54 kB │ gzip: 299.19 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.40s
+  dist/index.js  64.2kb
+⚡ Done in 7ms
+==> Uploading build...
+==> Uploaded in 8.5s. Compression took 4.7s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+⚠️ Firebase initialization failed: Cannot read properties of undefined (reading 'length')
+6:46:00 AM [express] [INFO] serving on port 10000 (production)
+6:46:01 AM [db] [INFO] Database connected
+6:46:01 AM [ws] [INFO] WebSocket server ready at /ws
+6:46:01 AM [server] [INFO] ✓ Ping process started (PID: 90)
+6:46:01 AM [cleanup] [ERROR] Failed to cleanup old messages on startup
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1139:18)
+    at afterConnectMultiple (node:net:1714:7)
+[PING] Starting keep-alive loop (every 180s to http://localhost:10000/ping)
+[06:46:01] ✓ Ping #1 OK
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://flashcamedu-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
