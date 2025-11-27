@@ -243,10 +243,6 @@ export class DatabaseStorage implements IStorage {
     await db.update(messages).set({ read: true }).where(eq(messages.id, id));
   }
 
-  async markConversationAsRead(userId: string, otherUserId: string): Promise<void> {
-    await db.update(messages).set({ read: true }).where(and(eq(messages.toUserId, userId), eq(messages.fromUserId, otherUserId), eq(messages.read, false)));
-  }
-
   async getValidMessageRecipients(userId: string, userRole: string): Promise<User[]> {
     const allUsers = await this.getAllUsers();
     return allUsers.filter(u => {
