@@ -1,41 +1,42 @@
 import * as admin from 'firebase-admin';
 
-if (!process.env.FIREBASE_PROJECT_ID) {
-  console.error("❌ FIREBASE_PROJECT_ID not set in environment variables");
-  process.exit(1);
-}
+let isInitialized = false;
+let firestore: admin.firestore.Firestore | null = null;
+let auth: admin.auth.Auth | null = null;
 
-if (!process.env.FIREBASE_CLIENT_EMAIL) {
-  console.error("❌ FIREBASE_CLIENT_EMAIL not set in environment variables");
-  process.exit(1);
-}
+// Check if all Firebase variables are present
+const hasAllVars = !!(
+  process.env.FIREBASE_PROJECT_ID &&
+  process.env.FIREBASE_CLIENT_EMAIL &&
+  process.env.FIREBASE_PRIVATE_KEY
+);
 
-if (!process.env.FIREBASE_PRIVATE_KEY) {
-  console.error("❌ FIREBASE_PRIVATE_KEY not set in environment variables");
-  process.exit(1);
-}
+if (hasAllVars) {
+  try {
+    const serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    };
 
-const serviceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-};
-
-try {
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    });
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+      });
+    }
+    
+    firestore = admin.firestore();
+    auth = admin.auth();
+    firestore.settings({ ignoreUndefinedProperties: true });
+    
+    isInitialized = true;
+    console.log("✅ Firebase Admin SDK initialized");
+  } catch (error: any) {
+    console.warn("⚠️ Firebase initialization failed:", error.message);
+    isInitialized = false;
   }
-  console.log("✅ Firebase Admin SDK initialized");
-} catch (error: any) {
-  console.error("❌ Failed to initialize Firebase:", error.message);
-  process.exit(1);
+} else {
+  console.warn("⚠️ Firebase environment variables not configured. Using PostgreSQL storage.");
 }
 
-export const firestore = admin.firestore();
-export const auth = admin.auth();
-
-firestore.settings({ ignoreUndefinedProperties: true });
-
-export default admin.app();
+export { firestore, auth, isInitialized };

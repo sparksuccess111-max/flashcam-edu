@@ -1,23 +1,16 @@
 // Select between Firebase and PostgreSQL storage based on environment variables
 import { DatabaseStorage } from './storage';
-
-// Check if all Firebase environment variables are set
-const hasFirebaseConfig = !!(
-  process.env.FIREBASE_PROJECT_ID &&
-  process.env.FIREBASE_CLIENT_EMAIL &&
-  process.env.FIREBASE_PRIVATE_KEY
-);
+import { isInitialized as isFirebaseInitialized } from './firebase';
 
 let selectedStorage: any = new DatabaseStorage();
 
-// If Firebase is configured, we'll try to use it
-if (hasFirebaseConfig) {
+// Only try to use Firebase storage if it was successfully initialized
+if (isFirebaseInitialized) {
   try {
-    // Lazy load Firebase storage only if configured
     const { FirestoreStorage } = require('./storage-firebase');
     selectedStorage = new FirestoreStorage();
   } catch (err: any) {
-    console.warn("⚠️  Firebase initialization failed, falling back to PostgreSQL:", err.message);
+    console.warn("⚠️ Failed to load Firestore storage, using PostgreSQL:", err.message);
     selectedStorage = new DatabaseStorage();
   }
 }
