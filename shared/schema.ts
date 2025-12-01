@@ -16,6 +16,7 @@ export const accountRequests = pgTable("account_requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
   password: text("password").notNull(),
   requestedRole: text("requested_role", { enum: ["admin", "teacher", "student"] }).notNull().default("student"),
   status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
@@ -88,6 +89,7 @@ export const signupSchema = z.object({
 export const signupBackendSchema = z.object({
   firstName: z.string().min(1, "Prénom is required"),
   lastName: z.string().min(1, "Nom is required"),
+  email: z.string().email("Email must be valid"),
   password: z.string().min(6, "Mot de passe doit contenir au moins 6 caractères"),
 });
 
