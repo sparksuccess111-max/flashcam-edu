@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcrypt";
-import { storage } from "./storage";
+import { storage } from "./storage-selector";
 import { authenticate, requireAdmin, requireTeacherOrAdmin, optionalAuth, generateToken, type AuthRequest } from "./middleware/auth";
 import { logger } from "./logger";
 import { normalizeName, findUserByNormalizedName } from "./utils/normalize";
@@ -118,6 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const request = await storage.createAccountRequest({
         firstName: signupData.firstName,
         lastName: signupData.lastName,
+        email: signupData.email,
         password: hashedPassword,
       });
       logger.info(`Signup request created: ${signupData.firstName} ${signupData.lastName}`, "api");
