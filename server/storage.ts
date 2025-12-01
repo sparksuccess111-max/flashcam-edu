@@ -1,11 +1,6 @@
-// DEPRECATED: This file is no longer used
-// Storage is now provided by storage-selector.ts which uses:
-// - SQLiteStorage (primary, reliable, persistent)
-// - FirestoreStorage (fallback if Firebase is configured)
-// - MemoryStorage (final fallback)
-//
-// This file is kept only for reference and backward compatibility.
-// DO NOT USE - All imports should be from storage-selector.ts
+// Re-export storage from storage-selector
+// This file is deprecated but kept for backward compatibility
+export { storage } from "./storage-selector";
 
 import type {
   User, InsertUser, Pack, InsertPack, UpdatePack,
