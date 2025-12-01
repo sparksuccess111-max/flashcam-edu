@@ -12,26 +12,6 @@ let selectedStorage: any;
 try {
   selectedStorage = new SQLiteStorage();
   console.log("✅ Using SQLite storage (reliable, persistent database)");
-  
-  // Initialize with default admin account if needed
-  (async () => {
-    try {
-      const existing = await selectedStorage.getAllUsers();
-      if (existing.length === 0) {
-        const hashedPassword = await bcrypt.hash("CaMa_39.cAmA", 10);
-        await selectedStorage.createUser({
-          firstName: "Camille",
-          lastName: "Cordier",
-          email: "camille@flashcamedu.local",
-          password: hashedPassword,
-          role: "admin"
-        });
-        console.log("✅ Default admin account created in SQLite (Camille Cordier)");
-      }
-    } catch (error: any) {
-      console.warn("⚠️ Could not initialize default admin:", error.message);
-    }
-  })();
 } catch (err: any) {
   console.warn("⚠️ SQLite initialization failed:", err.message);
   selectedStorage = null;
@@ -53,10 +33,13 @@ if (!selectedStorage && isFirebaseInitialized) {
 if (!selectedStorage) {
   console.log("✅ Using Memory storage (final fallback - data resets on restart)");
   selectedStorage = new MemoryStorage();
-  
-  // Initialize with default admin account for testing
-  (async () => {
-    try {
+}
+
+// Initialize default admin account - this runs AFTER storage is selected
+async function initializeDefaultAdmin() {
+  try {
+    const existing = await selectedStorage.getAllUsers();
+    if (existing.length === 0) {
       const hashedPassword = await bcrypt.hash("CaMa_39.cAmA", 10);
       await selectedStorage.createUser({
         firstName: "Camille",
@@ -66,10 +49,16 @@ if (!selectedStorage) {
         role: "admin"
       });
       console.log("✅ Default admin account created (Camille Cordier)");
-    } catch (error: any) {
-      // User might already exist, ignore
     }
-  })();
+  } catch (error: any) {
+    // Account may already exist or storage initialization failed - ignore
+    if (error.message && !error.message.includes("UNIQUE constraint")) {
+      console.warn("⚠️ Could not initialize default admin:", error.message);
+    }
+  }
 }
+
+// Call initialization after a small delay to ensure storage is ready
+setTimeout(initializeDefaultAdmin, 100);
 
 export { selectedStorage as storage };
