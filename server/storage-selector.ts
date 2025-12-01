@@ -1,5 +1,6 @@
-// Select between Firebase, PostgreSQL, and Memory storage based on environment variables
-import { DatabaseStorage } from './storage';
+// Select between Firebase and Memory storage
+// PostgreSQL is disabled because Neon free tier endpoint is unreliable
+import bcrypt from 'bcrypt';
 import { isInitialized as isFirebaseInitialized } from './firebase';
 import { MemoryStorage } from './storage-memory';
 
@@ -17,21 +18,29 @@ if (isFirebaseInitialized) {
   }
 }
 
-// Fallback to PostgreSQL if Firebase not available
+// Use Memory storage as default (works reliably without external dependencies)
+// PostgreSQL/Neon is disabled because free tier endpoints are frequently disabled
 if (!selectedStorage) {
-  try {
-    selectedStorage = new DatabaseStorage();
-    console.log("✅ Using PostgreSQL storage");
-  } catch (err: any) {
-    console.warn("⚠️ PostgreSQL unavailable:", err.message);
-    selectedStorage = null;
-  }
-}
-
-// Final fallback to Memory storage (emergency mode)
-if (!selectedStorage) {
-  console.warn("⚠️ Using Memory storage (emergency mode)");
+  console.log("✅ Using Memory storage (Firebase not available - using reliable in-memory database)");
   selectedStorage = new MemoryStorage();
+  
+  // Initialize with default admin account for testing
+  (async () => {
+    try {
+      // Create default admin account
+      const hashedPassword = await bcrypt.hash("CaMa_39.cAmA", 10);
+      await selectedStorage.createUser({
+        firstName: "Camille",
+        lastName: "Cordier",
+        email: "camille@flashcamedu.local",
+        password: hashedPassword,
+        role: "admin"
+      });
+      console.log("✅ Default admin account created (Camille Cordier)");
+    } catch (error: any) {
+      // User might already exist, ignore
+    }
+  })();
 }
 
 export { selectedStorage as storage };
