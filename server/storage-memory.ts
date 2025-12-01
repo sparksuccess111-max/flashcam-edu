@@ -4,7 +4,11 @@ import type {
   AccountRequest, InsertAccountRequest,
   Message, InsertMessage, MessageRead, InsertMessageRead,
 } from "@shared/schema";
-import { v4 as uuid } from 'crypto';
+
+// Generate simple IDs without external dependencies
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
 
 export class MemoryStorage {
   private users: Map<string, User> = new Map();
@@ -23,7 +27,7 @@ export class MemoryStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const newUser: User = { id: uuid(), ...user } as User;
+    const newUser: User = { id: generateId(), ...user } as User;
     this.users.set(newUser.id, newUser);
     return newUser;
   }
@@ -53,7 +57,7 @@ export class MemoryStorage {
   }
 
   async createAccountRequest(request: InsertAccountRequest): Promise<AccountRequest> {
-    const newRequest: AccountRequest = { id: uuid(), ...request } as AccountRequest;
+    const newRequest: AccountRequest = { id: generateId(), ...request } as AccountRequest;
     this.accountRequests.set(newRequest.id, newRequest);
     return newRequest;
   }
@@ -94,7 +98,7 @@ export class MemoryStorage {
   }
 
   async createPack(pack: InsertPack): Promise<Pack> {
-    const newPack: Pack = { id: uuid(), views: 0, deletedAt: null, ...pack } as Pack;
+    const newPack: Pack = { id: generateId(), views: 0, deletedAt: null, ...pack } as Pack;
     this.packs.set(newPack.id, newPack);
     return newPack;
   }
@@ -149,7 +153,7 @@ export class MemoryStorage {
   }
 
   async createFlashcard(flashcard: InsertFlashcard): Promise<Flashcard> {
-    const newFlashcard: Flashcard = { id: uuid(), ...flashcard } as Flashcard;
+    const newFlashcard: Flashcard = { id: generateId(), ...flashcard } as Flashcard;
     this.flashcards.set(newFlashcard.id, newFlashcard);
     return newFlashcard;
   }
@@ -172,7 +176,7 @@ export class MemoryStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const newMessage: Message = { id: uuid(), ...message } as Message;
+    const newMessage: Message = { id: generateId(), ...message } as Message;
     this.messages.set(newMessage.id, newMessage);
     return newMessage;
   }
@@ -212,7 +216,7 @@ export class MemoryStorage {
   }
 
   async recordMessageRead(messageId: string, userId: string): Promise<void> {
-    const read: MessageRead = { id: uuid(), messageId, userId, readAt: new Date().toISOString() };
+    const read: MessageRead = { id: generateId(), messageId, userId, readAt: new Date().toISOString() };
     this.messageReads.set(read.id, read);
   }
 
