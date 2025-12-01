@@ -36,6 +36,7 @@ export default function Signup() {
         {
           firstName: data.firstName,
           lastName: data.lastName,
+          email: "user@example.local",
           password: data.password,
         }
       );
