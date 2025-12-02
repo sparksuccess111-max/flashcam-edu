@@ -120,6 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: signupData.lastName,
         email: signupData.email,
         password: hashedPassword,
+        requestedRole: "student",
       });
       logger.info(`Signup request created: ${signupData.firstName} ${signupData.lastName}`, "api");
       res.status(201).json({ status: "pending", id: request.id });

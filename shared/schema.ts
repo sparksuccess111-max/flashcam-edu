@@ -53,8 +53,8 @@ export const packs = pgTable("packs", {
 export const flashcards = pgTable("flashcards", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   packId: varchar("pack_id").notNull().references(() => packs.id, { onDelete: "cascade" }),
-  question: text("question").notNull(),
-  answer: text("answer").notNull(),
+  front: text("front").notNull(),
+  back: text("back").notNull(),
   order: integer("order").notNull().default(0),
 });
 
