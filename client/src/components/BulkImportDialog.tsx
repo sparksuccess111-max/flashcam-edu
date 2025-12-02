@@ -19,14 +19,14 @@ export function BulkImportDialog({ packId, open, onOpenChange }: BulkImportDialo
   const importMutation = useMutation({
     mutationFn: async (content: string) => {
       const lines = content.split("\n").filter(line => line.trim());
-      const flashcards: Array<{ question: string; answer: string }> = [];
+      const flashcards: Array<{ front: string; back: string }> = [];
 
       for (const line of lines) {
         const match = line.match(/\("(.+?)",\s*"(.+?)"\)/);
         if (match) {
           flashcards.push({
-            question: match[1],
-            answer: match[2],
+            front: match[1],
+            back: match[2],
           });
         }
       }

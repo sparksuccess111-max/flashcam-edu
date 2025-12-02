@@ -269,10 +269,10 @@ export function FlashcardManager({ packId, onClose, onEditPack }: FlashcardManag
             >
               <CardHeader>
                 <CardTitle className="text-lg" data-testid={`text-question-${card.id}`}>
-                  {card.question}
+                  {card.front}
                 </CardTitle>
                 <CardDescription data-testid={`text-answer-${card.id}`}>
-                  {card.answer}
+                  {card.back}
                 </CardDescription>
               </CardHeader>
               <CardContent>

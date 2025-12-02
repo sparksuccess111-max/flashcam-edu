@@ -27,8 +27,8 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
     resolver: zodResolver(insertFlashcardSchema),
     defaultValues: {
       packId,
-      question: "",
-      answer: "",
+      front: "",
+      back: "",
     },
   });
 
@@ -38,14 +38,14 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
       if (isEditing && flashcard) {
         form.reset({
           packId,
-          question: flashcard.question || "",
-          answer: flashcard.answer || "",
+          front: flashcard.front || "",
+          back: flashcard.back || "",
         });
       } else {
         form.reset({
           packId,
-          question: "",
-          answer: "",
+          front: "",
+          back: "",
         });
       }
     }
@@ -118,7 +118,7 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="question"
+              name="front"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Question</FormLabel>
@@ -136,7 +136,7 @@ export function FlashcardDialog({ packId, flashcard, open, onOpenChange, nextOrd
             />
             <FormField
               control={form.control}
-              name="answer"
+              name="back"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Réponse</FormLabel>

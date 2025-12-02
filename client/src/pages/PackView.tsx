@@ -144,7 +144,7 @@ export default function PackView() {
         doc.text(`#${idx + 1} - ${pack?.title || "Pack"}`, x + margin, y + margin + 3);
 
         // Texte centré (Question recto / Réponse verso) - en évidence
-        const text = isRecto ? (card.question || "") : (card.answer || "");
+        const text = isRecto ? (card.front || "") : (card.back || "");
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(12);
         const contentStartY = y + margin + 8;
@@ -248,7 +248,7 @@ export default function PackView() {
                 </span>
               </div>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold leading-relaxed text-foreground" data-testid={isFlipped ? "text-answer" : "text-question"}>
-                {isFlipped ? currentCard?.answer : currentCard?.question}
+                {isFlipped ? currentCard?.back : currentCard?.front}
               </p>
               <div className="mt-2 text-xs text-muted-foreground/50">
                 Cliquez pour {isFlipped ? "la question" : "la réponse"}
