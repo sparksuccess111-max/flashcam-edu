@@ -243,6 +243,8 @@ export class SQLiteStorage {
   }
 
   async permanentlyDeletePack(id: string): Promise<void> {
+    const deleteFlashcards = this.db.prepare('DELETE FROM flashcards WHERE packId = ?');
+    deleteFlashcards.run(id);
     const stmt = this.db.prepare('DELETE FROM packs WHERE id = ?');
     stmt.run(id);
   }
